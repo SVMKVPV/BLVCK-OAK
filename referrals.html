@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080909">
+  <meta name="description" content="Join the Black Oak referral partner programme, receive a tracked code and earn verified weekly Stripe payouts.">
+  <meta property="og:title" content="Black Oak Referral Partners">
+  <meta property="og:description" content="Make the introduction. Share the upside. Register for a tracked Black Oak referral code and secure weekly payouts.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://blvckoak.netlify.app/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Black Oak Referral Partners">
+  <meta name="twitter:description" content="Register for a tracked Black Oak referral code and secure weekly Stripe payouts.">
+  <meta name="twitter:image" content="https://blvckoak.netlify.app/og.png">
+  <title>Referral Partners — Black Oak</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=7">
+  <script src="script.js?v=7" defer></script>
+</head>
+<body class="referral-page">
+  <div class="payment-notice" data-payment-notice role="status" hidden>
+    <span data-payment-icon aria-hidden="true">✓</span>
+    <p>
+      <strong data-payment-title>Stripe onboarding submitted.</strong>
+      <span data-payment-message>Your referral profile is being verified.</span>
+    </p>
+    <button type="button" data-dismiss-notice aria-label="Dismiss message">×</button>
+  </div>
+
+  <header class="site-header referral-site-header">
+    <a class="brand" href="index.html#top" aria-label="Black Oak home"><span>Black</span> Oak</a>
+    <nav aria-label="Referral page navigation">
+      <a href="index.html#packages">Packages</a>
+      <a href="#rewards">Rewards</a>
+      <a href="#partner-faq">Questions</a>
+      <a class="nav-cta" href="#referral-signup">Become a partner</a>
+    </nav>
+  </header>
+
+  <main class="referral-page-main">
+    <section class="partner-hero" aria-labelledby="partner-title">
+      <div class="partner-hero-grid" aria-hidden="true"></div>
+      <div class="partner-hero-copy">
+        <p class="kicker"><span></span> Black Oak referral partners</p>
+        <h1 id="partner-title">Make the introduction.<br><em>Share the upside.</em></h1>
+        <p>Turn trusted business introductions into secure, tracked rewards. Register once, share your personal links and receive verified payouts through Stripe.</p>
+        <div class="hero-actions">
+          <a class="button button-gold" href="#referral-signup">Create my referral code <span>↗</span></a>
+          <a class="text-link" href="index.html">Return to Black Oak <span>↗</span></a>
+        </div>
+        <div class="partner-trust" aria-label="Referral programme highlights">
+          <span>Weekly payouts</span>
+          <span>Stripe secured</span>
+          <span>Tracked links</span>
+        </div>
+      </div>
+
+      <div class="partner-visual" aria-hidden="true">
+        <span class="partner-orbit partner-orbit-one"></span>
+        <span class="partner-orbit partner-orbit-two"></span>
+        <span class="partner-orbit partner-orbit-three"></span>
+        <div class="partner-code-card">
+          <small>Partner access</small>
+          <strong>BO-••••••••••</strong>
+          <span><i></i> Secure tracking active</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="partner-rewards" id="rewards" aria-labelledby="rewards-title">
+      <div class="section-heading">
+        <div>
+          <p class="section-label">Simple, transparent rewards</p>
+          <h2 id="rewards-title">Know what you earn.</h2>
+        </div>
+        <p>Rewards apply only to verified, fully paid and non-refunded Black Oak purchases connected to your active code.</p>
+      </div>
+
+      <div class="referral-rewards" aria-label="Referral reward rules">
+        <article><span>Every successful sale</span><strong>$100</strong><small>AUD base reward</small></article>
+        <article><span>Sales over $501</span><strong>+10%</strong><small>of the full paid amount</small></article>
+        <article><span>Payout timing</span><strong>Weekly</strong><small>after the verification hold</small></article>
+      </div>
+
+      <aside class="enterprise-referral-offer" aria-labelledby="partner-enterprise-title">
+        <div>
+          <p class="section-label">Enterprise referral release</p>
+          <h3 id="partner-enterprise-title">Your client saves 60%. You earn $390.</h3>
+          <p>A valid partner code reduces Enterprise from <s>$2,900</s> to <strong>$1,160 AUD</strong>. The offer is limited to the first 1,000 verified redemptions.</p>
+        </div>
+        <div class="offer-meter" data-enterprise-offer-meter aria-live="polite">
+          <div class="offer-meter-heading">
+            <span>Completed redemptions</span>
+            <strong><span data-enterprise-offer-used>0</span> / <span data-enterprise-offer-limit>1,000</span></strong>
+          </div>
+          <div class="offer-progress" role="progressbar" aria-label="Enterprise referral offer redemptions" aria-valuemin="0" aria-valuemax="1000" aria-valuenow="0" data-enterprise-offer-progress>
+            <span data-enterprise-offer-bar></span>
+          </div>
+          <small data-enterprise-offer-remaining>1,000 offers remaining</small>
+        </div>
+      </aside>
+    </section>
+
+    <section class="partner-signup" id="referral-signup" aria-labelledby="signup-title">
+      <div class="referral-panel referral-page-panel">
+        <div class="referral-panel-copy">
+          <p class="section-label">Secure partner registration</p>
+          <h2 id="signup-title">Get your code and tracked links.</h2>
+          <p>Registration sends a private email-verification link first. Only after you confirm ownership does Stripe privately collect the identity and payout details required to send eligible rewards.</p>
+          <ol>
+            <li><span>01</span>Register and verify your email</li>
+            <li><span>02</span>Complete secure Stripe onboarding</li>
+            <li><span>03</span>Use the tracked links sent by email</li>
+            <li><span>04</span>Receive verified rewards weekly</li>
+          </ol>
+          <p class="partner-security-note"><strong>Private by design.</strong> Bank and identity information goes directly to Stripe. Black Oak never receives or stores it.</p>
+        </div>
+
+        <form class="referral-form" data-referral-form action="/api/referrals/register" method="post">
+          <div data-referral-fields>
+            <p class="form-intro">Create your partner profile</p>
+            <label>Full name<input type="text" name="name" autocomplete="name" required minlength="2" maxlength="100" placeholder="Your full name"></label>
+            <label>Email address<input type="email" name="email" autocomplete="email" required maxlength="160" placeholder="you@example.com"></label>
+            <label class="referral-honeypot" aria-hidden="true">Company website<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+            <label class="referral-consent"><input type="checkbox" name="terms" required><span>I confirm I am at least 18 and agree to the referral reward terms below.</span></label>
+            <button class="button button-gold referral-submit" type="submit">Send my verification link <span>↗</span></button>
+            <p class="form-status" data-referral-status role="status"></p>
+          </div>
+
+          <div class="referral-result" data-referral-result hidden>
+            <p class="section-label" data-referral-result-title>Verification required</p>
+            <strong data-referral-code>Check your inbox</strong>
+            <p data-referral-result-message>Use the private link in your email to confirm ownership and continue securely to Stripe.</p>
+            <a class="button button-gold" data-onboarding-link href="#" hidden>Complete secure Stripe onboarding <span>↗</span></a>
+            <div class="referral-link-list" data-referral-links></div>
+          </div>
+        </form>
+      </div>
+
+      <details class="referral-terms" open>
+        <summary>Referral reward terms <span>+</span></summary>
+        <p>Rewards apply to successful, fully paid and non-refunded purchases attributed to an active referral code. Each qualifying sale earns AUD $100. When the paid amount exceeds AUD $501, the reward is AUD $100 plus 10% of the full paid amount. For the limited Enterprise referral offer, the customer receives 60% off the AUD $2,900 list price and the partner reward is AUD $390: the AUD $100 base reward plus 10% of the original AUD $2,900 list price. The offer is limited to the first 1,000 completed Stripe redemptions. Eligible rewards enter a minimum 14-day fraud and refund hold, then are processed in the next weekly payout run. Self-referrals, duplicate claims, fraudulent transactions, disputes, chargebacks and refunded payments are excluded or reversed. Completed Stripe identity and payout verification is required before a code can be used.</p>
+      </details>
+    </section>
+
+    <section class="partner-faq" id="partner-faq" aria-labelledby="partner-faq-title">
+      <div>
+        <p class="section-label">Before you join</p>
+        <h2 id="partner-faq-title">Clear rules.<br>No surprises.</h2>
+      </div>
+      <div class="faq-list">
+        <details><summary>When do referral rewards become payable?<span>+</span></summary><p>Eligible rewards enter a minimum 14-day fraud and refund hold, then move into the next weekly payout run.</p></details>
+        <details><summary>Where do I enter my bank details?<span>+</span></summary><p>Only inside Stripe’s secure onboarding. Black Oak never asks for or stores bank details on this website.</p></details>
+        <details><summary>Can I refer myself?<span>+</span></summary><p>No. Self-referrals, duplicate claims and transactions linked to fraud, refunds, disputes or chargebacks are excluded.</p></details>
+        <details><summary>How is a sale connected to me?<span>+</span></summary><p>Your code and tracked package links attach your referral to the secure checkout. The payment and partner profile must both pass verification.</p></details>
+      </div>
+    </section>
+
+    <section class="closing-cta partner-closing">
+      <p class="section-label">Ready to make the introduction?</p>
+      <h2>One code. Every package. Weekly upside.</h2>
+      <a class="button button-gold" href="#referral-signup">Create my referral code <span>↗</span></a>
+    </section>
+  </main>
+
+  <footer>
+    <a class="brand" href="index.html#top"><span>Black</span> Oak</a>
+    <div class="footer-links"><a href="contact.html">Contact</a><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="refunds.html">Refunds</a></div>
+    <p>© 2026 Black Oak Digital</p>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080909">
+  <meta name="description" content="Start a website project with Black Oak Digital through our secure enquiry form.">
+  <title>Contact — Black Oak Digital</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=7">
+  <script src="script.js?v=7" defer></script>
+</head>
+<body>
+  <header class="site-header referral-site-header">
+    <a class="brand" href="index.html#top" aria-label="Black Oak home"><span>Black</span> Oak</a>
+    <nav aria-label="Primary navigation">
+      <a href="index.html#approach">Approach</a>
+      <a href="index.html#packages">Packages</a>
+      <a href="referrals.html">Referrals</a>
+      <a class="nav-cta" href="index.html#packages">View packages</a>
+    </nav>
+  </header>
+
+  <main class="content-page">
+    <div class="content-shell">
+      <div class="content-intro">
+        <p class="section-label">Start a conversation</p>
+        <h1>Tell us what needs to move.</h1>
+        <p>Share the outcome, timing and any constraints. Your enquiry goes directly to the Black Oak business inbox and you receive an email confirmation.</p>
+      </div>
+
+      <section class="contact-panel" aria-labelledby="contact-title">
+        <div class="contact-context">
+          <h2 id="contact-title">A clear first step.</h2>
+          <p>No bank details, passwords or card information belong in this form. Payments are handled only through Stripe’s hosted checkout.</p>
+          <ul>
+            <li>Response target: within two business days</li>
+            <li>Project scope confirmed before work begins</li>
+            <li>Private payment details stay with Stripe</li>
+          </ul>
+        </div>
+
+        <form class="referral-form" data-contact-form>
+          <label>Full name<input type="text" name="name" autocomplete="name" required minlength="2" maxlength="100" placeholder="Your full name"></label>
+          <label>Email address<input type="email" name="email" autocomplete="email" required maxlength="160" placeholder="you@example.com"></label>
+          <label>Company or project<input type="text" name="company" autocomplete="organization" maxlength="120" placeholder="Optional"></label>
+          <label>What would you like to build?<textarea name="message" required minlength="20" maxlength="3000" placeholder="Your goal, timing and anything the site needs to do"></textarea></label>
+          <label class="referral-honeypot" aria-hidden="true">Website<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+          <label class="referral-consent"><input type="checkbox" name="privacy" required><span>I agree that Black Oak may use these details to respond to my enquiry, as described in the <a href="privacy.html">privacy policy</a>.</span></label>
+          <button class="button button-gold referral-submit" type="submit">Send secure enquiry <span>↗</span></button>
+          <p class="form-status" data-contact-status role="status"></p>
+        </form>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <a class="brand" href="index.html#top"><span>Black</span> Oak</a>
+    <div class="footer-links"><a href="contact.html">Contact</a><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="refunds.html">Refunds</a></div>
+    <p>© 2026 Black Oak Digital</p>
+  </footer>
+</body>
+</html>

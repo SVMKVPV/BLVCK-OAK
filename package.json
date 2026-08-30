@@ -1,0 +1,20 @@
+{
+  "name": "black-oak-referral-program",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.19.0",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "preflight": "node scripts/preflight.mjs",
+    "preflight:live": "node scripts/preflight.mjs --live",
+    "check": "node --check script.js && node --check netlify/lib/referrals.mjs && node --check netlify/lib/email.mjs && node --check netlify/functions/referral-register.mjs && node --check netlify/functions/referral-verify.mjs && node --check netlify/functions/referral-access.mjs && node --check netlify/functions/referral-refresh.mjs && node --check netlify/functions/contact-submit.mjs && node --check netlify/functions/package-checkout.mjs && node --check netlify/functions/enterprise-checkout.mjs && node --check netlify/functions/enterprise-offer-stats.mjs && node --check netlify/functions/stripe-webhook.mjs && node --check netlify/functions/weekly-referral-payouts.mjs && node scripts/preflight.mjs && node --test tests/*.test.mjs"
+  },
+  "dependencies": {
+    "@netlify/blobs": "11.0.1",
+    "stripe": "22.5.0"
+  }
+}

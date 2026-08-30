@@ -1,0 +1,73 @@
+[build]
+  command = "pnpm run check && pnpm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22.13.0"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+[functions."weekly-referral-payouts"]
+  schedule = "0 22 * * 4"
+
+[[redirects]]
+  from = "/api/referrals/register"
+  to = "/.netlify/functions/referral-register"
+  status = 200
+
+[[redirects]]
+  from = "/api/referrals/refresh"
+  to = "/.netlify/functions/referral-refresh"
+  status = 200
+
+[[redirects]]
+  from = "/api/referrals/verify"
+  to = "/.netlify/functions/referral-verify"
+  status = 200
+
+[[redirects]]
+  from = "/api/referrals/access"
+  to = "/.netlify/functions/referral-access"
+  status = 200
+
+[[redirects]]
+  from = "/api/contact"
+  to = "/.netlify/functions/contact-submit"
+  status = 200
+
+[[redirects]]
+  from = "/api/stripe/webhook"
+  to = "/.netlify/functions/stripe-webhook"
+  status = 200
+
+[[redirects]]
+  from = "/api/checkout/enterprise"
+  to = "/.netlify/functions/enterprise-checkout"
+  status = 200
+
+[[redirects]]
+  from = "/api/checkout/package"
+  to = "/.netlify/functions/package-checkout"
+  status = 200
+
+[[redirects]]
+  from = "/api/referrals/enterprise-offer-stats"
+  to = "/.netlify/functions/enterprise-offer-stats"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "SAMEORIGIN"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; media-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

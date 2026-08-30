@@ -1,0 +1,14 @@
+BLVCKOAK — LAUNCH-HARDENED NETLIFY SOURCE
+
+This folder is the complete source. Do not drag only the HTML/CSS/JS files into Netlify: secure payments, referral verification, email, counters and weekly payouts need the included server functions.
+
+1. Read SETUP.md and BUSINESS-DETAILS-BEFORE-LAUNCH.md.
+2. Put this complete folder in a private GitHub repository.
+3. Import that repository into Netlify.
+4. Add all Netlify environment variables from SETUP.md.
+5. Configure and verify your Resend sending domain.
+6. Configure Stripe Connect, your bank payout account and the signed webhook.
+7. Complete every test-mode test in SETUP.md.
+8. Run pnpm run preflight:live before switching Netlify to live Stripe credentials.
+
+Never place Stripe secret keys, webhook secrets, Resend API keys, passwords or bank details in the website, GitHub, email or chat. Bank details belong only in Stripe’s private account settings.

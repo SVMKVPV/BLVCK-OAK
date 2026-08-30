@@ -1,0 +1,7 @@
+STATIC PREVIEW ONLY
+
+The files in dist show the public design, photos, video, contact page and policy pages.
+
+Secure checkout, referral verification, transactional email, the live Enterprise counter, Stripe webhooks and weekly payouts do not work from a static drag-and-drop upload because those features require the source package's Netlify Functions and environment variables.
+
+For the operational website, deploy the complete Netlify source through Git and follow SETUP.md.
