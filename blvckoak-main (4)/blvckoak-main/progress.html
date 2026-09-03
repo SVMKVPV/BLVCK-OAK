@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080909"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer">
+  <meta name="description" content="View live progress for your private Black Oak project.">
+  <title>Your Project Progress — Black Oak</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=8"><link rel="stylesheet" href="portal.css?v=4"><script src="progress.js?v=1" defer></script>
+</head>
+<body class="workspace-body">
+  <header class="workspace-header"><a class="brand" href="index.html"><span>Black</span> Oak</a><nav aria-label="Project navigation"><a data-payment-link href="pay.html">Private quote &amp; payments</a><a href="contact.html">Questions? Contact Black Oak</a></nav></header>
+  <main class="workspace progress-workspace">
+    <div class="workspace-heading"><div><p class="section-label">Private client project</p><h1 data-project-title>Your project progress.</h1></div><span class="workspace-tag">Updates automatically</span></div>
+    <p class="workspace-status" data-progress-status role="status">Loading your latest project update…</p>
+    <section data-progress-panel hidden>
+      <article class="workspace-card progress-overview">
+        <div class="progress-overview-heading"><div><p class="section-label" data-project-client></p><h2 data-progress-stage>Planning</h2></div><strong data-progress-percent>0%</strong></div>
+        <div class="progress-track" role="progressbar" aria-label="Project completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-progress-track><span data-progress-bar></span></div>
+        <div class="progress-meta"><span data-progress-updated>Waiting for the first update</span><span>Checks every 15 seconds</span></div>
+        <p class="progress-summary" data-progress-summary></p>
+      </article>
+      <div class="progress-columns">
+        <article class="workspace-card"><p class="section-label">Completed</p><h2>What’s been done.</h2><ul class="progress-checklist" data-completed-list></ul></article>
+        <article class="workspace-card"><p class="section-label">Coming next</p><h2>Next steps.</h2><ul class="progress-next-list" data-next-list></ul></article>
+      </div>
+      <article class="workspace-card progress-history-card"><p class="section-label">Project record</p><h2>Update history.</h2><div class="progress-history" data-progress-history></div></article>
+      <p class="small-muted progress-privacy">This is a private project link. Keep it with the intended client. Updates shown here are published by Black Oak.</p>
+    </section>
+    <p class="workspace-business-registration">Black Oak Digital · ACN 701 878 775 · ABN 57 799 643 567</p>
+  </main>
+</body>
+</html>

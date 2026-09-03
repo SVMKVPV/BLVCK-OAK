@@ -1,0 +1,29 @@
+BLACK OAK - EMAIL LOGIN FIX (2026-09-01)
+
+This complete Netlify project fixes:
+  Cannot read properties of null (reading 'reset')
+
+The error occurred after a successful email-code verification. The browser
+clears event.currentTarget while the asynchronous request is running. The
+verification form is now saved before that request and reset safely afterward.
+The page also requests partners.js?v=2 to refresh the client script.
+
+WHAT TO DO
+1. Keep the environment variables you already saved in your Netlify project.
+2. Upload this complete folder to that EXISTING project's deployment drop zone.
+   Do not create a new project or upload only the three HTML/CSS/JS files.
+3. Wait for the deployment to publish, then refresh /partners.html.
+4. If your first verification already created a session, the dashboard can open
+   immediately. Otherwise choose Sign in with the SAME email and request a new
+   code. Do not reuse a consumed code or create another account unnecessarily.
+
+Your Stripe and email settings are not changed by this source update. No keys
+or passwords are included. Existing account records remain on the same Netlify
+project; no data migrations or deletions are performed.
+
+This project also includes the previously discussed Node build setting fix:
+NODE_VERSION = "22" (instead of the obsolete 22.13.0 pin).
+
+Automated client regressions cover partner and owner login, an incorrect-code
+retry, and refreshing an existing session. These use simulated API responses;
+test your real sign-in after deployment. Stripe configuration is still separate.

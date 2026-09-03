@@ -1,0 +1,7 @@
+STATIC PREVIEW ONLY
+
+The files in dist show the public design, photos, video, partner sign-in screen, client quote layout, contact page and policy pages.
+
+Partner accounts, sign-in, saved quotes, owner approvals, deposits, secure checkout, referral verification, email, the Enterprise counter, Stripe webhooks and weekly payouts do not work from a static drag-and-drop upload. These features require the source package's Netlify Functions and environment variables.
+
+For the operational website, deploy the complete Netlify source through Git and follow SETUP.md.

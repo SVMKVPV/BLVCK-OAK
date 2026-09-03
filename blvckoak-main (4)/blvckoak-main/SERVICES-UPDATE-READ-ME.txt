@@ -1,0 +1,33 @@
+BLACK OAK — EXPANDED SERVICES UPDATE
+
+Added six enquiry-led services:
+- SEO & Search Strategy
+- Digital Marketing
+- Workflow & AI Automation
+- Digital Branding & Asset Kits
+- High-Ticket Consulting / Coaching
+- Website Upgrades
+
+Digital Marketing includes one-off campaign strategy, launch and local marketing setup, plus optional monthly social media, paid ads management, SEO/content, email, optimisation and website care.
+
+The public /quote.html self-quote builder asks visitors to choose their website starting point, features, specialist services, marketing setup, optional monthly marketing, timing and preferred payment approach. It generates a non-binding AUD planning range, keeps one-off and monthly costs separate, and can prefill the secure contact form with the selected scope. Advertising spend, hosting, paid software and other third-party charges are excluded unless confirmed in writing.
+
+The homepage Services section links to the contact form with the service already selected. Visitors can change their selection. The selected service is included in the owner enquiry email and the customer's acknowledgement.
+
+Existing website package prices, public previews, referral rules, partner accounts, quotes and payment code are unchanged. The previous sign-in form fix is retained.
+
+DEPLOY TO YOUR EXISTING NETLIFY PROJECT
+
+This is the complete source project, including assets and Netlify Functions. Replace/update the files in the Git repository already connected to your Netlify project, then deploy that commit. Keep your existing Netlify environment variables and site identity.
+
+Build command: pnpm run check && pnpm run build
+Publish directory: dist
+Functions directory: netlify/functions
+
+Do not upload only index.html, style.css and script.js. A static drag-and-drop upload alone does not deploy the server functions required for email, accounts and payments. See NETLIFY-START-HERE.txt and PARTNER-PORTAL-SETUP.md for the full setup.
+
+No new environment variables are required for this services update. Enquiry email uses your existing OWNER_EMAIL, RESEND_API_KEY and EMAIL_FROM settings.
+
+This update does not resolve or verify the previously reported Stripe checkout 'service temporarily unavailable' issue. That still needs your Netlify quote-payment function logs and Stripe configuration checked before accepting real payments.
+
+After deploying, visit /#services and open each enquiry button. Confirm the chosen service appears in the form, then test /quote.html with a website, add-ons and monthly marketing. Send the estimate into the contact form and check your inbox. Never include bank details or secret API keys in the form or source files.

@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080909">
+  <meta name="description" content="Build an indicative Black Oak quote for websites, marketing, SEO, automation, branding and digital services.">
+  <meta property="og:title" content="Build Your Estimate — Black Oak Digital">
+  <meta property="og:description" content="Choose the services and features you need, then receive an immediate indicative AUD estimate.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://blvckoak.netlify.app/og.png">
+  <title>Build Your Estimate — Black Oak Digital</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=11">
+  <script type="module" src="quote-builder.js?v=1"></script>
+</head>
+<body class="self-quote-page">
+  <header class="site-header referral-site-header">
+    <a class="brand" href="index.html#top" aria-label="Black Oak home"><span>Black</span> Oak</a>
+    <nav aria-label="Primary navigation">
+      <a href="index.html#services">Services</a>
+      <a href="index.html#packages">Packages</a>
+      <a href="portfolio.html">Portfolio</a>
+      <a href="quote.html" aria-current="page">Self quote</a>
+      <a class="nav-cta" href="contact.html">Contact</a>
+    </nav>
+  </header>
+
+  <main class="self-quote-main">
+    <section class="self-quote-intro" aria-labelledby="self-quote-title">
+      <p class="kicker"><span></span> Interactive project estimate</p>
+      <h1 id="self-quote-title">Choose what you need.<br><em>See the range.</em></h1>
+      <p>Select a website, features, specialist services and marketing support. You’ll receive an immediate indicative estimate, then Black Oak can confirm the final scope with you.</p>
+      <div class="self-quote-trust"><span>No sign-up required</span><span>Prices in AUD</span><span>Private until you send it</span></div>
+    </section>
+
+    <form class="self-quote-form" data-self-quote-form>
+      <section class="quote-step" aria-labelledby="quote-build-title">
+        <div class="quote-step-heading"><span>01</span><div><p class="section-label">Core project</p><h2 id="quote-build-title">What are we starting with?</h2></div></div>
+        <div class="quote-option-grid quote-option-grid-three">
+          <label class="quote-choice"><input type="radio" name="websiteBuild" value="new" required><span><strong>Build a new website</strong><small>Start fresh with a Black Oak website package.</small></span></label>
+          <label class="quote-choice"><input type="radio" name="websiteBuild" value="upgrade" required><span><strong>Upgrade my website</strong><small>Improve design, performance, pages or features.</small></span></label>
+          <label class="quote-choice"><input type="radio" name="websiteBuild" value="none" required><span><strong>No website work</strong><small>Choose marketing or another specialist service only.</small></span></label>
+        </div>
+        <fieldset class="quote-subsection" data-website-level hidden>
+          <legend>Choose a starting website package</legend>
+          <div class="quote-option-grid quote-option-grid-three">
+            <label class="quote-choice"><input type="radio" name="websiteLevel" value="essential"><span><strong>Essential</strong><small>Focused launch page · from A$500</small></span></label>
+            <label class="quote-choice"><input type="radio" name="websiteLevel" value="professional"><span><strong>Professional</strong><small>Up to five pages · from A$1,500</small></span></label>
+            <label class="quote-choice"><input type="radio" name="websiteLevel" value="enterprise"><span><strong>Enterprise</strong><small>Custom product or complex build · from A$2,900</small></span></label>
+          </div>
+        </fieldset>
+      </section>
+
+      <section class="quote-step" aria-labelledby="quote-features-title" data-website-features>
+        <div class="quote-step-heading"><span>02</span><div><p class="section-label">Website features</p><h2 id="quote-features-title">What should the website do?</h2></div></div>
+        <p class="quote-step-note" data-feature-note>Choose a new website or upgrade above to add website features.</p>
+        <fieldset class="quote-checkbox-grid" disabled data-feature-fieldset>
+          <legend class="sr-only">Website features</legend>
+          <label class="quote-check"><input type="checkbox" name="features" value="booking"><span><strong>Online booking</strong><small>Appointments, availability and confirmations</small></span></label>
+          <label class="quote-check"><input type="checkbox" name="features" value="ecommerce"><span><strong>Online store</strong><small>Products, cart and checkout</small></span></label>
+          <label class="quote-check"><input type="checkbox" name="features" value="payments"><span><strong>Online payments</strong><small>Stripe payment or deposit flow</small></span></label>
+          <label class="quote-check"><input type="checkbox" name="features" value="members"><span><strong>Client or member login</strong><small>Private accounts and protected content</small></span></label>
+          <label class="quote-check"><input type="checkbox" name="features" value="extra-pages"><span><strong>Extra pages</strong><small>Additional service, location or landing pages</small></span></label>
+          <label class="quote-check"><input type="checkbox" name="features" value="copywriting"><span><strong>Copywriting</strong><small>Clear conversion-led website copy</small></span></label>
+          <label class="quote-check"><input type="checkbox" name="features" value="analytics"><span><strong>Analytics setup</strong><small>Measurement, events and reporting foundations</small></span></label>
+          <label class="quote-check"><input type="checkbox" name="features" value="motion"><span><strong>Advanced motion</strong><small>Premium animation and interactive effects</small></span></label>
+        </fieldset>
+      </section>
+
+      <section class="quote-step" aria-labelledby="quote-services-title">
+        <div class="quote-step-heading"><span>03</span><div><p class="section-label">Specialist services</p><h2 id="quote-services-title">What else can help?</h2></div></div>
+        <div class="quote-checkbox-grid">
+          <label class="quote-check"><input type="checkbox" name="services" value="seo"><span><strong>SEO &amp; search strategy</strong><small>Technical, keyword and local search priorities</small></span></label>
+          <label class="quote-check"><input type="checkbox" name="services" value="automation"><span><strong>Workflow &amp; AI automation</strong><small>Lead follow-up, integrations and admin systems</small></span></label>
+          <label class="quote-check"><input type="checkbox" name="services" value="branding"><span><strong>Digital branding</strong><small>Visual direction, guidelines and asset kits</small></span></label>
+          <label class="quote-check"><input type="checkbox" name="services" value="consulting"><span><strong>Consulting &amp; coaching</strong><small>Positioning, offers and practical growth roadmap</small></span></label>
+        </div>
+      </section>
+
+      <section class="quote-step quote-marketing-step" aria-labelledby="quote-marketing-title">
+        <div class="quote-step-heading"><span>04</span><div><p class="section-label">Digital marketing</p><h2 id="quote-marketing-title">Launch once or grow monthly.</h2></div></div>
+        <div class="marketing-quote-columns">
+          <fieldset>
+            <legend>One-off marketing setup</legend>
+            <label class="quote-check"><input type="checkbox" name="marketingSetup" value="strategy"><span><strong>Campaign strategy &amp; setup</strong><small>Audience, channels, messaging and launch plan</small></span></label>
+            <label class="quote-check"><input type="checkbox" name="marketingSetup" value="launch"><span><strong>Brand launch campaign</strong><small>Creative assets and coordinated launch campaign</small></span></label>
+            <label class="quote-check"><input type="checkbox" name="marketingSetup" value="local"><span><strong>Local marketing setup</strong><small>Maps, listings and local discovery foundations</small></span></label>
+          </fieldset>
+          <fieldset>
+            <legend>Optional monthly marketing</legend>
+            <label class="quote-check"><input type="checkbox" name="monthly" value="social"><span><strong>Social media management</strong><small>Planning, content and publishing</small></span></label>
+            <label class="quote-check"><input type="checkbox" name="monthly" value="ads"><span><strong>Paid ads management</strong><small>Campaign management; advertising spend is separate</small></span></label>
+            <label class="quote-check"><input type="checkbox" name="monthly" value="seo-content"><span><strong>SEO &amp; content growth</strong><small>Ongoing content and search improvement</small></span></label>
+            <label class="quote-check"><input type="checkbox" name="monthly" value="email"><span><strong>Email campaigns</strong><small>Campaign planning, build and reporting</small></span></label>
+            <label class="quote-check"><input type="checkbox" name="monthly" value="optimisation"><span><strong>Website optimisation</strong><small>Analytics review and conversion improvements</small></span></label>
+            <label class="quote-check"><input type="checkbox" name="monthly" value="maintenance"><span><strong>Website care &amp; maintenance</strong><small>Updates, checks and agreed support</small></span></label>
+          </fieldset>
+        </div>
+      </section>
+
+      <section class="quote-step" aria-labelledby="quote-details-title">
+        <div class="quote-step-heading"><span>05</span><div><p class="section-label">Final details</p><h2 id="quote-details-title">How should we shape it?</h2></div></div>
+        <div class="quote-detail-grid">
+          <label>Your industry or business type<input type="text" name="industry" maxlength="100" placeholder="e.g. Café, electrician, consulting"></label>
+          <label>Preferred timing<select name="timeline"><option value="flexible">Flexible timing</option><option value="one-month">Within one month</option><option value="urgent">Urgent — as soon as possible</option><option value="planning">Still planning</option></select></label>
+          <label>Preferred payment approach<select name="payment"><option value="discuss">Discuss the best option</option><option value="standard">Standard deposit and balance</option><option value="staged">Staged project payments</option><option value="pay-as-you-sell">Ask about Pay as You Sell</option></select></label>
+          <label class="quote-notes">Anything else we should include?<textarea name="notes" rows="4" maxlength="500" placeholder="Your goals, integrations, examples or any special requirements"></textarea></label>
+        </div>
+        <p class="quote-estimate-disclaimer">This calculator provides a planning range only. It is not a binding offer, invoice or final quote. Black Oak confirms the scope, timing and final price before work begins. Third-party fees, advertising spend, hosting and paid software are excluded unless confirmed in writing. Referral eligibility and discounts are checked separately.</p>
+        <button class="button button-gold quote-generate" type="submit">Generate my estimate <span>↗</span></button>
+        <p class="form-status" data-quote-builder-status role="status"></p>
+      </section>
+    </form>
+
+    <section class="quote-result" data-quote-result hidden aria-labelledby="quote-result-title">
+      <div class="quote-result-heading"><div><p class="section-label">Your indicative estimate</p><h2 id="quote-result-title">A clearer starting point.</h2></div><span data-estimate-reference>BOQ-000000</span></div>
+      <div class="quote-result-prices">
+        <article><span>Estimated one-off project</span><strong data-one-off-estimate>A$0</strong><small>AUD · scope confirmation required</small></article>
+        <article data-monthly-estimate-card><span>Optional ongoing services</span><strong data-monthly-estimate>A$0</strong><small>AUD per month · separately agreed</small></article>
+      </div>
+      <div class="quote-result-scope"><h3>What you selected</h3><ul data-estimate-lines></ul></div>
+      <p class="quote-result-note">This is an indicative range generated from your selections. The final written quote may be lower or higher after Black Oak confirms complexity, content, integrations, deadlines and any third-party costs.</p>
+      <div class="quote-result-actions"><a class="button button-gold" href="contact.html" data-send-estimate>Send this estimate to Black Oak <span>↗</span></a><button class="button button-dark" type="button" data-print-estimate>Print / save as PDF <span>↓</span></button><button class="text-link" type="button" data-edit-estimate>Edit selections <span>↑</span></button></div>
+    </section>
+  </main>
+
+  <footer>
+    <a class="brand" href="index.html#top"><span>Black</span> Oak</a>
+    <div class="footer-links"><a href="quote.html">Self quote</a><a href="portfolio.html">Portfolio</a><a href="contact.html">Contact</a><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="refunds.html">Refunds</a></div>
+    <p class="business-registration">© 2026 Black Oak Digital<span>ACN 701 878 775 · ABN 57 799 643 567</span></p>
+  </footer>
+</body>
+</html>
