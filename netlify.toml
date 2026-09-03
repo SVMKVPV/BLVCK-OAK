@@ -3,7 +3,7 @@
   publish = "dist"
 
 [build.environment]
-  NODE_VERSION = "22.13.0"
+  NODE_VERSION = "22.14.0"
 
 [functions]
   directory = "netlify/functions"
@@ -11,6 +11,41 @@
 
 [functions."weekly-referral-payouts"]
   schedule = "0 22 * * 4"
+
+[[redirects]]
+  from = "/api/partners/auth"
+  to = "/.netlify/functions/partner-auth"
+  status = 200
+
+[[redirects]]
+  from = "/api/partners"
+  to = "/.netlify/functions/partner-api"
+  status = 200
+
+[[redirects]]
+  from = "/api/businesses/nearby"
+  to = "/.netlify/functions/nearby-businesses"
+  status = 200
+
+[[redirects]]
+  from = "/api/quote-payment"
+  to = "/.netlify/functions/quote-payment"
+  status = 200
+
+[[redirects]]
+  from = "/api/project-progress"
+  to = "/.netlify/functions/project-progress"
+  status = 200
+
+[[redirects]]
+  from = "/api/portfolio"
+  to = "/.netlify/functions/portfolio"
+  status = 200
+
+[[redirects]]
+  from = "/api/stripe/connect/callback"
+  to = "/.netlify/functions/stripe-connect-callback"
+  status = 200
 
 [[redirects]]
   from = "/api/referrals/register"
@@ -63,7 +98,7 @@
     X-Content-Type-Options = "nosniff"
     X-Frame-Options = "SAMEORIGIN"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(self)"
     Strict-Transport-Security = "max-age=31536000; includeSubDomains"
     Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; media-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests"
 
