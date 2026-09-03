@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080909"><meta name="robots" content="noindex,nofollow">
+  <meta name="description" content="Manage your Black Oak referral code, client quotes, deposits and payment links.">
+  <title>Partner Workspace — Black Oak</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=10"><link rel="stylesheet" href="portal.css?v=5">
+  <script src="partners.js?v=6" defer></script>
+</head>
+<body class="workspace-body">
+  <header class="workspace-header">
+    <a class="brand" href="index.html"><span>Black</span> Oak</a>
+    <nav aria-label="Workspace navigation"><a href="portfolio.html">Portfolio</a><a href="index.html#packages">Packages</a><a href="referrals.html">Referral rules</a><a href="contact.html">Support</a><button type="button" data-signout hidden>Sign out</button></nav>
+  </header>
+  <main class="workspace">
+    <div class="workspace-heading"><div><p class="section-label">Black Oak / Partner workspace</p><h1 data-workspace-title>Your clients. One clear view.</h1></div><span class="workspace-tag" data-role-tag>Email-verified access</span></div>
+    <p class="workspace-status" data-global-status role="status"></p>
+    <section class="auth-layout" data-auth-panel aria-label="Partner sign in">
+      <div class="workspace-card auth-card">
+        <div class="auth-tabs"><button type="button" data-auth-mode="login" aria-pressed="true">Sign in</button><button type="button" data-auth-mode="signup" aria-pressed="false">Create account</button></div>
+        <form data-auth-start>
+          <label data-signup-name hidden>Your name<input name="name" type="text" autocomplete="name" minlength="2" maxlength="100"></label>
+          <label>Email address<input name="email" type="email" autocomplete="email" required maxlength="160" placeholder="you@business.com"></label>
+          <label class="referral-honeypot" aria-hidden="true">Website<input name="website" type="text" tabindex="-1" autocomplete="off"></label>
+          <label class="portal-consent" data-signup-terms hidden><input name="terms" type="checkbox"><span>I am at least 18 and agree to the <a href="terms.html">terms</a>, <a href="privacy.html">privacy policy</a> and <a href="referrals.html#referral-signup">referral rules</a>.</span></label>
+          <button class="button button-gold" type="submit" data-auth-submit>Send sign-in code <span>↗</span></button>
+        </form>
+        <form data-auth-verify hidden>
+          <p class="muted">A private six-digit code has been sent to your email. It expires in 10 minutes.</p>
+          <label>Sign-in code<input name="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required placeholder="000000"></label>
+          <button class="button button-gold" type="submit">Verify &amp; sign in <span>↗</span></button>
+          <button class="quiet-button" data-auth-reset type="button">Use another email / request a new code</button>
+        </form>
+        <p class="form-status" data-auth-status role="status"></p>
+        <p class="small-muted">No password or ChatGPT account required. Already had a referral code before accounts were introduced? Create an account with that same email to retain it.</p>
+      </div>
+      <aside class="workspace-card auth-explainer">
+        <p class="section-label">Built around the job</p><h2>From introduction<br>to paid project.</h2>
+        <ol class="workspace-steps"><li><strong>01 / Sign in</strong><span>Verify your inbox and get your referral code.</span></li><li><strong>02 / Describe the job</strong><span>Choose the service, scope, total and deposit.</span></li><li><strong>03 / Get approval</strong><span>Black Oak approves custom pricing before payment opens.</span></li><li><strong>04 / Share &amp; track</strong><span>Send one link. See the deposit and remaining balance.</span></li></ol>
+      </aside>
+    </section>
+    <section data-dashboard hidden aria-label="Partner dashboard">
+      <div class="workspace-toolbar">
+        <div><span class="small-muted">Your referral code</span><strong data-partner-code>—</strong></div>
+        <button type="button" class="quiet-button" data-copy-referral>Copy Enterprise referral link</button>
+        <button type="button" class="quiet-button" data-onboard>Set up Stripe payouts</button>
+        <span class="small-muted" data-payout-status></span>
+        <button type="button" class="quiet-button" data-refresh>Refresh</button>
+      </div>
+      <div class="workspace-metrics"><article><span>Quotes</span><strong data-quote-count>0</strong></article><article><span>Payments collected</span><strong data-paid-total>A$0</strong></article><article><span>Awaiting approval</span><strong data-pending-count>0</strong></article></div>
+      <section class="workspace-card lead-finder" aria-labelledby="lead-finder-title">
+        <div class="lead-finder-heading">
+          <div><p class="section-label">Local lead finder</p><h2 id="lead-finder-title">Find businesses that need a website.</h2><p>Use your current location to find nearby operating businesses that do not list a website on Google Maps.</p></div>
+          <span class="lead-badge">Partner-only tool</span>
+        </div>
+        <form class="lead-search-form" data-lead-search>
+          <label>Business type<select name="category"><option value="all">All likely small businesses</option><option value="food">Cafés, restaurants &amp; bakeries</option><option value="trades">Tradies &amp; home services</option><option value="beauty">Hair, beauty &amp; wellness</option><option value="automotive">Mechanics &amp; automotive</option><option value="professional">Professional services</option><option value="retail">Local shops</option><option value="fitness">Gyms &amp; sports coaching</option></select></label>
+          <label>Search distance<select name="radius"><option value="2000">Within 2 km</option><option value="5000" selected>Within 5 km</option><option value="10000">Within 10 km</option><option value="20000">Within 20 km</option></select></label>
+          <button class="button button-gold" type="submit" data-lead-submit>Use my location &amp; search <span>↗</span></button>
+        </form>
+        <p class="form-status" data-lead-status role="status">Your browser will ask before sharing your location. Black Oak does not save your coordinates or the result list.</p>
+        <div class="lead-results" data-lead-results aria-live="polite"></div>
+        <div class="lead-disclosure"><p>“No website listed” means Google Maps did not return a website for that listing. Verify the business before contacting it; results do not prove the business is small or has no website elsewhere.</p><span class="google-maps-attribution" translate="no">Google Maps</span></div>
+      </section>
+      <section class="workspace-card progress-editor" data-progress-editor hidden aria-labelledby="progress-editor-title">
+        <div class="card-heading"><div><p class="section-label">Client progress</p><h2 id="progress-editor-title">Publish a project update.</h2></div><button class="quiet-button" type="button" data-close-progress>Close</button></div>
+        <p class="small-muted">Editing <strong data-progress-project>this project</strong>. Saving publishes the update immediately to the client’s private progress page.</p>
+        <form data-progress-form>
+          <div class="field-pair"><label>Project stage<select name="stage" required><option value="planning">Planning</option><option value="design">Design</option><option value="development">Development</option><option value="client_review">Client review</option><option value="launch">Launch</option><option value="completed">Completed</option><option value="on_hold">On hold</option></select></label><label>Completion percentage<input name="percentage" type="number" min="0" max="100" step="1" inputmode="numeric" required></label></div>
+          <label>Latest update<textarea name="summary" maxlength="1000" rows="4" placeholder="Tell the client what changed in this update."></textarea></label>
+          <div class="field-pair"><label>Completed work — one item per line<textarea name="completedItems" maxlength="2000" rows="6" placeholder="Homepage wireframe approved&#10;Mobile navigation built"></textarea></label><label>Next steps — one item per line<textarea name="nextSteps" maxlength="2000" rows="6" placeholder="Finish service pages&#10;Send staging link for review"></textarea></label></div>
+          <button class="button button-gold" type="submit" data-save-progress>Publish progress update <span>↗</span></button>
+          <p class="form-status" data-progress-form-status role="status"></p>
+        </form>
+      </section>
+      <section class="workspace-card portfolio-editor" data-portfolio-editor hidden aria-labelledby="portfolio-editor-title">
+        <div class="card-heading"><div><p class="section-label">Public portfolio</p><h2 id="portfolio-editor-title">Show completed work.</h2></div><button class="quiet-button" type="button" data-close-portfolio>Close</button></div>
+        <p class="small-muted">Editing <strong data-portfolio-project>this project</strong>. Only the public information below is shown—client names, emails, quotes, pricing and private progress stay hidden.</p>
+        <form data-portfolio-form>
+          <div class="field-pair"><label>Public project title<input name="title" type="text" required minlength="3" maxlength="100" placeholder="e.g. Coastal café website"></label><label>Category<input name="category" type="text" required minlength="2" maxlength="60" placeholder="e.g. Website design"></label></div>
+          <label>Public project summary<textarea name="summary" required minlength="20" maxlength="800" rows="5" placeholder="Describe the result and the work delivered without including private client details."></textarea></label>
+          <label>Live website link — optional<input name="websiteUrl" type="url" maxlength="2048" inputmode="url" placeholder="https://clientwebsite.com.au"></label>
+          <label class="portfolio-publish-choice"><input name="published" type="checkbox"> I confirm Black Oak may publicly show this work and publish it on the Portfolio page</label>
+          <div class="record-actions"><button class="button button-gold" type="submit" data-save-portfolio>Save portfolio listing <span>↗</span></button><a class="quiet-button" href="portfolio.html" target="_blank" rel="noopener noreferrer">View public portfolio ↗</a></div>
+          <p class="form-status" data-portfolio-form-status role="status"></p>
+        </form>
+      </section>
+      <div class="workspace-columns">
+        <section class="workspace-card quote-editor">
+          <div class="card-heading"><h2 data-editor-title>Create a client quote</h2><button class="quiet-button" type="button" data-new-quote hidden>New quote</button></div>
+          <p class="small-muted" data-editor-note>Draft the scope and pricing. Black Oak must approve it before the client can pay.</p>
+          <form data-quote-form>
+            <div class="field-pair"><label>Client name<input name="customerName" required minlength="2" maxlength="100" autocomplete="off"></label><label>Client email<input name="customerEmail" type="email" required maxlength="160" autocomplete="off"></label></div>
+            <label>Service / project title<input name="service" required minlength="3" maxlength="120" placeholder="e.g. Website redesign + booking system"></label>
+            <label>What is included?<textarea name="description" required minlength="20" maxlength="3000" rows="5" placeholder="Pages, features, agreed deliverables, timing and exclusions…"></textarea></label>
+            <div class="field-pair"><label>Total price (AUD)<input name="total" type="number" min="100" max="100000" step="0.01" inputmode="decimal" required placeholder="2900.00"></label><label>Deposit (AUD)<input name="deposit" type="number" min="0" max="100000" step="0.01" inputmode="decimal" required value="0"></label></div>
+            <div class="payment-plan-fields">
+              <label>Payment option<select name="paymentPlan" data-payment-plan><option value="standard">Standard deposit and balance</option><option value="pay_as_you_sell">Pay as You Sell — tracked through Stripe</option></select></label>
+              <div data-pay-as-you-sell-fields hidden>
+                <label>How sales contribute<select name="payAsYouSellMethod" data-sales-method><option value="percentage">Percentage of every Stripe sale</option><option value="fixed_per_sale">Fixed amount from every Stripe sale</option><option value="sales_milestone">Fixed payment after a set number of sales</option></select></label>
+                <label data-sales-percent>Percentage of each sale<input name="payAsYouSellPercent" type="number" min="1" max="100" step="0.01" inputmode="decimal" value="10"><span class="field-hint">Example: 10 means 10% of each successful AUD sale becomes payable.</span></label>
+                <label data-sales-amount hidden>Payment amount (AUD)<input name="payAsYouSellAmount" type="number" min="5" max="100000" step="0.01" inputmode="decimal" value="50"></label>
+                <label data-sales-count hidden>Number of sales before each payment<input name="payAsYouSellSalesCount" type="number" min="1" max="1000" step="1" inputmode="numeric" value="1"></label>
+                <p class="payment-plan-note">The client connects Stripe with read-only access. Successful AUD sales are recorded automatically, and only the calculated amount becomes payable through this quote. Contributions stop when the agreed project total is paid.</p>
+              </div>
+              <label class="maintenance-choice"><input name="maintenanceEnabled" type="checkbox" data-maintenance-enabled> Offer separately agreed monthly maintenance</label>
+              <label data-maintenance-amount hidden>Monthly maintenance (AUD)<input name="maintenanceMonthly" type="number" min="25" max="10000" step="0.01" inputmode="decimal" value="99"><span class="field-hint">Maintenance is separate from the website balance and begins only after the client accepts it.</span></label>
+            </div>
+            <div class="quote-calculation"><span>Due first <strong data-due-preview>A$0</strong></span><span>Then balance <strong data-balance-preview>A$0</strong></span></div>
+            <p class="small-muted">Use 0 deposit for full payment. Totals A$100–A$100,000; each instalment at least A$50. The total is the complete agreed customer price, including any applicable tax.</p>
+            <label data-review-note hidden>Review note<textarea name="reviewNote" maxlength="500" rows="2" placeholder="Optional note for the partner"></textarea></label>
+            <button class="button button-gold" type="submit" data-save-quote>Submit for approval <span>↗</span></button>
+            <button class="quiet-button danger-button" type="button" data-decline hidden>Decline this quote</button>
+            <p class="form-status" data-quote-status role="status"></p>
+          </form>
+          <p class="workspace-policy">Custom prices do not automatically receive the Enterprise 60% offer or standard package commissions. Any custom-job commission requires a separate owner agreement.</p>
+        </section>
+        <section class="workspace-card quote-list-panel">
+          <div class="card-heading"><h2 data-list-title>Your quotes</h2><label class="filter-label">Show<select data-quote-filter><option value="all">All quotes</option><option value="pending_approval">Awaiting approval</option><option value="approved">Approved</option><option value="deposit_paid">Deposit paid</option><option value="paid">Paid in full</option><option value="payment_review">Payment review</option><option value="declined">Declined</option></select></label></div>
+          <div data-quote-list class="quote-list"><p class="muted">Your quotes will appear here.</p></div>
+          <p class="small-muted">Showing the latest 100 quotes. Payments are confirmed by Stripe, never by a browser message.</p>
+        </section>
+      </div>
+    </section>
+    <p class="workspace-business-registration">Black Oak Digital · ACN 701 878 775 · ABN 57 799 643 567</p>
+  </main>
+</body>
+</html>
