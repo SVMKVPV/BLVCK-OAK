@@ -48,10 +48,9 @@ if (referralCodePattern.test(incomingReferralCode)) {
 }
 
 function getActiveReferralCode() {
+  const input = document.querySelector('[data-checkout-referral]');
   return normaliseReferralCode(
-    document.querySelector('[data-checkout-referral]')?.value
-      || sessionStorage.getItem(REFERRAL_STORAGE_KEY)
-      || '',
+    input ? input.value : (sessionStorage.getItem(REFERRAL_STORAGE_KEY) || ''),
   );
 }
 
@@ -138,7 +137,26 @@ function closeCheckout() {
 }
 
 document.querySelectorAll('[data-package]').forEach((button) => {
-  button.addEventListener('click', () => openCheckout(button.dataset.package));
+  button.addEventListener('click', () => {
+    openCheckout(button.dataset.package);
+    const directCode = document.querySelector('[data-enterprise-referral]')?.value;
+    if (button.dataset.package === 'enterprise' && directCode) {
+      checkoutReferralInput.value = normaliseReferralCode(directCode);
+      updateCheckoutOfferPresentation();
+    }
+  });
+});
+
+const enterpriseReferralInput = document.querySelector('[data-enterprise-referral]');
+enterpriseReferralInput?.addEventListener('input', () => {
+  enterpriseReferralInput.value = normaliseReferralCode(enterpriseReferralInput.value);
+});
+document.querySelector('[data-enterprise-apply]')?.addEventListener('click', () => {
+  const code = normaliseReferralCode(enterpriseReferralInput?.value || '');
+  openCheckout('enterprise');
+  checkoutReferralInput.value = code;
+  updateCheckoutOfferPresentation();
+  (referralCodePattern.test(code) ? checkoutEmailInput : checkoutReferralInput)?.focus();
 });
 
 closeModalButton?.addEventListener('click', closeCheckout);
@@ -192,6 +210,7 @@ checkoutButton?.addEventListener('click', async () => {
 
 checkoutReferralInput?.addEventListener('input', () => {
   checkoutReferralInput.value = normaliseReferralCode(checkoutReferralInput.value);
+  if (!checkoutReferralInput.value) sessionStorage.removeItem(REFERRAL_STORAGE_KEY);
   updateCheckoutOfferPresentation();
 });
 
@@ -205,7 +224,7 @@ document.addEventListener('keydown', (event) => {
 
   if (event.key !== 'Tab') return;
 
-  const focusable = checkoutModal.querySelectorAll('button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])');
+  const focusable = [...checkoutModal.querySelectorAll('button:not([disabled]), input:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])')].filter((el) => el.getClientRects().length);
   const first = focusable[0];
   const last = focusable[focusable.length - 1];
 
@@ -401,6 +420,18 @@ loadEnterpriseOfferStats();
 
 const contactForm = document.querySelector('[data-contact-form]');
 const contactStatus = document.querySelector('[data-contact-status]');
+const contactService = document.querySelector('[data-contact-service]');
+const contactMessage = document.querySelector('[data-contact-message]');
+const requestedService = pageParameters.get('service');
+const requestedBrief = pageParameters.get('brief');
+
+function preselectContactService() {
+  if (contactService && requestedService && [...contactService.options].some((option) => option.value === requestedService)) {
+    contactService.value = requestedService;
+  }
+}
+preselectContactService();
+if (contactMessage && requestedBrief && requestedBrief.length <= 2900) contactMessage.value = requestedBrief;
 
 contactForm?.addEventListener('submit', async (event) => {
   event.preventDefault();
@@ -422,6 +453,7 @@ contactForm?.addEventListener('submit', async (event) => {
         name: formData.get('name'),
         email: formData.get('email'),
         company: formData.get('company'),
+        service: formData.get('service'),
         message: formData.get('message'),
         website: formData.get('website'),
         acceptedPrivacy: formData.get('privacy') === 'on',
@@ -431,6 +463,7 @@ contactForm?.addEventListener('submit', async (event) => {
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || 'Your enquiry could not be sent.');
     contactForm.reset();
+    preselectContactService();
     contactStatus.textContent = result.message;
   } catch (error) {
     contactStatus.classList.add('error');
@@ -451,6 +484,7 @@ document.documentElement.classList.add('motion-ready');
 const revealTargets = document.querySelectorAll([
   '.approach-grid',
   '.section-heading',
+  '.service-card',
   '.package-card',
   '.enterprise-demo',
   '.film-heading',
