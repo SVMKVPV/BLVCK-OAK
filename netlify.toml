@@ -3,7 +3,7 @@
   publish = "dist"
 
 [build.environment]
-  NODE_VERSION = "22.14.0"
+  NODE_VERSION = "22"
 
 [functions]
   directory = "netlify/functions"
@@ -11,6 +11,9 @@
 
 [functions."weekly-referral-payouts"]
   schedule = "0 22 * * 4"
+
+[functions."quote-recovery-offers"]
+  schedule = "0 * * * *"
 
 [[redirects]]
   from = "/api/partners/auth"
@@ -73,6 +76,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/assistant"
+  to = "/.netlify/functions/assistant"
+  status = 200
+
+[[redirects]]
   from = "/api/stripe/webhook"
   to = "/.netlify/functions/stripe-webhook"
   status = 200
@@ -88,9 +96,26 @@
   status = 200
 
 [[redirects]]
+  from = "/api/signup-discount"
+  to = "/.netlify/functions/signup-discount"
+  status = 200
+
+[[redirects]]
   from = "/api/referrals/enterprise-offer-stats"
   to = "/.netlify/functions/enterprise-offer-stats"
   status = 200
+
+[[redirects]]
+  from = "/previews/ecommerce.html"
+  to = "https://lumera-beauty-store.samkapa3.chatgpt.site"
+  status = 302
+  force = true
+
+[[redirects]]
+  from = "/previews/link-in-bio.html"
+  to = "https://blvck-oak-links.samkapa3.chatgpt.site"
+  status = 302
+  force = true
 
 [[headers]]
   for = "/*"
