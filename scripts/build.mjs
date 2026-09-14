@@ -9,7 +9,7 @@ await mkdir(output, { recursive: true });
 
 for (const file of [
   'index.html','referrals.html','contact.html','privacy.html','terms.html','refunds.html',
-  'portfolio.html','quote.html','style.css','og.png','script.js',
+  'portfolio.html','marketplace.html','quote.html','style.css','og.png','script.js',
   'partners.html','partners.js','portal.css','pay.html','pay.js','progress.html','progress.js',
   'portfolio.js','quote-builder.js'
 ]) {
@@ -19,4 +19,4 @@ for (const file of [
 await cp(resolve(root, 'assets'), resolve(output, 'assets'), { recursive: true });
 await cp(resolve(root, 'previews'), resolve(output, 'previews'), { recursive: true });
 
-console.log('Black Oak launch-hardened client built successfully, including portfolio previews.');
+console.log('Black Oak launch-hardened client built successfully, including portfolio previews and marketplace.');
