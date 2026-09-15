@@ -107,6 +107,7 @@ for (const owner of [false, true]) {
     assert.equal(page.get('[data-dashboard]').hidden, false);
     assert.equal(page.get('[data-role-tag]').textContent, owner ? 'Owner workspace' : 'Partner workspace');
     assert.equal(page.get('[data-partner-code]').textContent, 'BO-AB12CD34EF');
+    assert.equal(page.get('[data-partner-code]').href, '/index.html?ref=BO-AB12CD34EF&package=enterprise#packages');
     assert.equal(page.get('[data-auth-status]').classes.has('error'), false);
     assert.equal(page.get('[data-auth-verify]').querySelector('[type="submit"]').disabled, false);
   });
