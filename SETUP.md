@@ -1,6 +1,6 @@
 # Black Oak production setup
 
-This is a full-stack Netlify project: the public website plus protected Stripe Checkout, verified-email referral registration, Stripe Connect onboarding, delayed weekly partner rewards, transactional email, a secure contact form and the live Enterprise offer counter.
+This is a full-stack Netlify project: the public website plus protected Stripe Checkout, passwordless six-digit email authentication, Stripe Connect onboarding, delayed weekly partner rewards, transactional email, a secure contact form and the live Enterprise offer counter.
 
 Do not deploy only `index.html`, `style.css` and `script.js`. Payments, referrals, email and the counter require the included Netlify Functions.
 
@@ -40,7 +40,7 @@ This build uses Resend’s HTTPS API without an extra library.
 5. Set `OWNER_EMAIL` to the private inbox that should receive paid-sale, referral-partner and contact alerts.
 6. Set `SUPPORT_EMAIL` to the reply-to address customers can use.
 
-Do not use an unverified Gmail address as `EMAIL_FROM`; use your verified business domain. The referral form deliberately refuses to create a Stripe payout account until the visitor clicks the private email link.
+Do not use an unverified Gmail address as `EMAIL_FROM`; use your verified business domain. The partner portal creates or signs into an account only after the visitor enters the private six-digit code sent to their inbox. Codes expire after 10 minutes, allow at most five attempts and cannot be replayed.
 
 ## 3. Configure Stripe in test mode
 
@@ -71,6 +71,9 @@ Do not use an unverified Gmail address as `EMAIL_FROM`; use your verified busine
 SITE_URL=https://YOUR-NETLIFY-DOMAIN
 STRIPE_SECRET_KEY=sk_test_YOUR_TEST_SECRET
 STRIPE_WEBHOOK_SECRET=whsec_YOUR_TEST_WEBHOOK_SECRET
+STRIPE_CONNECT_CLIENT_ID=ca_YOUR_CONNECT_CLIENT_ID
+STRIPE_CONNECT_WEBHOOK_SECRET=whsec_YOUR_CONNECTED_ACCOUNT_WEBHOOK_SECRET
+GOOGLE_MAPS_API_KEY=YOUR_SERVER_SIDE_PLACES_KEY
 STRIPE_ENTERPRISE_REFERRAL_COUPON_ID=bo-ent-60-first-1000
 RESEND_API_KEY=re_YOUR_KEY
 EMAIL_FROM=Black Oak Digital <partners@YOUR-VERIFIED-DOMAIN>
@@ -93,10 +96,10 @@ Never commit real values to `.env`, GitHub or the public site.
 Use test data only:
 
 1. Submit the contact form and confirm both owner alert and customer acknowledgement arrive.
-2. Register a referral using an inbox you control.
-3. Confirm no Stripe account or code is shown before the verification email is opened.
-4. Click the one-time verification link and finish Stripe Express onboarding.
-5. Submit the same email again and confirm the recovery email opens the existing profile instead of creating a duplicate.
+2. Create a partner account using an inbox you control and enter the six-digit code from the email.
+3. Confirm an incorrect code is rejected, a code cannot be reused, and a code older than 10 minutes is rejected.
+4. Finish Stripe Express onboarding from the authenticated partner dashboard.
+5. Sign out, sign in again with the same email and confirm the existing profile and referral code return.
 6. Try the partner’s tracked Essential, Professional and Enterprise links.
 7. Confirm Enterprise shows A$2,900 less 60%, with A$1,160 due.
 8. Confirm an invalid code, incomplete partner, malformed code and same-email self-referral are rejected.
@@ -122,3 +125,12 @@ Never place bank details in site files or Netlify environment variables; Stripe 
 Read `BUSINESS-DETAILS-BEFORE-LAUNCH.md`. The included privacy, terms and refund pages are working drafts, but the code cannot invent your legal entity, ABN, GST status, address or governing state. Have the pages and referral offer reviewed before live launch.
 
 At the discounted Enterprise price, the platform receives A$1,160 before Stripe fees and tax, then owes a A$390 partner reward after the hold. You remain responsible for margin, tax, fraud, chargebacks and any partner transfer that cannot be recovered.
+
+
+## Partner authentication and private links
+
+Partners and the owner sign in at `/partners.html` with a six-digit email code. There are no passwords or JWTs. Successful verification creates a 12-hour server-side session referenced by a Secure, HttpOnly, SameSite=Strict cookie. Mutating dashboard requests also require an exact same-origin request and a session-specific CSRF token.
+
+The owner is determined only by the verified account email matching `OWNER_EMAIL`. Do not place an owner role, email allowlist or secret in browser JavaScript.
+
+Approved projects use a high-entropy private token for client payment and progress pages. If a link is exposed, sign in as the owner and choose **Reset private links** on the quote. Send the newly generated links to the client; the old Black Oak payment and progress links stop working immediately. A Stripe-hosted Checkout URL that was already opened is controlled separately in Stripe.
