@@ -1,7 +1,7 @@
 import { createOnboardingLink, getStripe, isReferralAccountEligible, json, referralsStore } from '../lib/referrals.mjs';
 import { emailShell, escapeHtml, formatAud, getOwnerEmail, sendEmail } from '../lib/email.mjs';
 import { PortalError, assertCsrf, clientError, ensureReferral, hash, portalStore, quoteIdPattern, readBody, requireAccount, sessionCookie, siteOrigin } from '../lib/portal-auth.mjs';
-import { createQuote, grossPaid, quoteLink, validateQuoteInput } from '../lib/quotes.mjs';
+import { createQuote, grossPaid, quoteLink, rotatePublicToken, validateQuoteInput } from '../lib/quotes.mjs';
 import { applyProjectProgress, projectProgressLink, readProjectProgress } from '../lib/project-progress.mjs';
 import { publicPaymentArrangement } from '../lib/pay-as-you-sell.mjs';
 import { applyPortfolio, readPortfolio } from '../lib/portfolio.mjs';
@@ -71,6 +71,17 @@ export default async function handler(request) {
     if (body.action === 'logout') {
       await store.delete(auth.sessionKey);
       return json({ signedOut: true }, 200, { 'set-cookie': sessionCookie('', 0) });
+    }
+    if (body.action === 'rotate_client_link') {
+      if (!auth.isOwner) throw new PortalError('Only the Black Oak owner can reset private client links.', 403);
+      if (!quoteIdPattern.test(body.id || '')) throw new PortalError('Invalid project.');
+      const entry = await store.getWithMetadata(`quote/${body.id}`, { type: 'json' });
+      const quote = entry?.data;
+      if (!quote || !['approved', 'deposit_paid', 'paid', 'payment_review'].includes(quote.status)) throw new PortalError('Only an approved project can have its private links reset.', 409);
+      const updated = rotatePublicToken(quote, auth.account.id);
+      const saved = await store.setJSON(`quote/${quote.id}`, updated, { onlyIfMatch: entry.etag });
+      if (!saved.modified) throw new PortalError('This project changed. Refresh before resetting its links.', 409);
+      return json({ quote: dashboardQuote(updated, true) });
     }
     if (body.action === 'onboard') {
       const stripe = getStripe();
