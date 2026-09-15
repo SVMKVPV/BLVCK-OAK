@@ -31,6 +31,10 @@ export function readPortfolio(quote) {
       title: String(quote?.service || '').trim().slice(0, 100),
       category: 'Website design',
       summary: '',
+      outcome: '',
+      testimonial: '',
+      clientDisplayName: '',
+      testimonialConsent: false,
       websiteUrl: '',
       publishedAt: null,
       updatedAt: null,
@@ -43,6 +47,10 @@ export function readPortfolio(quote) {
     title: String(stored.title || '').trim().slice(0, 100),
     category: String(stored.category || '').trim().slice(0, 60),
     summary: String(stored.summary || '').trim().slice(0, 800),
+    outcome: String(stored.outcome || '').trim().slice(0, 300),
+    testimonial: String(stored.testimonial || '').trim().slice(0, 500),
+    clientDisplayName: String(stored.clientDisplayName || '').trim().slice(0, 80),
+    testimonialConsent: stored.testimonialConsent === true,
     websiteUrl: String(stored.websiteUrl || '').trim().slice(0, 2048),
     publishedAt: typeof stored.publishedAt === 'string' ? stored.publishedAt : null,
     updatedAt: typeof stored.updatedAt === 'string' ? stored.updatedAt : null,
@@ -58,6 +66,11 @@ export function applyPortfolio(quote, input, accountId, now = new Date().toISOSt
   const title = cleanText(input.title, 'Public project title', 3, 100);
   const category = cleanText(input.category, 'Project category', 2, 60);
   const summary = cleanText(input.summary, 'Public project summary', 20, 800);
+  const outcome = String(input.outcome || '').trim().slice(0, 300);
+  const testimonial = String(input.testimonial || '').trim().slice(0, 500);
+  const clientDisplayName = String(input.clientDisplayName || '').trim().slice(0, 80);
+  const testimonialConsent = input.testimonialConsent === true;
+  if (testimonial && (!testimonialConsent || clientDisplayName.length < 2)) throw new PortalError('Add the client display name and confirm permission before publishing a testimonial.');
   const websiteUrl = cleanWebsiteUrl(input.websiteUrl);
   const id = current.id || createId();
   if (!portfolioIdPattern.test(id)) throw new PortalError('Could not create the portfolio listing. Try again.', 503);
@@ -70,6 +83,10 @@ export function applyPortfolio(quote, input, accountId, now = new Date().toISOSt
       title,
       category,
       summary,
+      outcome,
+      testimonial,
+      clientDisplayName,
+      testimonialConsent,
       websiteUrl,
       publishedAt: published ? (current.publishedAt || now) : current.publishedAt,
       updatedAt: now,
@@ -87,6 +104,9 @@ export function publicPortfolioItem(quote) {
     title: listing.title,
     category: listing.category,
     summary: listing.summary,
+    outcome: listing.outcome || null,
+    testimonial: listing.testimonialConsent ? (listing.testimonial || null) : null,
+    clientDisplayName: listing.testimonialConsent ? (listing.clientDisplayName || null) : null,
     websiteUrl: listing.websiteUrl || null,
     completedAt: progress.updatedAt,
     publishedAt: listing.publishedAt,

@@ -12,8 +12,8 @@
 [functions."weekly-referral-payouts"]
   schedule = "0 22 * * 4"
 
-[functions."quote-recovery-offers"]
-  schedule = "0 * * * *"
+[functions."sales-followups"]
+  schedule = "15 * * * *"
 
 [[redirects]]
   from = "/api/partners/auth"
@@ -76,8 +76,13 @@
   status = 200
 
 [[redirects]]
-  from = "/api/assistant"
-  to = "/.netlify/functions/assistant"
+  from = "/api/book"
+  to = "/.netlify/functions/booking-submit"
+  status = 200
+
+[[redirects]]
+  from = "/api/website-audit"
+  to = "/.netlify/functions/website-audit"
   status = 200
 
 [[redirects]]
@@ -93,11 +98,6 @@
 [[redirects]]
   from = "/api/checkout/package"
   to = "/.netlify/functions/package-checkout"
-  status = 200
-
-[[redirects]]
-  from = "/api/signup-discount"
-  to = "/.netlify/functions/signup-discount"
   status = 200
 
 [[redirects]]

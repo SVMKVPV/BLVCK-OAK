@@ -45,11 +45,26 @@ test('portfolio listings are validated, revisioned and can be unpublished', () =
 test('public portfolio output excludes client, quote, payment and internal data', () => {
   const quote = applyPortfolio(completedQuote(), listing, owner.id, '2026-09-02T10:00:00.000Z', () => '1234567890abcdef1234');
   const item = publicPortfolioItem(quote);
-  assert.deepEqual(Object.keys(item), ['id', 'title', 'category', 'summary', 'websiteUrl', 'completedAt', 'publishedAt']);
+  assert.deepEqual(Object.keys(item), ['id', 'title', 'category', 'summary', 'outcome', 'testimonial', 'clientDisplayName', 'websiteUrl', 'completedAt', 'publishedAt']);
   const serialized = JSON.stringify(item);
   for (const privateValue of [quote.id, quote.publicToken, quote.customerName, quote.customerEmail, quote.partnerEmail, quote.totalCents, owner.id]) {
     assert.equal(serialized.includes(String(privateValue)), false);
   }
+});
+
+test('testimonials are public only with an approved display name and consent', () => {
+  assert.throws(() => applyPortfolio(completedQuote(), { ...listing, testimonial: 'Black Oak made the process clear.' }, owner.id), /permission/);
+  const quote = applyPortfolio(completedQuote(), {
+    ...listing,
+    outcome: 'A faster path from local search to enquiry.',
+    testimonial: 'Black Oak made the process clear.',
+    clientDisplayName: 'Jamie — Local Bakery',
+    testimonialConsent: true,
+  }, owner.id, '2026-09-02T10:00:00.000Z', () => '1234567890abcdef1234');
+  const item = publicPortfolioItem(quote);
+  assert.equal(item.outcome, 'A faster path from local search to enquiry.');
+  assert.equal(item.testimonial, 'Black Oak made the process clear.');
+  assert.equal(item.clientDisplayName, 'Jamie — Local Bakery');
 });
 
 test('public page loads published work and the owner workspace exposes deliberate publishing controls', async () => {
