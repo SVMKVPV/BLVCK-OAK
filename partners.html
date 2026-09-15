@@ -7,8 +7,8 @@
   <title>Partner Workspace — Black Oak</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=10"><link rel="stylesheet" href="portal.css?v=6">
-  <script src="partners.js?v=7" defer></script>
+  <link rel="stylesheet" href="style.css?v=12"><link rel="stylesheet" href="portal.css?v=7">
+  <script src="partners.js?v=8" defer></script>
 </head>
 <body class="workspace-body">
   <header class="workspace-header">
@@ -51,6 +51,11 @@
         <button type="button" class="quiet-button" data-refresh>Refresh</button>
       </div>
       <div class="workspace-metrics"><article><span>Quotes</span><strong data-quote-count>0</strong></article><article><span>Payments collected</span><strong data-paid-total>A$0</strong></article><article><span>Awaiting approval</span><strong data-pending-count>0</strong></article></div>
+      <section class="workspace-card sales-pipeline" data-owner-sales hidden aria-labelledby="sales-pipeline-title">
+        <div class="card-heading"><div><p class="section-label">Owner / Sales pipeline</p><h2 id="sales-pipeline-title">Every enquiry in one place.</h2></div><label class="filter-label">Show<select data-lead-filter><option value="all">All leads</option><option value="new">New</option><option value="contacted">Contacted</option><option value="qualified">Qualified</option><option value="booked">Booked</option><option value="won">Won</option><option value="lost">Lost</option></select></label></div>
+        <p class="small-muted">Contact forms, consultation requests and free audits appear here. New leads receive one automatic follow-up after 24 hours unless you change their status.</p>
+        <div class="sales-lead-list" data-sales-lead-list><p class="muted">New enquiries will appear here.</p></div>
+      </section>
       <section class="workspace-card lead-finder" aria-labelledby="lead-finder-title">
         <div class="lead-finder-heading">
           <div><p class="section-label">Local lead finder</p><h2 id="lead-finder-title">Find businesses that need a website.</h2><p>Use your current location to find nearby operating businesses that do not list a website on Google Maps.</p></div>
@@ -82,6 +87,9 @@
         <form data-portfolio-form>
           <div class="field-pair"><label>Public project title<input name="title" type="text" required minlength="3" maxlength="100" placeholder="e.g. Coastal café website"></label><label>Category<input name="category" type="text" required minlength="2" maxlength="60" placeholder="e.g. Website design"></label></div>
           <label>Public project summary<textarea name="summary" required minlength="20" maxlength="800" rows="5" placeholder="Describe the result and the work delivered without including private client details."></textarea></label>
+          <label>Client outcome — optional<textarea name="outcome" maxlength="300" rows="3" placeholder="Example: A clearer booking journey and faster mobile experience."></textarea></label>
+          <div class="field-pair"><label>Client testimonial — optional<textarea name="testimonial" maxlength="500" rows="4" placeholder="Use the client’s exact approved words."></textarea></label><label>Public client name<input name="clientDisplayName" type="text" maxlength="80" placeholder="First name + business, or approved display name"></label></div>
+          <label class="portfolio-publish-choice"><input name="testimonialConsent" type="checkbox"> I confirm the client approved this testimonial and display name for public use</label>
           <label>Live website link — optional<input name="websiteUrl" type="url" maxlength="2048" inputmode="url" placeholder="https://clientwebsite.com.au"></label>
           <label class="portfolio-publish-choice"><input name="published" type="checkbox"> I confirm Black Oak may publicly show this work and publish it on the Portfolio page</label>
           <div class="record-actions"><button class="button button-gold" type="submit" data-save-portfolio>Save portfolio listing <span>↗</span></button><a class="quiet-button" href="portfolio.html" target="_blank" rel="noopener noreferrer">View public portfolio ↗</a></div>

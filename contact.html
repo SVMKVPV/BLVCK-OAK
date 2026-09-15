@@ -9,8 +9,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=7">
-  <script src="script.js?v=7" defer></script>
+  <link rel="stylesheet" href="style.css?v=12">
+  <script src="script.js?v=10" defer></script>
+  <script src="sales-config.js?v=1" defer></script>
+  <script src="sales.js?v=1" defer></script>
 </head>
 <body>
   <header class="site-header referral-site-header">
@@ -19,7 +21,8 @@
       <a href="index.html#approach">Approach</a>
       <a href="index.html#packages">Packages</a>
       <a href="referrals.html">Referrals</a>
-      <a class="nav-cta" href="index.html#packages">View packages</a>
+      <a href="audit.html">Free audit</a>
+      <a class="nav-cta" href="book.html">Book a call</a>
     </nav>
   </header>
 
@@ -46,19 +49,21 @@
           <label>Full name<input type="text" name="name" autocomplete="name" required minlength="2" maxlength="100" placeholder="Your full name"></label>
           <label>Email address<input type="email" name="email" autocomplete="email" required maxlength="160" placeholder="you@example.com"></label>
           <label>Company or project<input type="text" name="company" autocomplete="organization" maxlength="120" placeholder="Optional"></label>
-          <label>What would you like to build?<textarea name="message" required minlength="20" maxlength="3000" placeholder="Your goal, timing and anything the site needs to do"></textarea></label>
+          <label>What do you need?<select name="service" data-contact-service required><option value="general">Not sure yet / Multiple services</option><option value="website-packages">Website packages</option><option value="website-upgrades">Website upgrades</option><option value="business-directory">Marketplace business listing</option><option value="seo-search">SEO &amp; Search Strategy</option><option value="digital-marketing">Digital Marketing</option><option value="workflow-ai">Workflow &amp; AI Automation</option><option value="digital-branding">Digital Branding &amp; Asset Kits</option><option value="consulting-coaching">High-Ticket Consulting / Coaching</option></select></label>
+          <label>What would you like to build?<textarea name="message" data-contact-message required minlength="20" maxlength="3000" placeholder="Your goal, timing and anything the site needs to do"></textarea></label>
           <label class="referral-honeypot" aria-hidden="true">Website<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
           <label class="referral-consent"><input type="checkbox" name="privacy" required><span>I agree that Black Oak may use these details to respond to my enquiry, as described in the <a href="privacy.html">privacy policy</a>.</span></label>
           <button class="button button-gold referral-submit" type="submit">Send secure enquiry <span>↗</span></button>
           <p class="form-status" data-contact-status role="status"></p>
         </form>
       </section>
+      <div class="contact-shortcuts"><a href="audit.html"><span>Not ready to enquire?</span><strong>Get a free website audit ↗</strong></a><a href="book.html"><span>Prefer to talk?</span><strong>Request a 15-minute call ↗</strong></a></div>
     </div>
   </main>
 
   <footer>
     <a class="brand" href="index.html#top"><span>Black</span> Oak</a>
-    <div class="footer-links"><a href="contact.html">Contact</a><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="refunds.html">Refunds</a></div>
+    <div class="footer-links"><a href="audit.html">Free audit</a><a href="book.html">Book a call</a><a href="contact.html">Contact</a><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="refunds.html">Refunds</a></div>
     <p>© 2026 Black Oak Digital</p>
   </footer>
 </body>

@@ -1,5 +1,6 @@
 import { emailShell, escapeHtml, getOwnerEmail, sendEmail } from '../lib/email.mjs';
 import { json } from '../lib/referrals.mjs';
+import { createSalesLead } from '../lib/sales-leads.mjs';
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const requestIdPattern = /^[A-Za-z0-9-]{16,80}$/;
@@ -11,6 +12,7 @@ const serviceLabels = Object.freeze({
   'consulting-coaching': 'High-Ticket Consulting / Coaching',
   'website-upgrades': 'Website Upgrades',
   'website-packages': 'Website packages',
+  'business-directory': 'Marketplace business listing',
   general: 'Not sure yet / Multiple services',
 });
 
@@ -52,6 +54,15 @@ export default async function handler(request) {
 
     const ownerEmail = getOwnerEmail();
     if (!ownerEmail) throw new Error('OWNER_EMAIL is not configured.');
+    const lead = await createSalesLead({
+      type: 'contact',
+      requestId,
+      name,
+      email,
+      company,
+      service,
+      message,
+    });
 
     await sendEmail({
       to: ownerEmail,
@@ -60,7 +71,7 @@ export default async function handler(request) {
       html: emailShell('New project enquiry', `
         <p style="color:#b6b5ae;line-height:1.7"><strong>Service:</strong> ${escapeHtml(service)}<br><strong>Name:</strong> ${escapeHtml(name)}<br><strong>Email:</strong> ${escapeHtml(email)}<br><strong>Company:</strong> ${escapeHtml(company || 'Not supplied')}</p>
         <div style="margin-top:22px;padding:18px;border-left:3px solid #d4ae58;background:#171817;color:#d5d3cc;line-height:1.7;white-space:pre-wrap">${escapeHtml(message)}</div>`),
-      idempotencyKey: `contact-owner-${requestId}`,
+      idempotencyKey: `contact-owner-${lead.id}`,
     });
 
     await sendEmail({
@@ -68,7 +79,7 @@ export default async function handler(request) {
       subject: 'Black Oak received your enquiry',
       text: `Hi ${name}, your enquiry about ${service} reached Black Oak. We aim to respond within two business days.`,
       html: emailShell('Your message is with us', `<p style="color:#b6b5ae;line-height:1.7">Hi ${escapeHtml(name)}, your enquiry about ${escapeHtml(service)} reached Black Oak. We aim to respond within two business days.</p>`),
-      idempotencyKey: `contact-customer-${requestId}`,
+      idempotencyKey: `contact-customer-${lead.id}`,
     }).catch((error) => console.error('Contact acknowledgement failed:', error.message));
 
     return json({ message: 'Your enquiry has been sent. We will reply within two business days.' }, 201);

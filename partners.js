@@ -3,6 +3,7 @@ const $ = (selector) => document.querySelector(selector);
 const money = (cents) => new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' }).format((Number(cents) || 0) / 100);
 const escape = (value) => String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const labels = { pending_approval: 'Awaiting approval', approved: 'Approved', deposit_paid: 'Deposit paid', paid: 'Paid in full', declined: 'Declined', cancelled: 'Cancelled', payment_review: 'Owner review required' };
+const leadLabels = { new: 'New', contacted: 'Contacted', qualified: 'Qualified', booked: 'Booked', won: 'Won', lost: 'Lost' };
 let authMode = 'login';
 let challenge = '';
 let dashboard = null;
@@ -169,6 +170,42 @@ function renderQuotes() {
   });
 }
 
+function renderSalesPipeline() {
+  const panel = $('[data-owner-sales]');
+  if (!panel) return;
+  panel.hidden = !dashboard?.isOwner;
+  if (!dashboard?.isOwner) return;
+  const list = $('[data-sales-lead-list]');
+  const filter = $('[data-lead-filter]').value;
+  const leads = (dashboard.leads || []).filter((lead) => filter === 'all' || lead.status === filter);
+  list.replaceChildren();
+  if (!leads.length) {
+    const empty = document.createElement('p'); empty.className = 'muted'; empty.textContent = 'No sales leads in this view yet.';
+    list.append(empty); return;
+  }
+  leads.forEach((lead) => {
+    const article = document.createElement('article'); article.className = 'sales-lead-record';
+    const created = new Date(lead.createdAt);
+    article.innerHTML = '<header><div><span class="lead-source">' + escape(lead.type) + '</span><h3>' + escape(lead.name) + '</h3></div><span class="status-pill ' + escape(lead.status) + '">' + escape(leadLabels[lead.status] || lead.status) + '</span></header>' +
+      '<p><a href="mailto:' + encodeURIComponent(lead.email) + '">' + escape(lead.email) + '</a>' + (lead.company ? ' · ' + escape(lead.company) : '') + (lead.phone ? '<br>' + escape(lead.phone) : '') + '</p>' +
+      (lead.websiteUrl ? '<p><a href="' + escape(lead.websiteUrl) + '" target="_blank" rel="noopener noreferrer">Open audited website ↗</a>' + (lead.auditScore != null ? ' · Score <strong>' + escape(lead.auditScore) + '/100</strong>' : '') + '</p>' : '') +
+      (lead.preferredDate ? '<p><strong>Requested call:</strong> ' + escape(lead.preferredDate) + ' at ' + escape(lead.preferredTime) + ' Australia/Sydney</p>' : '') +
+      (lead.message ? '<details><summary>Lead details</summary><p>' + escape(lead.message) + '</p></details>' : '') +
+      '<small>Received ' + escape(Number.isNaN(created.getTime()) ? '' : created.toLocaleString('en-AU')) + (lead.followUpSentAt ? ' · 24-hour follow-up sent' : '') + '</small>' +
+      '<div class="lead-manage"><label>Status<select data-sales-status><option value="new">New</option><option value="contacted">Contacted</option><option value="qualified">Qualified</option><option value="booked">Booked</option><option value="won">Won</option><option value="lost">Lost</option></select></label><label>Private note<textarea data-sales-note maxlength="1000" rows="2" placeholder="Call outcome, budget or next step"></textarea></label><button class="quiet-button" type="button" data-save-sales-lead>Save lead</button></div>';
+    article.querySelector('[data-sales-status]').value = lead.status;
+    article.querySelector('[data-sales-note]').value = lead.ownerNote || '';
+    article.querySelector('[data-save-sales-lead]').addEventListener('click', async (event) => {
+      const button = event.currentTarget; button.disabled = true; button.textContent = 'Saving…';
+      try {
+        await api('/api/partners', { action: 'update_lead', id: lead.id, status: article.querySelector('[data-sales-status]').value, ownerNote: article.querySelector('[data-sales-note]').value }, dashboard.csrf);
+        await loadDashboard(); status('[data-global-status]', 'Sales lead updated.');
+      } catch (error) { status('[data-global-status]', error.message, true); button.disabled = false; button.textContent = 'Save lead'; }
+    });
+    list.append(article);
+  });
+}
+
 function locationError(error) {
   if (error?.code === 1) return 'Location access was blocked. Allow location for this site in your browser, then try again.';
   if (error?.code === 2) return 'Your location is unavailable right now. Check location services and try again.';
@@ -258,7 +295,8 @@ async function loadDashboard() {
     if (progressQuote) closeProgressEditor();
     if (portfolioQuote) closePortfolioEditor();
     renderQuotes();
-    status('[data-global-status]', dashboard.isOwner ? 'You can review quotes, see every payment and publish live client progress.' : 'Create a quote below. Approved payment and progress links can be shared with your client.');
+    renderSalesPipeline();
+    status('[data-global-status]', dashboard.isOwner ? 'You can manage leads, review quotes, see payments and publish live client progress.' : 'Create a quote below. Approved payment and progress links can be shared with your client.');
   } catch (error) {
     if (error.status === 401) {
       dashboard = null; $('[data-auth-panel]').hidden = false; $('[data-dashboard]').hidden = true; $('[data-signout]').hidden = true;
@@ -288,6 +326,7 @@ function updatePaymentFields() {
 }
 $('[data-quote-form]').addEventListener('input', () => { calculatePreview(); updatePaymentFields(); });
 $('[data-quote-filter]').addEventListener('change', renderQuotes);
+$('[data-lead-filter]')?.addEventListener('change', renderSalesPipeline);
 $('[data-refresh]').addEventListener('click', loadDashboard);
 
 function closeProgressEditor() {
@@ -340,6 +379,10 @@ function editPortfolio(quote) {
   form.elements.title.value = quote.portfolio.title || quote.service;
   form.elements.category.value = quote.portfolio.category || 'Website design';
   form.elements.summary.value = quote.portfolio.summary || quote.progress.summary || '';
+  form.elements.outcome.value = quote.portfolio.outcome || '';
+  form.elements.testimonial.value = quote.portfolio.testimonial || '';
+  form.elements.clientDisplayName.value = quote.portfolio.clientDisplayName || '';
+  form.elements.testimonialConsent.checked = quote.portfolio.testimonialConsent === true;
   form.elements.websiteUrl.value = quote.portfolio.websiteUrl || '';
   form.elements.published.checked = quote.portfolio.published;
   $('[data-portfolio-project]').textContent = `${quote.service} for ${quote.customerName}`;
@@ -356,9 +399,10 @@ $('[data-portfolio-form]').addEventListener('submit', async (event) => {
   const button = $('[data-save-portfolio]'); button.disabled = true;
   const values = Object.fromEntries(new FormData(event.currentTarget));
   const published = event.currentTarget.elements.published.checked;
+  const testimonialConsent = event.currentTarget.elements.testimonialConsent.checked;
   status('[data-portfolio-form-status]', published ? 'Publishing this completed project…' : 'Saving this private portfolio draft…');
   try {
-    await api('/api/partners', { ...values, published, action: 'update_portfolio', id: portfolioQuote.id, portfolioRevision: portfolioQuote.portfolio.revision }, dashboard.csrf);
+    await api('/api/partners', { ...values, published, testimonialConsent, action: 'update_portfolio', id: portfolioQuote.id, portfolioRevision: portfolioQuote.portfolio.revision }, dashboard.csrf);
     closePortfolioEditor(); await loadDashboard();
     status('[data-global-status]', published ? 'Portfolio listing published. It is now visible on the public Portfolio page.' : 'Portfolio draft saved and hidden from the public page.');
   } catch (error) { status('[data-portfolio-form-status]', error.message, true); }

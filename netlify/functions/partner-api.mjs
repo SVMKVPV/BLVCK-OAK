@@ -5,6 +5,7 @@ import { createQuote, grossPaid, quoteLink, rotatePublicToken, validateQuoteInpu
 import { applyProjectProgress, projectProgressLink, readProjectProgress } from '../lib/project-progress.mjs';
 import { publicPaymentArrangement } from '../lib/pay-as-you-sell.mjs';
 import { applyPortfolio, readPortfolio } from '../lib/portfolio.mjs';
+import { listSalesLeads, updateSalesLead } from '../lib/sales-leads.mjs';
 
 export const config = { rateLimit: { action: 'rate_limit', aggregateBy: ['domain', 'ip'], windowSize: 60, windowLimit: 40 } };
 
@@ -63,7 +64,8 @@ export default async function handler(request) {
       if (referral.stripeAccountId && process.env.STRIPE_SECRET_KEY) {
         payoutReady = await getStripe().accounts.retrieve(referral.stripeAccountId).then(isReferralAccountEligible).catch(() => false);
       }
-      return json({ account: { name: auth.account.name, email: auth.account.email }, isOwner: auth.isOwner, csrf: auth.session.csrf, referral: { code: referral.code, payoutReady }, quotes, limit: 100 });
+      const leads = auth.isOwner ? await listSalesLeads(100) : [];
+      return json({ account: { name: auth.account.name, email: auth.account.email }, isOwner: auth.isOwner, csrf: auth.session.csrf, referral: { code: referral.code, payoutReady }, quotes, leads, limit: 100 });
     }
     if (request.method !== 'POST') return json({ error: 'Method not allowed.' }, 405);
     assertCsrf(request, auth);
@@ -97,6 +99,15 @@ export default async function handler(request) {
       }
       const link = await createOnboardingLink(stripe, referral, request);
       return json({ url: link.url });
+    }
+    if (body.action === 'update_lead') {
+      if (!auth.isOwner) throw new PortalError('Only the Black Oak owner can manage sales leads.', 403);
+      try {
+        const lead = await updateSalesLead(body.id, { status: body.status, ownerNote: body.ownerNote }, auth.account.id);
+        return json({ lead });
+      } catch (error) {
+        throw new PortalError(error.message, /not found/i.test(error.message) ? 404 : 400);
+      }
     }
     if (body.action === 'create_quote') {
       if (!/^[A-Za-z0-9-]{16,80}$/.test(body.requestId || '')) throw new PortalError('Refresh before creating another quote.');

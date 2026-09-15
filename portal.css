@@ -176,3 +176,22 @@
   color: #fff1bd;
   border-bottom-color: currentColor;
 }
+
+.sales-pipeline { margin:20px 0; border-color:#5d5030; background:radial-gradient(circle at top right,rgba(212,174,88,.08),transparent 42%),#111313; }
+.sales-lead-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin-top:24px; }
+.sales-lead-record { padding:22px; border:1px solid #31372f; background:#0b0e0d; }
+.sales-lead-record header { display:flex; align-items:flex-start; justify-content:space-between; gap:15px; }
+.sales-lead-record h3 { margin:7px 0 0; font-family:'Cinzel',serif; font-size:21px; font-weight:500; }
+.sales-lead-record p,.sales-lead-record details { color:#aeb2a8; font-size:11px; line-height:1.7; }
+.sales-lead-record a { color:#d9c27f; overflow-wrap:anywhere; }
+.sales-lead-record > small { display:block; color:#717970; font-size:9px; line-height:1.6; }
+.lead-source { color:var(--gold); font-size:8px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; }
+.lead-manage { display:grid; grid-template-columns:150px 1fr auto; gap:10px; align-items:end; margin-top:18px; padding-top:18px; border-top:1px solid #293028; }
+.lead-manage label { display:grid; gap:7px; color:#8f978b; font-size:9px; text-transform:uppercase; letter-spacing:.08em; }
+.lead-manage select,.lead-manage textarea { width:100%; min-height:42px; padding:10px; border:1px solid #384035; background:#111611; color:#dad8cd; font:inherit; font-size:11px; text-transform:none; letter-spacing:0; }
+.status-pill.new { border-color:#725e2f; color:#e7c873; }
+.status-pill.contacted,.status-pill.qualified,.status-pill.booked { border-color:#36506b; color:#92bde8; }
+.status-pill.won { border-color:#426342; color:#a4d7a0; }
+.status-pill.lost { border-color:#5c3838; color:#c98d8d; }
+@media(max-width:1050px) { .sales-lead-list { grid-template-columns:1fr; } }
+@media(max-width:700px) { .lead-manage { grid-template-columns:1fr; } }

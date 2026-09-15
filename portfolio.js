@@ -32,6 +32,17 @@ function projectCard(project, index) {
   const title = document.createElement('h3'); title.textContent = project.title;
   const summary = document.createElement('p'); summary.textContent = project.summary;
   body.append(meta, title, summary);
+  if (project.outcome) {
+    const outcome = document.createElement('p'); outcome.className = 'portfolio-outcome';
+    const label = document.createElement('strong'); label.textContent = 'Client outcome';
+    outcome.append(label, document.createTextNode(project.outcome)); body.append(outcome);
+  }
+  if (project.testimonial) {
+    const testimonial = document.createElement('blockquote'); testimonial.className = 'portfolio-testimonial';
+    testimonial.append(document.createTextNode(`“${project.testimonial}”`));
+    const cite = document.createElement('cite'); cite.textContent = project.clientDisplayName || 'Verified client';
+    testimonial.append(cite); body.append(testimonial);
+  }
   if (project.websiteUrl) {
     const link = document.createElement('a');
     link.className = 'portfolio-project-link'; link.href = project.websiteUrl; link.target = '_blank'; link.rel = 'noopener noreferrer';
