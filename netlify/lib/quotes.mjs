@@ -45,6 +45,15 @@ export function createQuote(input, account, referralCode, isOwner = false) {
   };
 }
 
+export function rotatePublicToken(quote, accountId) {
+  return {
+    ...quote,
+    publicToken: secretToken(),
+    clientLinkRotatedAt: new Date().toISOString(),
+    clientLinkRotatedBy: accountId,
+  };
+}
+
 export const grossPaid = (quote) => quote.payments.reduce((sum, payment) => sum + payment.amountCents, 0);
 export const refunded = (quote) => quote.payments.reduce((sum, payment) => sum + (payment.refundedCents || 0), 0);
 
