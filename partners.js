@@ -123,6 +123,19 @@ function renderQuotes() {
       const openProgress = document.createElement('a'); openProgress.className = 'quiet-button'; openProgress.href = quote.progressLink; openProgress.target = '_blank'; openProgress.rel = 'noopener noreferrer'; openProgress.textContent = 'View progress page ↗';
       actions.append(copyProgress, openProgress);
     }
+    if (dashboard.isOwner && quote.progressLink) {
+      const rotate = document.createElement('button'); rotate.className = 'quiet-button'; rotate.type = 'button'; rotate.textContent = 'Reset private links';
+      rotate.addEventListener('click', async () => {
+        if (!window.confirm('Reset this client’s payment and progress links? The old Black Oak links will stop working immediately.')) return;
+        rotate.disabled = true;
+        try {
+          await api('/api/partners', { action: 'rotate_client_link', id: quote.id }, dashboard.csrf);
+          await loadDashboard();
+          status('[data-global-status]', 'Private links reset. Copy and send the new links to the client.');
+        } catch (error) { status('[data-global-status]', error.message, true); rotate.disabled = false; }
+      });
+      actions.append(rotate);
+    }
     if (dashboard.isOwner && ['approved', 'deposit_paid', 'paid', 'payment_review'].includes(quote.status)) {
       const manage = document.createElement('button'); manage.className = 'quiet-button progress-manage-button'; manage.type = 'button'; manage.textContent = 'Manage progress';
       manage.addEventListener('click', () => editProgress(quote)); actions.append(manage);
