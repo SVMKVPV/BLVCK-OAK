@@ -157,3 +157,22 @@
 @media(max-width:1050px) { .workspace-columns { grid-template-columns: 1fr; }.workspace-heading { align-items: start; }.workspace-tag { display:none; }.lead-search-form { grid-template-columns: 1fr 1fr; }.lead-search-form .button { grid-column: 1 / -1; } }
 @media(max-width:760px) { .auth-layout,.client-quote-grid,.progress-columns { grid-template-columns: 1fr; }.workspace-header { align-items: start; }.workspace-header nav { gap: 12px; }.workspace-header nav a { font-size: 10px; }.workspace-metrics { gap:8px; }.workspace-metrics article { padding:14px; }.workspace-metrics strong { font-size:22px; }.workspace { padding-top:30px; }.lead-results { grid-template-columns: 1fr; }.lead-finder-heading,.lead-disclosure { align-items:start; flex-direction:column; }.lead-search-form { grid-template-columns:1fr; }.lead-search-form .button { grid-column:auto; width:100%; }.progress-overview-heading { align-items:start; flex-direction:column; gap:18px; }.progress-meta,.progress-history-entry header { align-items:start; flex-direction:column; gap:7px; } }
 @media(max-width:450px) { .field-pair { grid-template-columns:1fr; gap:0; }.workspace-header { flex-direction:column; gap:16px; }.card-heading { flex-wrap:wrap; }.quote-record header { flex-wrap:wrap; }.workspace-metrics span { font-size:9px; }.workspace-metrics strong { font-size:17px; } }
+
+
+.referral-code-link {
+  display: block;
+  width: fit-content;
+  margin-top: 4px;
+  color: var(--gold-light);
+  font-family: 'Cinzel', serif;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(241, 212, 140, .45);
+}
+.referral-code-link:hover,
+.referral-code-link:focus-visible {
+  color: #fff1bd;
+  border-bottom-color: currentColor;
+}
