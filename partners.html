@@ -7,8 +7,8 @@
   <title>Partner Workspace — Black Oak</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=10"><link rel="stylesheet" href="portal.css?v=5">
-  <script src="partners.js?v=6" defer></script>
+  <link rel="stylesheet" href="style.css?v=10"><link rel="stylesheet" href="portal.css?v=6">
+  <script src="partners.js?v=7" defer></script>
 </head>
 <body class="workspace-body">
   <header class="workspace-header">
@@ -44,7 +44,7 @@
     </section>
     <section data-dashboard hidden aria-label="Partner dashboard">
       <div class="workspace-toolbar">
-        <div><span class="small-muted">Your referral code</span><strong data-partner-code>—</strong></div>
+        <div><span class="small-muted">Your referral code</span><a class="referral-code-link" data-partner-code href="index.html#packages" target="_blank" rel="noopener noreferrer" aria-label="Open your tracked Enterprise referral link">—</a></div>
         <button type="button" class="quiet-button" data-copy-referral>Copy Enterprise referral link</button>
         <button type="button" class="quiet-button" data-onboard>Set up Stripe payouts</button>
         <span class="small-muted" data-payout-status></span>
