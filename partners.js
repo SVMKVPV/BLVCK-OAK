@@ -17,6 +17,10 @@ function status(selector, text, error = false) {
   target.classList.toggle('error', error);
 }
 
+function enterpriseReferralPath(code) {
+  return `/index.html?ref=${encodeURIComponent(code)}&package=enterprise#packages`;
+}
+
 async function api(path, body, csrf) {
   const options = body ? { method: 'POST', headers: { 'Content-Type': 'application/json', ...(csrf ? { 'X-CSRF-Token': csrf } : {}) }, body: JSON.stringify(body) } : { headers: { Accept: 'application/json' } };
   const response = await fetch(path, { ...options, credentials: 'same-origin', cache: 'no-store' });
@@ -241,7 +245,9 @@ async function loadDashboard() {
     $('[data-auth-panel]').hidden = true; $('[data-dashboard]').hidden = false; $('[data-signout]').hidden = false;
     $('[data-workspace-title]').textContent = dashboard.isOwner ? 'Your clients. Your control.' : 'Welcome, ' + dashboard.account.name.split(' ')[0] + '.';
     $('[data-role-tag]').textContent = dashboard.isOwner ? 'Owner workspace' : 'Partner workspace';
-    $('[data-partner-code]').textContent = dashboard.referral.code;
+    const referralCodeLink = $('[data-partner-code]');
+    referralCodeLink.textContent = dashboard.referral.code;
+    referralCodeLink.href = enterpriseReferralPath(dashboard.referral.code);
     $('[data-payout-status]').textContent = dashboard.referral.payoutReady ? 'Standard package rewards enabled' : 'Finish Stripe verification to activate package referrals';
     $('[data-onboard]').textContent = dashboard.referral.payoutReady ? 'Review Stripe onboarding' : 'Set up Stripe payouts';
     $('[data-quote-count]').textContent = dashboard.quotes.length;
@@ -420,7 +426,7 @@ $('[data-onboard]').addEventListener('click', async () => {
   catch (error) { status('[data-global-status]', error.message, true); button.disabled = false; }
 });
 $('[data-copy-referral]').addEventListener('click', async () => {
-  const link = new URL('/index.html', location.origin); link.searchParams.set('ref', dashboard.referral.code); link.searchParams.set('package', 'enterprise'); link.hash = 'packages';
+  const link = new URL(enterpriseReferralPath(dashboard.referral.code), location.origin);
   try { await navigator.clipboard.writeText(link.toString()); status('[data-global-status]', 'Enterprise referral link copied. Stripe payout verification must be complete before it can be used.'); }
   catch { status('[data-global-status]', 'Clipboard unavailable. Your referral code is ' + dashboard.referral.code, true); }
 });
