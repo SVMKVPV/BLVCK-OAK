@@ -13,6 +13,14 @@ export const ENTERPRISE_COUPON_ID = process.env.STRIPE_ENTERPRISE_REFERRAL_COUPO
 export const REFERRAL_CODE_PATTERN = /^BO-[A-F0-9]{10}$/;
 
 export const PACKAGE_CATALOG = Object.freeze({
+  'link-in-bio': Object.freeze({
+    id: 'link-in-bio',
+    name: 'Black Oak Link in Bio monthly plan',
+    priceCents: 1313,
+    billingInterval: 'month',
+    referralEligible: false,
+    description: 'A custom branded, mobile-first link page with managed updates and hosting while subscribed.',
+  }),
   essential: Object.freeze({
     id: 'essential',
     name: 'Black Oak Essential website package',
