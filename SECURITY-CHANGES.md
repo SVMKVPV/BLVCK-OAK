@@ -1,6 +1,6 @@
 # Payment, referral and launch hardening
 
-- Routes Essential, Professional and Enterprise through one server-priced Stripe Checkout function.
+- Routes Link in Bio, Essential, Professional and Enterprise through one server-priced Stripe Checkout function; Link in Bio uses Stripe subscription mode at A$13.13 per month.
 - Removes all public test Payment Links and rejects browser-supplied prices.
 - Uses one strict referral format: `BO-` plus ten hexadecimal characters.
 - Verifies email ownership with a six-digit, time-limited, single-use email code before creating a partner session or Stripe payout account.
