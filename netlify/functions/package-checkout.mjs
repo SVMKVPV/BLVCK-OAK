@@ -29,6 +29,47 @@ export const config = {
   },
 };
 
+export function packageCheckoutParameters({
+  packageItem,
+  metadata,
+  hasReferral = false,
+  referralCode = '',
+  customerEmail = '',
+  coupon = null,
+  successUrl,
+  cancelUrl,
+}) {
+  const isSubscription = packageItem.billingInterval === 'month';
+  return {
+    mode: isSubscription ? 'subscription' : 'payment',
+    client_reference_id: hasReferral ? referralCode : undefined,
+    customer_email: emailPattern.test(customerEmail) ? customerEmail : undefined,
+    line_items: [{
+      price_data: {
+        currency: 'aud',
+        unit_amount: packageItem.priceCents,
+        ...(isSubscription ? { recurring: { interval: packageItem.billingInterval } } : {}),
+        product_data: {
+          name: packageItem.name,
+          description: packageItem.description,
+          metadata: { package_id: packageItem.id, checkout_version: CHECKOUT_VERSION },
+        },
+      },
+      quantity: 1,
+    }],
+    discounts: coupon ? [{ coupon: coupon.id }] : undefined,
+    payment_method_types: ['card'],
+    success_url: successUrl.toString(),
+    cancel_url: cancelUrl.toString(),
+    billing_address_collection: 'required',
+    expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
+    metadata,
+    ...(isSubscription
+      ? { subscription_data: { metadata } }
+      : { customer_creation: 'always', payment_intent_data: { metadata } }),
+  };
+}
+
 export default async function handler(request) {
   if (request.method !== 'POST') return json({ error: 'Method not allowed.' }, 405);
 
@@ -49,6 +90,9 @@ export default async function handler(request) {
     if (!requestIdPattern.test(requestId)) return json({ error: 'Refresh the page and try checkout again.' }, 400);
     if (hasReferral && !isValidCode(referralCode)) {
       return json({ error: 'Use a complete referral code in the format BO-AB12CD34EF.' }, 400);
+    }
+    if (hasReferral && packageItem.referralEligible === false) {
+      return json({ error: 'Referral codes are not available for the monthly Link in Bio plan.' }, 400);
     }
     if (hasReferral && !emailPattern.test(customerEmail)) {
       return json({ error: 'Enter the customer email that will be used at Stripe checkout.' }, 400);
@@ -91,10 +135,12 @@ export default async function handler(request) {
     const siteUrl = getSiteUrl(request);
     const successUrl = new URL('/', siteUrl);
     successUrl.searchParams.set('payment', 'success');
+    successUrl.searchParams.set('package', packageItem.id);
     successUrl.searchParams.set('session_id', '{CHECKOUT_SESSION_ID}');
     successUrl.hash = 'packages';
     const cancelUrl = new URL('/', siteUrl);
     cancelUrl.searchParams.set('payment', 'cancelled');
+    cancelUrl.searchParams.set('package', packageItem.id);
     cancelUrl.hash = 'packages';
 
     const metadata = {
@@ -106,32 +152,16 @@ export default async function handler(request) {
       reward_policy: hasReferral && packageItem.id === 'enterprise' ? 'enterprise_list_price' : hasReferral ? 'standard' : 'none',
     };
 
-    const session = await stripe.checkout.sessions.create({
-      mode: 'payment',
-      client_reference_id: hasReferral ? referralCode : undefined,
-      customer_email: emailPattern.test(customerEmail) ? customerEmail : undefined,
-      line_items: [{
-        price_data: {
-          currency: 'aud',
-          unit_amount: packageItem.priceCents,
-          product_data: {
-            name: packageItem.name,
-            description: packageItem.description,
-            metadata: { package_id: packageItem.id, checkout_version: CHECKOUT_VERSION },
-          },
-        },
-        quantity: 1,
-      }],
-      discounts: coupon ? [{ coupon: coupon.id }] : undefined,
-      payment_method_types: ['card'],
-      success_url: successUrl.toString(),
-      cancel_url: cancelUrl.toString(),
-      customer_creation: 'always',
-      billing_address_collection: 'required',
-      expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
+    const session = await stripe.checkout.sessions.create(packageCheckoutParameters({
+      packageItem,
       metadata,
-      payment_intent_data: { metadata },
-    }, { idempotencyKey: `black-oak-checkout-${requestId}` });
+      hasReferral,
+      referralCode,
+      customerEmail,
+      coupon,
+      successUrl,
+      cancelUrl,
+    }), { idempotencyKey: `black-oak-checkout-${requestId}` });
 
     const dueNowCents = expectedPaidAmount(packageItem.id, hasReferral);
     const referralRewardCents = !hasReferral
@@ -147,6 +177,7 @@ export default async function handler(request) {
         discountPercent: coupon ? ENTERPRISE_REFERRAL_DISCOUNT_PERCENT : 0,
         dueNowCents,
         referralRewardCents,
+        billingInterval: packageItem.billingInterval || null,
       },
     });
   } catch (error) {
