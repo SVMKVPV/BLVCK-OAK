@@ -56,16 +56,18 @@ async function sendPurchaseNotifications(session) {
   const customerEmail = String(session.customer_details?.email || session.customer_email || '').trim().toLowerCase();
   const ownerEmail = getOwnerEmail();
   const amount = formatAud(session.amount_total);
+  const isSubscription = packageItem.billingInterval === 'month';
+  const paymentDescription = isSubscription ? `${amount} monthly` : amount;
   const contactUrl = new URL('/contact.html', process.env.SITE_URL || 'https://blvckoak.netlify.app').toString();
   const notifications = [];
 
   if (customerEmail) {
     notifications.push(sendEmail({
       to: customerEmail,
-      subject: `Payment received — Black Oak ${packageItem.name.replace('Black Oak ', '')}`,
-      text: `We received your ${amount} payment for ${packageItem.name}. Black Oak will contact you with onboarding and kick-off details. Support: ${contactUrl}`,
-      html: emailShell('Your build is reserved', `
-        <p style="color:#b6b5ae;line-height:1.7">We received your <strong style="color:#f1d48c">${escapeHtml(amount)}</strong> payment for ${escapeHtml(packageItem.name)}.</p>
+      subject: isSubscription ? 'Link in Bio monthly plan started' : `Payment received — Black Oak ${packageItem.name.replace('Black Oak ', '')}`,
+      text: `We received your ${paymentDescription} payment for ${packageItem.name}. Black Oak will contact you with onboarding and kick-off details. Support: ${contactUrl}`,
+      html: emailShell(isSubscription ? 'Your monthly plan is active' : 'Your build is reserved', `
+        <p style="color:#b6b5ae;line-height:1.7">We received your <strong style="color:#f1d48c">${escapeHtml(paymentDescription)}</strong> payment for ${escapeHtml(packageItem.name)}.</p>
         <p style="color:#b6b5ae;line-height:1.7">Black Oak will contact you with onboarding and kick-off details. If anything in the order needs attention, use the <a href="${escapeHtml(contactUrl)}" style="color:#f1d48c">secure contact page</a>.</p>`),
       idempotencyKey: `purchase-customer-${session.id}`,
     }));
@@ -74,10 +76,10 @@ async function sendPurchaseNotifications(session) {
   if (ownerEmail) {
     notifications.push(sendEmail({
       to: ownerEmail,
-      subject: `New paid ${packageItem.id} project — ${amount}`,
-      text: `A paid ${packageItem.name} checkout completed for ${amount}. Customer: ${customerEmail || 'See Stripe'}. Session: ${session.id}. Referral: ${hasReferral ? referralCode : 'none'}.`,
-      html: emailShell('New paid project', `
-        <p style="color:#b6b5ae;line-height:1.7"><strong>${escapeHtml(packageItem.name)}</strong> was paid in full for <strong style="color:#f1d48c">${escapeHtml(amount)}</strong>.</p>
+      subject: isSubscription ? `New Link in Bio subscription — ${amount}/month` : `New paid ${packageItem.id} project — ${amount}`,
+      text: `A paid ${packageItem.name} checkout completed for ${paymentDescription}. Customer: ${customerEmail || 'See Stripe'}. Session: ${session.id}. Referral: ${hasReferral ? referralCode : 'none'}.`,
+      html: emailShell(isSubscription ? 'New monthly subscription' : 'New paid project', `
+        <p style="color:#b6b5ae;line-height:1.7"><strong>${escapeHtml(packageItem.name)}</strong> checkout completed for <strong style="color:#f1d48c">${escapeHtml(paymentDescription)}</strong>.</p>
         <p style="color:#b6b5ae;line-height:1.7">Customer: ${escapeHtml(customerEmail || 'See Stripe')}<br>Stripe session: ${escapeHtml(session.id)}<br>Referral: ${escapeHtml(hasReferral ? referralCode : 'none')}</p>`),
       idempotencyKey: `purchase-owner-${session.id}`,
     }));
