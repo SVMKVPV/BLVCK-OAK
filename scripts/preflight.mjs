@@ -53,6 +53,8 @@ const redirects = await readFile(resolve(root, 'netlify.toml'), 'utf8');
 if (/buy\.stripe\.com\/test_/i.test(index) || /buy\.stripe\.com\/test_/i.test(client)) {
   failures.push('A Stripe test Payment Link is still exposed in public client code.');
 }
+if (!/data-package="link-in-bio"/.test(index)) failures.push('Link in Bio is not routed through server checkout.');
+if (!/billing:\s*'monthly'/.test(client)) failures.push('Link in Bio is not marked as a monthly client plan.');
 if (!/data-package="enterprise"/.test(index)) failures.push('Enterprise is not routed through server checkout.');
 for (const route of ['/api/partners/auth', '/api/partners', '/api/businesses/nearby', '/api/quote-payment', '/api/project-progress', '/api/portfolio', '/api/stripe/connect/callback', '/api/contact', '/api/stripe/webhook']) {
   if (!redirects.includes(route)) failures.push(`Missing Netlify route: ${route}`);
