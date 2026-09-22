@@ -10,6 +10,7 @@ export const ENTERPRISE_LIST_PRICE_CENTS = 290000;
 export const ENTERPRISE_REFERRAL_DISCOUNT_PERCENT = 60;
 export const ENTERPRISE_REFERRAL_LIMIT = 1000;
 export const ENTERPRISE_COUPON_ID = process.env.STRIPE_ENTERPRISE_REFERRAL_COUPON_ID || 'bo-ent-60-first-1000';
+export const LINK_IN_BIO_REFERRAL_COUPON_ID = process.env.STRIPE_LINK_IN_BIO_REFERRAL_COUPON_ID || 'bo-link-bio-first-month-free';
 export const REFERRAL_CODE_PATTERN = /^BO-[A-F0-9]{10}$/;
 
 export const PACKAGE_CATALOG = Object.freeze({
@@ -18,7 +19,7 @@ export const PACKAGE_CATALOG = Object.freeze({
     name: 'Black Oak Link in Bio monthly plan',
     priceCents: 1313,
     billingInterval: 'month',
-    referralEligible: false,
+    referralEligible: true,
     description: 'A custom branded, mobile-first link page with managed updates and hosting while subscribed.',
   }),
   essential: Object.freeze({
@@ -125,6 +126,7 @@ export function expectedPaidAmount(packageId, hasReferral = false) {
   if (packageItem.id === 'enterprise' && hasReferral) {
     return Math.round(packageItem.priceCents * (1 - ENTERPRISE_REFERRAL_DISCOUNT_PERCENT / 100));
   }
+  if (packageItem.id === 'link-in-bio' && hasReferral) return 0;
   return packageItem.priceCents;
 }
 
@@ -198,6 +200,31 @@ export async function getEnterpriseCoupon(stripe, { create = false } = {}) {
     if (error?.code === 'resource_already_exists') {
       return stripe.coupons.retrieve(ENTERPRISE_COUPON_ID);
     }
+    throw error;
+  }
+}
+
+export async function getLinkInBioReferralCoupon(stripe, { create = false } = {}) {
+  try {
+    const coupon = await stripe.coupons.retrieve(LINK_IN_BIO_REFERRAL_COUPON_ID);
+    if (coupon.deleted) return null;
+    return coupon;
+  } catch (error) {
+    if (error?.code === 'resource_missing' && !create) return null;
+    if (error?.code !== 'resource_missing') throw error;
+  }
+
+  try {
+    return await stripe.coupons.create({
+      id: LINK_IN_BIO_REFERRAL_COUPON_ID,
+      name: 'Black Oak Link in Bio referral — first month free',
+      duration: 'once',
+      amount_off: PACKAGE_CATALOG['link-in-bio'].priceCents,
+      currency: 'aud',
+      metadata: { program: 'black_oak_link_in_bio_first_month_free', recurring_price_aud: '13.13' },
+    }, { idempotencyKey: 'black-oak-link-in-bio-first-month-free-v1' });
+  } catch (error) {
+    if (error?.code === 'resource_already_exists') return stripe.coupons.retrieve(LINK_IN_BIO_REFERRAL_COUPON_ID);
     throw error;
   }
 }

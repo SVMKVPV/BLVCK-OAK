@@ -46,7 +46,17 @@
         <a href="contact.html">Contact</a>
         <a class="nav-cta" href="book.html">Book a call</a>
       </nav>
+      <button class="menu-toggle" type="button" data-menu-toggle aria-label="Open navigation menu" aria-controls="side-menu" aria-expanded="false"><span></span><span></span><span></span></button>
     </header>
+
+    <div class="side-menu-backdrop" data-menu-backdrop hidden></div>
+    <aside class="side-menu" id="side-menu" data-side-menu aria-label="Quick navigation" aria-hidden="true">
+      <div class="side-menu-heading"><span>Navigate</span><button type="button" data-menu-close aria-label="Close navigation menu">×</button></div>
+      <nav>
+        <a href="#top"><small>01</small>Home</a><a href="#approach"><small>02</small>Approach</a><a href="#services"><small>03</small>Services</a><a href="#packages"><small>04</small>Packages</a><a href="portfolio.html"><small>05</small>Portfolio</a><a href="audit.html"><small>06</small>Free website audit</a><a href="quote.html"><small>07</small>Build a quote</a><a href="partners.html"><small>08</small>Partner login</a><a href="contact.html"><small>09</small>Contact</a>
+      </nav>
+      <a class="button button-gold side-menu-cta" href="book.html">Book a call <span>↗</span></a>
+    </aside>
 
     <section class="hero" id="top">
       <canvas class="hero-canvas" data-hero-canvas aria-hidden="true"></canvas>
@@ -213,6 +223,7 @@
         <article class="package-card link-in-bio-card">
           <div class="package-topline"><span>01</span><span>Link in Bio</span></div>
           <div class="package-price">$13.13<small> AUD / MONTH</small></div>
+          <p class="package-referral-offer">Referral code: first month free</p>
           <p>A premium, mobile-first home for every link your audience needs.</p>
           <ul>
             <li><span>✓</span>Custom branded page</li>
@@ -445,7 +456,7 @@
 
       <details class="referral-terms">
         <summary>Referral reward terms <span>+</span></summary>
-        <p>Rewards apply to successful, fully paid and non-refunded purchases attributed to an active referral code. Each qualifying sale earns AUD $100. When the paid amount exceeds AUD $501, the reward is AUD $100 plus 10% of the full paid amount. For the limited Enterprise referral offer, the customer receives 60% off the AUD $2,900 list price and the partner reward is AUD $390: the AUD $100 base reward plus 10% of the original AUD $2,900 list price. The offer is limited to the first 1,000 completed Stripe redemptions. Eligible rewards enter a minimum 14-day fraud and refund hold, then are processed in the next weekly payout run. Self-referrals, duplicate claims, fraudulent transactions, disputes, chargebacks and refunded payments are excluded or reversed. Completed Stripe identity and payout verification is required before a code can be used.</p>
+        <p>Rewards apply to successful, fully paid and non-refunded purchases attributed to an active referral code. A referred Link in Bio customer receives the first month free, then pays AUD $13.13 monthly until cancelled; no partner reward is created from the free month. Each other qualifying sale earns AUD $100. When the paid amount exceeds AUD $501, the reward is AUD $100 plus 10% of the full paid amount. For the limited Enterprise referral offer, the customer receives 60% off the AUD $2,900 list price and the partner reward is AUD $390: the AUD $100 base reward plus 10% of the original AUD $2,900 list price. The Enterprise offer is limited to the first 1,000 completed Stripe redemptions. Eligible rewards enter a minimum 14-day fraud and refund hold, then are processed in the next weekly payout run. Self-referrals, duplicate claims, fraudulent transactions, disputes, chargebacks and refunded payments are excluded or reversed. Completed Stripe identity and payout verification is required before a code can be used.</p>
       </details>
     </section>
 
@@ -516,7 +527,7 @@
         </label>
         <small class="checkout-referral-message" data-checkout-referral-message></small>
         <button class="button button-gold checkout-action" type="button" data-checkout-action>Continue to secure checkout <span>↗</span></button>
-        <small data-checkout-billing-note hidden>Renews automatically at A$13.13 each month until cancelled. Contact Black Oak to cancel before the next renewal.</small>
+        <small data-checkout-billing-note hidden>A valid referral code makes the first month free. Otherwise A$13.13 is due today. Renews automatically at A$13.13 each month until cancelled.</small>
         <small>Encrypted payment by Stripe · Card details are never stored by Black Oak</small>
       </section>
     </div>

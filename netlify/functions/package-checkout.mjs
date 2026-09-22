@@ -6,6 +6,7 @@ import {
   calculateReward,
   expectedPaidAmount,
   getEnterpriseCoupon,
+  getLinkInBioReferralCoupon,
   getPackage,
   getSiteUrl,
   getStripe,
@@ -58,7 +59,6 @@ export function packageCheckoutParameters({
       quantity: 1,
     }],
     discounts: coupon ? [{ coupon: coupon.id }] : undefined,
-    payment_method_types: ['card'],
     success_url: successUrl.toString(),
     cancel_url: cancelUrl.toString(),
     billing_address_collection: 'required',
@@ -90,9 +90,6 @@ export default async function handler(request) {
     if (!requestIdPattern.test(requestId)) return json({ error: 'Refresh the page and try checkout again.' }, 400);
     if (hasReferral && !isValidCode(referralCode)) {
       return json({ error: 'Use a complete referral code in the format BO-AB12CD34EF.' }, 400);
-    }
-    if (hasReferral && packageItem.referralEligible === false) {
-      return json({ error: 'Referral codes are not available for the monthly Link in Bio plan.' }, 400);
     }
     if (hasReferral && !emailPattern.test(customerEmail)) {
       return json({ error: 'Enter the customer email that will be used at Stripe checkout.' }, 400);
@@ -129,6 +126,15 @@ export default async function handler(request) {
         if (offerExhausted) {
           return json({ error: 'The first 1,000 Enterprise referral offers have been claimed.' }, 409);
         }
+      } else if (packageItem.id === 'link-in-bio') {
+        coupon = await getLinkInBioReferralCoupon(stripe, { create: true });
+        const invalidCoupon = !coupon
+          || !coupon.valid
+          || coupon.duration !== 'once'
+          || coupon.amount_off !== packageItem.priceCents
+          || coupon.currency !== 'aud'
+          || coupon.metadata?.program !== 'black_oak_link_in_bio_first_month_free';
+        if (invalidCoupon) return json({ error: 'The first-month-free referral offer is temporarily unavailable.' }, 409);
       }
     }
 
@@ -149,7 +155,11 @@ export default async function handler(request) {
       package_list_price_cents: String(packageItem.priceCents),
       referral_program: hasReferral ? 'black_oak_verified_partner' : 'none',
       referral_code: hasReferral ? referralCode : '',
-      reward_policy: hasReferral && packageItem.id === 'enterprise' ? 'enterprise_list_price' : hasReferral ? 'standard' : 'none',
+      reward_policy: hasReferral && packageItem.id === 'enterprise'
+        ? 'enterprise_list_price'
+        : hasReferral && packageItem.id === 'link-in-bio'
+          ? 'after_first_paid_renewal'
+          : hasReferral ? 'standard' : 'none',
     };
 
     const session = await stripe.checkout.sessions.create(packageCheckoutParameters({
@@ -164,7 +174,7 @@ export default async function handler(request) {
     }), { idempotencyKey: `black-oak-checkout-${requestId}` });
 
     const dueNowCents = expectedPaidAmount(packageItem.id, hasReferral);
-    const referralRewardCents = !hasReferral
+    const referralRewardCents = !hasReferral || packageItem.id === 'link-in-bio'
       ? 0
       : packageItem.id === 'enterprise'
         ? calculateEnterpriseReferralReward()
@@ -174,7 +184,8 @@ export default async function handler(request) {
       url: session.url,
       pricing: {
         listPriceCents: packageItem.priceCents,
-        discountPercent: coupon ? ENTERPRISE_REFERRAL_DISCOUNT_PERCENT : 0,
+        discountPercent: coupon && packageItem.id === 'enterprise' ? ENTERPRISE_REFERRAL_DISCOUNT_PERCENT : 0,
+        firstMonthFree: hasReferral && packageItem.id === 'link-in-bio',
         dueNowCents,
         referralRewardCents,
         billingInterval: packageItem.billingInterval || null,

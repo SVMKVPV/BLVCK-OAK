@@ -40,8 +40,9 @@ test('package pricing and rewards are fixed to the advertised AUD amounts', () =
   assert.equal(CHECKOUT_VERSION, 'black_oak_v2');
   assert.equal(getPackage('link-in-bio').priceCents, 1313);
   assert.equal(getPackage('link-in-bio').billingInterval, 'month');
-  assert.equal(getPackage('link-in-bio').referralEligible, false);
+  assert.equal(getPackage('link-in-bio').referralEligible, true);
   assert.equal(expectedPaidAmount('link-in-bio', false), 1313);
+  assert.equal(expectedPaidAmount('link-in-bio', true), 0);
   assert.equal(getPackage('essential').priceCents, 50000);
   assert.equal(getPackage('professional').priceCents, 150000);
   assert.equal(getPackage('enterprise').priceCents, 290000);

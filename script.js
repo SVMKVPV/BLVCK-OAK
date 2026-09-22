@@ -6,7 +6,8 @@ const packageCatalog = Object.freeze({
     name: 'Link in Bio',
     price: '$13.13 AUD / month',
     billing: 'monthly',
-    referralEligible: false,
+    referralEligible: true,
+    referralPrice: '$0 today',
   },
   essential: {
     id: 'essential',
@@ -29,6 +30,33 @@ const packageCatalog = Object.freeze({
 const REFERRAL_STORAGE_KEY = 'blackOakReferralCode';
 const referralCodePattern = /^BO-[A-F0-9]{10}$/;
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const menuToggle = document.querySelector('[data-menu-toggle]');
+const sideMenu = document.querySelector('[data-side-menu]');
+const menuBackdrop = document.querySelector('[data-menu-backdrop]');
+const menuClose = document.querySelector('[data-menu-close]');
+let menuPreviouslyFocused = null;
+
+function setSideMenu(open) {
+  if (!menuToggle || !sideMenu || !menuBackdrop) return;
+  if (open) menuPreviouslyFocused = document.activeElement;
+  sideMenu.classList.toggle('is-open', open);
+  sideMenu.setAttribute('aria-hidden', String(!open));
+  menuToggle.setAttribute('aria-expanded', String(open));
+  menuToggle.setAttribute('aria-label', open ? 'Close navigation menu' : 'Open navigation menu');
+  menuBackdrop.hidden = !open;
+  document.body.classList.toggle('menu-open', open);
+  if (open) menuClose?.focus();
+  else if (menuPreviouslyFocused instanceof HTMLElement) menuPreviouslyFocused.focus();
+}
+
+menuToggle?.addEventListener('click', () => setSideMenu(menuToggle.getAttribute('aria-expanded') !== 'true'));
+menuClose?.addEventListener('click', () => setSideMenu(false));
+menuBackdrop?.addEventListener('click', () => setSideMenu(false));
+sideMenu?.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => setSideMenu(false)));
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && sideMenu?.classList.contains('is-open')) setSideMenu(false);
+});
 
 function normaliseReferralCode(value = '') {
   return String(value)
@@ -90,27 +118,34 @@ function updateCheckoutOfferPresentation() {
   const referralEligible = selectedPackage.referralEligible !== false;
   const hasReferral = referralEligible && referralCodePattern.test(code);
   const enterpriseReferral = selectedPackage.id === 'enterprise' && hasReferral;
+  const linkInBioReferral = selectedPackage.id === 'link-in-bio' && hasReferral;
 
   if (checkoutReferralField) checkoutReferralField.hidden = !referralEligible;
   if (checkoutEmailField) checkoutEmailField.hidden = !hasReferral;
   if (checkoutBillingNote) checkoutBillingNote.hidden = selectedPackage.billing !== 'monthly';
-  if (summaryPriceLabel) summaryPriceLabel.textContent = selectedPackage.billing === 'monthly' ? 'Due monthly' : 'Due now';
+  if (summaryPriceLabel) summaryPriceLabel.textContent = linkInBioReferral ? 'Due today' : selectedPackage.billing === 'monthly' ? 'Due monthly' : 'Due now';
 
   summaryListPriceRow.hidden = !enterpriseReferral;
   summaryDiscountRow.hidden = !enterpriseReferral;
-  summaryPrice.textContent = enterpriseReferral ? selectedPackage.referralPrice : selectedPackage.price;
+  summaryPrice.textContent = enterpriseReferral || linkInBioReferral ? selectedPackage.referralPrice : selectedPackage.price;
   modalPrice.textContent = enterpriseReferral
     ? `${selectedPackage.referralPrice} after referral verification`
+    : linkInBioReferral
+      ? '$0 for the first month after referral verification, then $13.13 AUD/month'
     : selectedPackage.price;
 
   if (enterpriseReferral) {
     checkoutReferralMessage.textContent = `${code} will be verified. If eligible, the limited 60% Enterprise offer applies.`;
+  } else if (linkInBioReferral) {
+    checkoutReferralMessage.textContent = `${code} will be verified. Your first month will be free, then A$13.13 monthly.`;
   } else if (hasReferral) {
     checkoutReferralMessage.textContent = `Referral ${code} will be tracked at Stripe checkout.`;
   } else if (referralEligible) {
     checkoutReferralMessage.textContent = selectedPackage.id === 'enterprise'
       ? 'Add a valid partner code to unlock the limited 60% Enterprise offer.'
-      : 'Add a partner code if someone referred you.';
+      : selectedPackage.id === 'link-in-bio'
+        ? 'Add a valid partner code to receive your first month free.'
+        : 'Add a partner code if someone referred you.';
   } else {
     checkoutReferralMessage.textContent = '';
   }

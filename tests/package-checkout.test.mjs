@@ -44,3 +44,22 @@ test('website build packages remain one-time Stripe payments', () => {
   assert.deepEqual(params.payment_intent_data, { metadata: params.metadata });
   assert.equal(params.subscription_data, undefined);
 });
+
+test('a verified Link in Bio referral applies a first-month-free coupon', () => {
+  const coupon = { id: 'bo-link-bio-first-month-free' };
+  const params = packageCheckoutParameters({
+    packageItem: getPackage('link-in-bio'),
+    metadata: { ...metadata, referral_program: 'black_oak_verified_partner' },
+    hasReferral: true,
+    referralCode: 'BO-AB12CD34EF',
+    customerEmail: 'customer@example.test',
+    coupon,
+    successUrl: new URL('https://blackoak.example/?payment=success&package=link-in-bio'),
+    cancelUrl: new URL('https://blackoak.example/?payment=cancelled&package=link-in-bio'),
+  });
+  assert.equal(params.mode, 'subscription');
+  assert.deepEqual(params.discounts, [{ coupon: coupon.id }]);
+  assert.equal(params.client_reference_id, 'BO-AB12CD34EF');
+  assert.equal(params.customer_email, 'customer@example.test');
+  assert.equal(params.payment_method_types, undefined);
+});

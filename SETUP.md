@@ -7,6 +7,7 @@ Do not deploy only `index.html`, `style.css` and `script.js`. Payments, referral
 ## Fixed commercial rules in this build
 
 - Link in Bio: **A$13.13 per month**, billed automatically by Stripe until cancelled
+- Valid Link in Bio referral: **first month free**, then **A$13.13 per month**
 - Essential: **A$500**
 - Professional: **A$1,500**
 - Enterprise: **A$2,900**
@@ -102,9 +103,9 @@ Use test data only:
 4. Finish Stripe Express onboarding from the authenticated partner dashboard.
 5. Sign out, sign in again with the same email and confirm the existing profile and referral code return.
 6. Try the partner’s tracked Essential, Professional and Enterprise links.
-7. Start a Link in Bio checkout and confirm Stripe shows **A$13.13 AUD billed monthly**, then complete it with a test card.
+7. Start a Link in Bio checkout without a code and confirm Stripe shows **A$13.13 AUD billed monthly**. Repeat with a verified referral code and confirm the first month is **A$0**, followed by **A$13.13 monthly**.
 8. Confirm Enterprise shows A$2,900 less 60%, with A$1,160 due.
-9. Confirm an invalid code, incomplete partner, malformed code and same-email self-referral are rejected. Link in Bio is intentionally excluded from referral rewards.
+9. Confirm an invalid code, incomplete partner, malformed code and same-email self-referral are rejected. The free Link in Bio month does not create a partner reward.
 10. Complete a test payment and confirm Stripe’s event is successful, owner/customer email arrives and the Enterprise counter changes after an Enterprise referral purchase.
 11. Confirm the A$390 reward is pending for at least 14 days.
 12. In test data only, make a reward eligible and use Netlify’s **Run now** control for `weekly-referral-payouts`; confirm the Stripe test transfer.
