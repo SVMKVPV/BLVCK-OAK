@@ -38,6 +38,10 @@ test('copied codes normalize safely while malformed and legacy strings are rejec
 
 test('package pricing and rewards are fixed to the advertised AUD amounts', () => {
   assert.equal(CHECKOUT_VERSION, 'black_oak_v2');
+  assert.equal(getPackage('link-in-bio').priceCents, 1313);
+  assert.equal(getPackage('link-in-bio').billingInterval, 'month');
+  assert.equal(getPackage('link-in-bio').referralEligible, false);
+  assert.equal(expectedPaidAmount('link-in-bio', false), 1313);
   assert.equal(getPackage('essential').priceCents, 50000);
   assert.equal(getPackage('professional').priceCents, 150000);
   assert.equal(getPackage('enterprise').priceCents, 290000);
@@ -83,6 +87,8 @@ test('the browser uses the same exact referral pattern and server checkout', asy
   assert.match(client, /\/api\/checkout\/package/);
   assert.doesNotMatch(client, /buy\.stripe\.com/);
   assert.doesNotMatch(html, /buy\.stripe\.com/);
+  assert.match(html, /data-package="link-in-bio"/);
+  assert.match(client, /billing: 'monthly'/);
   assert.match(html, /data-package="enterprise"/);
   assert.match(html, /data-enterprise-referral/);
   assert.match(html, /data-enterprise-apply/);
