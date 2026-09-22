@@ -6,6 +6,7 @@ Do not deploy only `index.html`, `style.css` and `script.js`. Payments, referral
 
 ## Fixed commercial rules in this build
 
+- Link in Bio: **A$13.13 per month**, billed automatically by Stripe until cancelled
 - Essential: **A$500**
 - Professional: **A$1,500**
 - Enterprise: **A$2,900**
@@ -15,7 +16,7 @@ Do not deploy only `index.html`, `style.css` and `script.js`. Payments, referral
 - Other qualifying sales: A$100; when paid total is above A$501, add 10% of paid total
 - Rewards: minimum 14-day hold, then processed weekly
 
-All three package prices are created on the server. There are no public Stripe Payment Links in the site.
+All four catalogue prices are created on the server. Link in Bio uses Stripe subscription mode; the three website-build packages remain one-time payments. There are no public Stripe Payment Links in the site.
 
 ## 1. Test the source locally
 
@@ -101,12 +102,13 @@ Use test data only:
 4. Finish Stripe Express onboarding from the authenticated partner dashboard.
 5. Sign out, sign in again with the same email and confirm the existing profile and referral code return.
 6. Try the partner’s tracked Essential, Professional and Enterprise links.
-7. Confirm Enterprise shows A$2,900 less 60%, with A$1,160 due.
-8. Confirm an invalid code, incomplete partner, malformed code and same-email self-referral are rejected.
-9. Complete a test payment and confirm Stripe’s event is successful, owner/customer email arrives and the Enterprise counter changes after an Enterprise referral purchase.
-10. Confirm the A$390 reward is pending for at least 14 days.
-11. In test data only, make a reward eligible and use Netlify’s **Run now** control for `weekly-referral-payouts`; confirm the Stripe test transfer.
-12. Test partial/full refunds and a dispute; confirm the reward reduces, cancels, blocks or reverses.
+7. Start a Link in Bio checkout and confirm Stripe shows **A$13.13 AUD billed monthly**, then complete it with a test card.
+8. Confirm Enterprise shows A$2,900 less 60%, with A$1,160 due.
+9. Confirm an invalid code, incomplete partner, malformed code and same-email self-referral are rejected. Link in Bio is intentionally excluded from referral rewards.
+10. Complete a test payment and confirm Stripe’s event is successful, owner/customer email arrives and the Enterprise counter changes after an Enterprise referral purchase.
+11. Confirm the A$390 reward is pending for at least 14 days.
+12. In test data only, make a reward eligible and use Netlify’s **Run now** control for `weekly-referral-payouts`; confirm the Stripe test transfer.
+13. Test partial/full refunds and a dispute; confirm the reward reduces, cancels, blocks or reverses.
 
 ## 6. Switch to live payments
 
