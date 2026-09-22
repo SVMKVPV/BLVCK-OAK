@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css?v=12">
-  <script src="script.js?v=10" defer></script>
+  <script src="script.js?v=11" defer></script>
   <script src="sales-config.js?v=1" defer></script>
   <script src="sales.js?v=1" defer></script>
 </head>
@@ -210,8 +210,23 @@
       </div>
 
       <div class="pricing-grid">
+        <article class="package-card link-in-bio-card">
+          <div class="package-topline"><span>01</span><span>Link in Bio</span></div>
+          <div class="package-price">$13.13<small> AUD / MONTH</small></div>
+          <p>A premium, mobile-first home for every link your audience needs.</p>
+          <ul>
+            <li><span>✓</span>Custom branded page</li>
+            <li><span>✓</span>Social and business links</li>
+            <li><span>✓</span>Mobile-first responsive design</li>
+            <li><span>✓</span>Managed link updates</li>
+            <li><span>✓</span>Hosting while subscribed</li>
+          </ul>
+          <a class="package-demo-link" href="previews/link-in-bio.html">Preview the Link in Bio experience <span>↗</span></a>
+          <button class="button button-dark package-action" type="button" data-package="link-in-bio">Start monthly plan <span>↗</span></button>
+        </article>
+
         <article class="package-card">
-          <div class="package-topline"><span>01</span><span>Essential</span></div>
+          <div class="package-topline"><span>02</span><span>Essential</span></div>
           <div class="package-price">$500<small> AUD</small></div>
           <p>A focused, conversion-ready launch page with a premium finish.</p>
           <ul>
@@ -227,7 +242,7 @@
 
         <article class="package-card featured">
           <span class="package-badge">Most selected</span>
-          <div class="package-topline"><span>02</span><span>Professional</span></div>
+          <div class="package-topline"><span>03</span><span>Professional</span></div>
           <div class="package-price">$1,500<small> AUD</small></div>
           <p>A complete brand platform engineered to turn attention into action.</p>
           <ul>
@@ -242,7 +257,7 @@
         </article>
 
         <article class="package-card enterprise-card">
-          <div class="package-topline"><span>03</span><span>Enterprise</span></div>
+          <div class="package-topline"><span>04</span><span>Enterprise</span></div>
           <div class="package-price">$2,900<small> AUD</small></div>
           <p>A tailored digital product for ambitious, technically complex ideas.</p>
           <ul>
@@ -346,7 +361,7 @@
           </div>
         </a>
       </article>
-      <p class="pricing-note">Prices are in AUD. All packages include a private project space, two revision rounds and 30 days of post-launch support.</p>
+      <p class="pricing-note">Prices are in AUD. Link in Bio renews monthly until cancelled. Website builds include a private project space, two revision rounds and 30 days of post-launch support.</p>
     </section>
 
     <section class="brand-film" id="brand-film" aria-labelledby="brand-film-title">
@@ -491,9 +506,9 @@
           <div><span>Package</span><strong data-summary-name>Essential</strong></div>
           <div data-summary-list-price-row hidden><span>List price</span><strong data-summary-list-price>$2,900 AUD</strong></div>
           <div data-summary-discount-row hidden><span>Referral saving</span><strong class="summary-saving">−60%</strong></div>
-          <div><span>Due now</span><strong data-summary-price>$500 AUD</strong></div>
+          <div><span data-summary-price-label>Due now</span><strong data-summary-price>$500 AUD</strong></div>
         </div>
-        <label class="checkout-referral-field">Referral code <span>Optional</span>
+        <label class="checkout-referral-field" data-checkout-referral-field>Referral code <span>Optional</span>
           <input type="text" data-checkout-referral maxlength="13" pattern="BO-[A-Fa-f0-9]{10}" placeholder="e.g. BO-AB12CD34EF" autocomplete="off" autocapitalize="characters" spellcheck="false">
         </label>
         <label class="checkout-referral-field" data-checkout-email-field hidden>Checkout email <span>Required with a referral</span>
@@ -501,6 +516,7 @@
         </label>
         <small class="checkout-referral-message" data-checkout-referral-message></small>
         <button class="button button-gold checkout-action" type="button" data-checkout-action>Continue to secure checkout <span>↗</span></button>
+        <small data-checkout-billing-note hidden>Renews automatically at A$13.13 each month until cancelled. Contact Black Oak to cancel before the next renewal.</small>
         <small>Encrypted payment by Stripe · Card details are never stored by Black Oak</small>
       </section>
     </div>
