@@ -207,7 +207,7 @@ body.scrolled .site-header { height: 74px; background: rgba(8,9,9,.82); backdrop
 .section-heading .section-label { margin-bottom: 18px; }
 .section-heading h2 { font-size: clamp(38px, 5vw, 68px); }
 .section-heading > p { max-width: 290px; margin: 0; color: #82827c; font-size: 13px; line-height: 1.7; }
-.pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.pricing-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
 .package-card {
   --card-rx: 0deg;
   --card-ry: 0deg;
@@ -227,6 +227,7 @@ body.scrolled .site-header { height: 74px; background: rgba(8,9,9,.82); backdrop
 .package-card:hover { --card-lift: -8px; border-color: rgba(212,174,88,.52); box-shadow: 0 42px 90px rgba(0,0,0,.34), 0 0 50px rgba(212,174,88,.055); }
 .package-card > * { position: relative; z-index: 1; transform: translateZ(18px); }
 .package-card.featured { border-color: rgba(212, 174, 88, .7); background: linear-gradient(160deg, rgba(212,174,88,.09), #111212 42%); }
+.link-in-bio-card { border-color: rgba(212, 174, 88, .34); background: linear-gradient(160deg, rgba(212,174,88,.055), #111212 46%); }
 .package-badge { position: absolute; top: 0; right: 0; padding: 8px 14px; background: var(--gold); color: #090a09; font-size: 9px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
 .package-topline { display: flex; gap: 14px; color: #84847e; font-size: 10px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; }
 .package-topline span:first-child { color: var(--gold); }
@@ -418,6 +419,10 @@ footer p:last-child { text-align: right; }
 .checkout-action { width: 100%; margin-top: 18px; }
 .checkout-action:disabled { cursor: wait; opacity: .7; transform: none; }
 .checkout-modal small { display: block; margin-top: 18px; color: #66665f; text-align: center; }
+
+@media (max-width: 1180px) and (min-width: 901px) {
+  .pricing-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 
 @media (max-width: 900px) {
   .site-header nav a:not(.nav-cta) { display: none; }
