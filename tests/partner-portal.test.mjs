@@ -190,6 +190,8 @@ test('session cookies are secure and owner authority is resolved only from verif
 test('mutating actions require both same-origin requests and a session-specific CSRF value', () => {
   process.env.SITE_URL = 'https://blackoak.example';
   assert.throws(() => assertSameOrigin(new Request('https://blackoak.example', { headers: { origin: 'https://attacker.example' } })));
+  assert.doesNotThrow(() => assertSameOrigin(new Request('https://blvckoak.com.au', { headers: { origin: 'https://blvckoak.com.au' } })));
+  assert.doesNotThrow(() => assertSameOrigin(new Request('https://www.blvckoak.com.au', { headers: { origin: 'https://www.blvckoak.com.au' } })));
   assert.throws(() => assertCsrf(new Request('https://blackoak.example', { headers: { origin: 'https://blackoak.example', 'x-csrf-token': 'wrong' } }), { session: { csrf: 'correct' } }));
   assert.doesNotThrow(() => assertCsrf(new Request('https://blackoak.example', { headers: { origin: 'https://blackoak.example', 'x-csrf-token': 'correct' } }), { session: { csrf: 'correct' } }));
 });

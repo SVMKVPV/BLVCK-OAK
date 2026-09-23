@@ -10,6 +10,11 @@ export const hash = (value) => createHash('sha256').update(String(value)).digest
 export const validEmail = (value) => typeof value === 'string' && value.length <= 160 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 export const tokenPattern = /^[A-Za-z0-9_-]{43}$/;
 export const quoteIdPattern = /^[a-f0-9]{32}$/;
+const PRODUCTION_SITE_ORIGINS = new Set([
+  'https://blvckoak.com.au',
+  'https://www.blvckoak.com.au',
+  'https://blvckoak.netlify.app',
+]);
 
 export class PortalError extends Error {
   constructor(message, status = 400) { super(message); this.status = status; }
@@ -24,7 +29,10 @@ export function siteOrigin() {
 }
 
 export function assertSameOrigin(request) {
-  if (request.headers.get('origin') !== siteOrigin()) throw new PortalError('This request must come from the Black Oak website.', 403);
+  const origin = request.headers.get('origin');
+  if (origin !== siteOrigin() && !PRODUCTION_SITE_ORIGINS.has(origin)) {
+    throw new PortalError('This request must come from the Black Oak website.', 403);
+  }
 }
 
 export async function readBody(request, limit = 16000) {
