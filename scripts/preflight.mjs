@@ -27,6 +27,7 @@ const requiredFiles = [
   'netlify/functions/stripe-connect-callback.mjs',
   'netlify/lib/pay-as-you-sell.mjs',
   'index.html',
+  'style.css',
   'referrals.html',
   'contact.html',
   'privacy.html',
@@ -48,7 +49,15 @@ for (const file of requiredFiles) {
 
 const index = await readFile(resolve(root, 'index.html'), 'utf8');
 const client = await readFile(resolve(root, 'script.js'), 'utf8');
+const stylesheet = await readFile(resolve(root, 'style.css'), 'utf8');
 const redirects = await readFile(resolve(root, 'netlify.toml'), 'utf8');
+
+if (!stylesheet.trimStart().startsWith(':root') || stylesheet.includes('\uFFFD')) {
+  failures.push('style.css is not valid UTF-8 CSS.');
+}
+for (const selector of ['.site-header', '.pricing-grid', '.side-menu']) {
+  if (!stylesheet.includes(selector)) failures.push(`style.css is missing required selector: ${selector}`);
+}
 
 if (/buy\.stripe\.com\/test_/i.test(index) || /buy\.stripe\.com\/test_/i.test(client)) {
   failures.push('A Stripe test Payment Link is still exposed in public client code.');
