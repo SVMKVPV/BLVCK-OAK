@@ -250,14 +250,15 @@ async function suspendDisputedReward(stripe, dispute) {
 export default async function handler(request) {
   if (request.method !== 'POST') return json({ error: 'Method not allowed.' }, 405);
 
-  const store = rewardsStore();
   let eventKey = null;
+  let store = null;
   try {
     const signature = request.headers.get('stripe-signature');
     const webhookSecrets = [process.env.STRIPE_WEBHOOK_SECRET, process.env.STRIPE_CONNECT_WEBHOOK_SECRET].filter(Boolean);
     if (!signature || !webhookSecrets.length) return json({ error: 'Webhook is not configured.' }, 503);
 
     const stripe = getStripe();
+    store = rewardsStore();
     const payload = await request.text();
     let event = null;
     for (const secret of webhookSecrets) {
@@ -318,7 +319,7 @@ export default async function handler(request) {
     await store.set(eventKey, `processed:${event.type}`);
     return json({ received: true });
   } catch (error) {
-    if (eventKey) await store.delete(eventKey).catch(() => {});
+    if (eventKey && store) await store.delete(eventKey).catch(() => {});
     console.error('Stripe webhook failed:', error.message);
     return json({ error: 'Webhook verification or processing failed.' }, 400);
   }
