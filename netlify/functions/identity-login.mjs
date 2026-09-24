@@ -10,5 +10,5 @@ export default async function handler(request) {
   if (!email || email !== ownerEmail() || provider !== 'google') {
     return new Response('Not allowed.', { status: 403 });
   }
-  return new Response('', { status: 204 });
+  return new Response(null, { status: 204 });
 }
