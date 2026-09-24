@@ -5,11 +5,22 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+  statuses: read
+
+concurrency:
+  group: verify-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -17,3 +28,19 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm run check
       - run: pnpm run build
+      - name: Verify the exact Netlify release
+        run: node scripts/release-smoke.mjs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_EVENT: ${{ github.event_name }}
+          RELEASE_PR: ${{ github.event.pull_request.number }}
+          RELEASE_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Keep public build and verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-release-${{ github.run_id }}
+          path: |
+            dist/
+            release-smoke-results.json
+          retention-days: 7
