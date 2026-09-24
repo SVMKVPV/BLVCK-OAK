@@ -1,20 +1,15 @@
 import { randomBytes, timingSafeEqual, createHash } from 'node:crypto';
 import { getStore } from '@netlify/blobs';
-import { emailKey, generateReferralCode, referralsStore, isValidCode } from './referrals.mjs';
+import { emailKey, generateReferralCode, referralsStore, isValidCode, scopedStoreName } from './referrals.mjs';
 
 export const SESSION_COOKIE = '__Host-blackoak-session';
 export const SESSION_SECONDS = 12 * 60 * 60;
-export const portalStore = () => getStore({ name: 'black-oak-partner-portal', consistency: 'strong' });
+export const portalStore = () => getStore({ name: scopedStoreName('black-oak-partner-portal'), consistency: 'strong' });
 export const secretToken = () => randomBytes(32).toString('base64url');
 export const hash = (value) => createHash('sha256').update(String(value)).digest('hex');
 export const validEmail = (value) => typeof value === 'string' && value.length <= 160 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 export const tokenPattern = /^[A-Za-z0-9_-]{43}$/;
 export const quoteIdPattern = /^[a-f0-9]{32}$/;
-const PRODUCTION_SITE_ORIGINS = new Set([
-  'https://blvckoak.com.au',
-  'https://www.blvckoak.com.au',
-  'https://blvckoak.netlify.app',
-]);
 
 export class PortalError extends Error {
   constructor(message, status = 400) { super(message); this.status = status; }
@@ -30,9 +25,14 @@ export function siteOrigin() {
 
 export function assertSameOrigin(request) {
   const origin = request.headers.get('origin');
-  if (origin !== siteOrigin() && !PRODUCTION_SITE_ORIGINS.has(origin)) {
+  const requestOrigin = new URL(request.url).origin;
+  if (!origin || (origin !== requestOrigin && origin !== siteOrigin())) {
     throw new PortalError('This request must come from the Black Oak website.', 403);
   }
+}
+
+export function ownerAuthEmail() {
+  return String(process.env.OWNER_AUTH_EMAIL || process.env.OWNER_EMAIL || '').trim().toLowerCase();
 }
 
 export async function readBody(request, limit = 16000) {
@@ -81,7 +81,7 @@ export async function requireAccount(request, store = portalStore()) {
   if (!session || !Number.isFinite(session.expiresAt) || session.expiresAt <= Date.now()) throw new PortalError('Your session expired. Sign in again.', 401);
   const account = await store.get(`account/${session.accountId}`, { type: 'json' });
   if (!account || account.disabled) throw new PortalError('This account is unavailable.', 403);
-  const ownerEmail = String(process.env.OWNER_EMAIL || '').trim().toLowerCase();
+  const ownerEmail = ownerAuthEmail();
   return { account, session, sessionKey, isOwner: Boolean(ownerEmail && account.email === ownerEmail) };
 }
 
