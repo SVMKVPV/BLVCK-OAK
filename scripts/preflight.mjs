@@ -1,5 +1,6 @@
 import { access, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { NEARBY_BUSINESSES_ENABLED } from '../netlify/lib/launch-flags.mjs';
 
 const root = resolve(import.meta.dirname, '..');
 const failures = [];
@@ -22,6 +23,8 @@ const requiredFiles = [
   'netlify/functions/partner-api.mjs',
   'netlify/functions/nearby-businesses.mjs',
   'netlify/lib/nearby-businesses.mjs',
+  'netlify/lib/launch-flags.mjs',
+  'scripts/prepare-release.mjs',
   'netlify/functions/quote-payment.mjs',
   'netlify/functions/project-progress.mjs',
   'netlify/lib/project-progress.mjs',
@@ -84,7 +87,7 @@ if (process.argv.includes('--live')) {
     ['OWNER_AUTH_EMAIL', (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) && !/example/i.test(value)],
     ['OWNER_NOTIFICATION_EMAIL', (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) && !/example/i.test(value)],
     ['SUPPORT_EMAIL', (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) && !/example/i.test(value)],
-    ['GOOGLE_MAPS_API_KEY', (value) => /^AIza[0-9A-Za-z_-]{30,}$/.test(value)],
+    ...(NEARBY_BUSINESSES_ENABLED ? [['GOOGLE_MAPS_API_KEY', (value) => /^AIza[0-9A-Za-z_-]{30,}$/.test(value)]] : []),
   ];
   for (const [name, validate] of expected) {
     const value = String(process.env[name] || '').trim();
@@ -97,6 +100,6 @@ if (failures.length) {
   process.exitCode = 1;
 } else {
   console.log(process.argv.includes('--live')
-    ? 'Live preflight passed.'
+    ? 'Live preflight passed for enabled features. Nearby discovery is Coming soon.'
     : 'Structural preflight passed. Run pnpm run preflight:live with production environment variables before launch.');
 }
