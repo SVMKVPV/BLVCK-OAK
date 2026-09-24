@@ -78,7 +78,8 @@ if (process.argv.includes('--live')) {
     ['STRIPE_CONNECT_WEBHOOK_SECRET', (value) => /^whsec_/.test(value)],
     ['RESEND_API_KEY', (value) => /^re_/.test(value)],
     ['EMAIL_FROM', (value) => /@/.test(value) && !/example/i.test(value)],
-    ['OWNER_EMAIL', (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) && !/example/i.test(value)],
+    ['OWNER_AUTH_EMAIL', (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) && !/example/i.test(value)],
+    ['OWNER_NOTIFICATION_EMAIL', (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) && !/example/i.test(value)],
     ['SUPPORT_EMAIL', (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) && !/example/i.test(value)],
     ['GOOGLE_MAPS_API_KEY', (value) => /^AIza[0-9A-Za-z_-]{30,}$/.test(value)],
   ];
