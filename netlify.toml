@@ -105,9 +105,10 @@
   to = "/.netlify/functions/enterprise-offer-stats"
   status = 200
 
+# The previous external ecommerce preview returned HTTP 401 to public visitors.
 [[redirects]]
   from = "/previews/ecommerce.html"
-  to = "https://lumera-beauty-store.samkapa3.chatgpt.site"
+  to = "/coming-soon.html"
   status = 302
   force = true
 

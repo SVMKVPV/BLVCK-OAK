@@ -51,6 +51,17 @@ export function runtimeEnv(name) {
   return globalThis.Netlify?.env?.get?.(name) || process.env[name];
 }
 
+export function deployContext() {
+  return String(runtimeEnv('CONTEXT') || 'dev').trim().toLowerCase();
+}
+
+export function scopedStoreName(base) {
+  if (deployContext() === 'production') return base;
+  const seed = String(runtimeEnv('DEPLOY_ID') || runtimeEnv('BRANCH') || deployContext());
+  const suffix = createHash('sha256').update(seed).digest('hex').slice(0, 12);
+  return `${base.slice(0, 50)}-${suffix}`;
+}
+
 export function getStripe() {
   const secretKey = runtimeEnv('STRIPE_SECRET_KEY');
   if (!secretKey) {
@@ -63,11 +74,11 @@ export function getStripe() {
 }
 
 export function referralsStore() {
-  return getStore({ name: REFERRAL_STORE, consistency: 'strong' });
+  return getStore({ name: scopedStoreName(REFERRAL_STORE), consistency: 'strong' });
 }
 
 export function rewardsStore() {
-  return getStore({ name: REWARD_STORE, consistency: 'strong' });
+  return getStore({ name: scopedStoreName(REWARD_STORE), consistency: 'strong' });
 }
 
 export function json(data, status = 200, additionalHeaders = {}) {

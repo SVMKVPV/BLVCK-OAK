@@ -27,7 +27,7 @@ Black Oak uses passwordless email authentication for partners and the owner. No 
 
 The session cookie is `Secure`, `HttpOnly`, `SameSite=Strict`, has `Path=/`, has no `Domain` attribute and expires after 12 hours.
 
-Owner authority is never accepted from the browser or an account role field. An authenticated account is the owner only when its verified email exactly matches the private `OWNER_EMAIL` environment variable.
+Owner authority is never accepted from the browser or an account role field. An authenticated account is the owner only when its verified email exactly matches the private `OWNER_AUTH_EMAIL` environment variable. Notification routing is separate through `OWNER_NOTIFICATION_EMAIL`.
 
 Partners may access only their own indexed quotes. Owner checks protect approval, cancellation, project updates, portfolio publishing and private-link rotation.
 
@@ -49,6 +49,11 @@ Store these only as encrypted Netlify environment variables:
 - `STRIPE_CONNECT_CLIENT_ID`
 - `STRIPE_CONNECT_WEBHOOK_SECRET`
 - `GOOGLE_MAPS_API_KEY`
-- `OWNER_EMAIL`, `EMAIL_FROM`, `SUPPORT_EMAIL` and `SITE_URL`
+- `OWNER_AUTH_EMAIL`, `OWNER_NOTIFICATION_EMAIL`, `EMAIL_FROM`, `SUPPORT_EMAIL` and `SITE_URL`
 
 The browser never receives secret Stripe, Resend or Google keys. Stripe webhook bodies are accepted only after signature verification. Stripe OAuth uses a hashed, single-use, 10-minute state value and requests read-only scope.
+
+
+## Deploy-preview isolation
+
+Netlify Blobs store names are stable in production and automatically namespaced outside production using the deploy/branch context. Preview and development deployments therefore do not read or mutate production partner sessions, referral records, rewards or sales leads. Keep preview Stripe and email credentials disabled or test-only in Netlify environment-variable contexts.

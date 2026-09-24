@@ -1,7 +1,8 @@
 import { createHash, randomBytes } from 'node:crypto';
 import { getStore } from '@netlify/blobs';
+import { scopedStoreName } from './referrals.mjs';
 
-export const salesStore = () => getStore({ name: 'black-oak-sales', consistency: 'strong' });
+export const salesStore = () => getStore({ name: scopedStoreName('black-oak-sales'), consistency: 'strong' });
 export const leadIdPattern = /^[a-f0-9]{32}$/;
 export const leadStatuses = Object.freeze(['new', 'contacted', 'qualified', 'booked', 'won', 'lost']);
 

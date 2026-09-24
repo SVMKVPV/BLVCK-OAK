@@ -18,7 +18,7 @@ export function formatAud(cents) {
 }
 
 export function getOwnerEmail() {
-  return String(process.env.OWNER_EMAIL || '').trim();
+  return String(process.env.OWNER_NOTIFICATION_EMAIL || process.env.OWNER_EMAIL || '').trim();
 }
 
 export function getSupportEmail() {

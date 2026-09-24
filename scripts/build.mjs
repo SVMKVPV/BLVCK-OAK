@@ -1,5 +1,7 @@
 import { cp, mkdir, rm } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { prepareRelease } from './prepare-release.mjs';
+import { markUnavailableLinks } from './unavailable-links.mjs';
 
 const root = resolve(import.meta.dirname, '..');
 const output = resolve(root, 'dist');
@@ -18,5 +20,7 @@ for (const file of [
 
 await cp(resolve(root, 'assets'), resolve(output, 'assets'), { recursive: true });
 await cp(resolve(root, 'previews'), resolve(output, 'previews'), { recursive: true });
+await prepareRelease(output);
+await markUnavailableLinks(output);
 
-console.log('Black Oak client built successfully, including the sales system, portfolio previews and marketplace assets.');
+console.log('Black Oak public client built successfully. New shops and community remain Coming soon; private prototypes are excluded.');

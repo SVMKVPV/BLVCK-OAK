@@ -39,8 +39,9 @@ This build uses Resend’s HTTPS API without an extra library.
 2. Add a domain you control and complete the SPF and DKIM records Resend gives you. Add DMARC as recommended.
 3. Create an API key restricted to sending email.
 4. Choose an address on that verified domain for `EMAIL_FROM`.
-5. Set `OWNER_EMAIL` to the private inbox that should receive paid-sale, referral-partner and contact alerts.
-6. Set `SUPPORT_EMAIL` to the reply-to address customers can use.
+5. Set `OWNER_AUTH_EMAIL` to the single private account allowed to receive owner authority.
+6. Set `OWNER_NOTIFICATION_EMAIL` to the inbox that should receive paid-sale, referral-partner and contact alerts.
+7. Set `SUPPORT_EMAIL` to the reply-to address customers can use.
 
 Do not use an unverified Gmail address as `EMAIL_FROM`; use your verified business domain. The partner portal creates or signs into an account only after the visitor enters the private six-digit code sent to their inbox. Codes expire after 10 minutes, allow at most five attempts and cannot be replayed.
 
@@ -58,8 +59,17 @@ Do not use an unverified Gmail address as `EMAIL_FROM`; use your verified busine
    - `checkout.session.async_payment_succeeded`
    - `charge.refunded`
    - `charge.dispute.created`
+   - `customer.subscription.updated`
+   - `customer.subscription.deleted`
 
-5. Copy the test secret key (`sk_test_...`) and the webhook signing secret (`whsec_...`).
+5. Create a second **Connect** webhook at the same URL for connected-account events and subscribe it to:
+
+   - `payment_intent.succeeded`
+   - `charge.refunded`
+   - `charge.dispute.created`
+   - `account.application.deauthorized`
+
+6. Copy the account webhook signing secret, the connected-account webhook signing secret, your Connect platform client ID (`ca_...`) and the test secret key (`sk_test_...`) and the webhook signing secret (`whsec_...`).
 6. Keep Stripe Radar enabled and configure receipts, business branding and support details in Stripe.
 
 ## 4. Deploy the complete source to Netlify
@@ -79,7 +89,8 @@ GOOGLE_MAPS_API_KEY=YOUR_SERVER_SIDE_PLACES_KEY
 STRIPE_ENTERPRISE_REFERRAL_COUPON_ID=bo-ent-60-first-1000
 RESEND_API_KEY=re_YOUR_KEY
 EMAIL_FROM=Black Oak Digital <partners@YOUR-VERIFIED-DOMAIN>
-OWNER_EMAIL=YOUR-PRIVATE-BUSINESS-INBOX
+OWNER_AUTH_EMAIL=YOUR-PRIVATE-OWNER-ACCOUNT
+OWNER_NOTIFICATION_EMAIL=YOUR-BUSINESS-NOTIFICATION-INBOX
 SUPPORT_EMAIL=support@YOUR-VERIFIED-DOMAIN
 REFERRAL_COUNTRY=AU
 REFERRAL_PAYOUT_DAY=friday
@@ -91,7 +102,7 @@ REFERRAL_VERIFICATION_TTL_MINUTES=30
 REFERRAL_TERMS_VERSION=2026-08-31
 ```
 
-Never commit real values to `.env`, GitHub or the public site.
+Never commit real values to `.env`, GitHub or the public site. Production and preview credentials must use separate Netlify contexts. Preview deploys should use disabled/test credentials only; the code also namespaces Netlify Blobs by deploy so preview sessions, referrals, rewards and sales leads cannot share production stores.
 
 ## 5. Test the complete flow
 
@@ -134,6 +145,6 @@ At the discounted Enterprise price, the platform receives A$1,160 before Stripe 
 
 Partners and the owner sign in at `/partners.html` with a six-digit email code. There are no passwords or JWTs. Successful verification creates a 12-hour server-side session referenced by a Secure, HttpOnly, SameSite=Strict cookie. Mutating dashboard requests also require an exact same-origin request and a session-specific CSRF token.
 
-The owner is determined only by the verified account email matching `OWNER_EMAIL`. Do not place an owner role, email allowlist or secret in browser JavaScript.
+The owner is determined only by the verified account email matching `OWNER_AUTH_EMAIL` (with `OWNER_EMAIL` retained only as a temporary backwards-compatible fallback). Owner notifications use `OWNER_NOTIFICATION_EMAIL`. Do not place an owner role, email allowlist or secret in browser JavaScript.
 
 Approved projects use a high-entropy private token for client payment and progress pages. If a link is exposed, sign in as the owner and choose **Reset private links** on the quote. Send the newly generated links to the client; the old Black Oak payment and progress links stop working immediately. A Stripe-hosted Checkout URL that was already opened is controlled separately in Stripe.
