@@ -1,7 +1,7 @@
 import { randomInt } from 'node:crypto';
 import { emailKey, json } from '../lib/referrals.mjs';
 import { emailShell, escapeHtml, sendEmail } from '../lib/email.mjs';
-import { PortalError, assertSameOrigin, clientError, consumeChallenge, createSession, ensureReferral, hash, portalStore, readBody, secretToken, validEmail } from '../lib/portal-auth.mjs';
+import { PortalError, assertSameOrigin, clientError, consumeChallenge, createSession, ensureReferral, hash, ownerAuthEmail, portalStore, readBody, secretToken, validEmail } from '../lib/portal-auth.mjs';
 
 export const config = { rateLimit: { action: 'rate_limit', aggregateBy: ['domain', 'ip'], windowSize: 60, windowLimit: 10 } };
 
@@ -25,7 +25,7 @@ export default async function handler(request) {
       const limited = await store.setJSON(rateKey, { at: Date.now() }, rate?.etag ? { onlyIfMatch: rate.etag } : { onlyIfNew: true });
       if (!limited.modified) throw new PortalError('Please wait before requesting another code.', 429);
       const account = await store.get(`account/${id}`, { type: 'json' });
-      const owner = email === String(process.env.OWNER_EMAIL || '').trim().toLowerCase();
+      const owner = email === ownerAuthEmail();
       const challenge = secretToken();
       if (account?.disabled || (!account && body.mode === 'login' && !owner)) return json({ challenge, message: 'If this email has access, a sign-in code is on its way.' });
       const code = String(randomInt(100000, 1000000));
