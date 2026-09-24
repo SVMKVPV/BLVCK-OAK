@@ -68,12 +68,11 @@ async function externalLinks() {
   for(const match of config.matchAll(/to\s*=\s*"(https:\/\/[^\"]+)"/g)) urls.add(match[1]);
   for(const value of [...urls].filter(u=>!trusted(u)).slice(0,60)) {
     const url = new URL(value);
-    // Only ordinary public DNS hostnames; no local/private IP targets.
     if (!/^[a-z0-9.-]+\.[a-z]{2,}$/i.test(url.hostname) || /(?:^|\.)(?:localhost|local|internal)$/i.test(url.hostname) || url.username || url.password || url.port) continue;
     try {
       const response = await request(value);
       await response.body?.cancel();
-      const item = {url:url.origin+url.pathname,status:response.status,confirmedBroken:[404,410].includes(response.status)};
+      const item = {url:url.origin+url.pathname,status:response.status,confirmedBroken:[401,403,404,410].includes(response.status)};
       result.externalLinks.push(item);
       console.log(`External link ${item.status}: ${item.url}`);
     } catch { result.externalLinks.push({url:url.origin+url.pathname,status:null,confirmedBroken:false,unverified:true}); }
@@ -86,8 +85,10 @@ try {
   for(const path of ['/shops.html','/marketplace.html','/community.html','/nearby.html','/login.html','/coming-soon.html']) await check(base,path,[200],/Coming soon/);
   await check(base,'/partners.html',[200],/data-lead-search[^>]+hidden/);
   await check(base,'/portfolio.html',[200],/<!doctype html>/i);
+  await check(base,'/previews/ecommerce.html',[200],/Coming soon/);
   await check(base,'/release.css',[200],/coming-soon-chip/);
   await check(base,'/release.js',[200],/data-lead-search/);
+  await check(base,'/unavailable-links.js',[200],/coming-soon-chip/);
   await check(base,'/api/partners/auth',[405]);
   await check(base,'/api/partners',[401,403]);
   await check(base,'/api/contact',[405]);
@@ -95,7 +96,7 @@ try {
   await check(base,'/api/businesses/nearby',[503],/COMING_SOON/,{method:'POST',headers:{'Content-Type':'application/json','Origin':base},body:'{}'});
   await check(base,'/release-verification-missing-page',[404],/Coming soon/);
   await externalLinks();
-  if(result.externalLinks.some(item=>item.confirmedBroken)) throw new Error('A confirmed broken external link needs a Coming soon treatment.');
+  if(result.externalLinks.some(item=>item.confirmedBroken)) throw new Error('A confirmed broken or inaccessible external link needs a Coming soon treatment.');
   result.ok=true;
   console.log(`Release smoke checks passed for ${expected} at ${base}. No payment, email or account was created.`);
 } catch(error) { result.ok=false; result.error=error.message; console.error(error.message); process.exitCode=1; }
