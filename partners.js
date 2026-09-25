@@ -276,6 +276,38 @@ $('[data-lead-search]').addEventListener('submit', async (event) => {
   } finally { button.disabled = false; }
 });
 
+
+function renderOwnerAnalytics(data) {
+  const panel=$('[data-owner-analytics]'); if(!panel) return;
+  panel.hidden=!dashboard?.isOwner; if(!dashboard?.isOwner) return;
+  $('[data-analytics-views]').textContent=Number(data.traffic?.views||0).toLocaleString('en-AU');
+  $('[data-analytics-visitors]').textContent=Number(data.traffic?.uniqueVisitors||0).toLocaleString('en-AU');
+  $('[data-analytics-revenue]').textContent=money(data.finance?.grossRevenueCents);
+  $('[data-analytics-fees]').textContent=money(data.finance?.stripeFeesCents);
+  $('[data-analytics-net]').textContent=money(data.finance?.netBalanceActivityCents);
+  $('[data-analytics-tax]').textContent=money(data.finance?.estimatedGstComponentCents);
+  $('[data-analytics-accounts]').textContent=Number(data.accounts?.total||0).toLocaleString('en-AU');
+  $('[data-analytics-tax-note]').textContent=(data.finance?.taxEstimateMethod||'Tax estimate only')+' — verify GST/BAS/tax payable with your records or accountant.';
+  const pages=$('[data-analytics-pages]'); pages.replaceChildren();
+  (data.traffic?.topPages||[]).forEach(row=>{const p=document.createElement('p');p.innerHTML='<strong>'+escape(row.path)+'</strong><span>'+escape(row.views)+' views</span>';pages.append(p);});
+  if(!pages.children.length) pages.innerHTML='<p class="muted">No tracked views in this period yet.</p>';
+  const accounts=$('[data-analytics-accounts-list]'); accounts.replaceChildren();
+  (data.accounts?.rows||[]).forEach(row=>{const p=document.createElement('p');const signed=row.signedUpAt?new Date(row.signedUpAt).toLocaleDateString('en-AU'):'Stripe customer';p.innerHTML='<strong>'+escape(row.email)+'</strong><span>'+escape(row.name||'')+' · signed up '+escape(signed)+' · '+money(row.revenueCents)+' · '+escape(row.payments)+' payments</span>';accounts.append(p);});
+  if(!accounts.children.length) accounts.innerHTML='<p class="muted">No matching accounts.</p>';
+}
+async function loadOwnerAnalytics() {
+  if(!dashboard?.isOwner) return;
+  try {
+    const days=$('[data-analytics-days]')?.value||'30';
+    const q=$('[data-analytics-search]')?.value?.trim()||'';
+    const data=await api('/.netlify/functions/owner-analytics?days='+encodeURIComponent(days)+'&q='+encodeURIComponent(q));
+    renderOwnerAnalytics(data);
+  } catch(error) { status('[data-global-status]','Analytics: '+error.message,true); }
+}
+$('[data-analytics-days]')?.addEventListener('change',loadOwnerAnalytics);
+let analyticsSearchTimer;
+$('[data-analytics-search]')?.addEventListener('input',()=>{clearTimeout(analyticsSearchTimer);analyticsSearchTimer=setTimeout(loadOwnerAnalytics,300);});
+
 async function loadDashboard() {
   try {
     dashboard = await api('/api/partners');
@@ -296,6 +328,7 @@ async function loadDashboard() {
     if (portfolioQuote) closePortfolioEditor();
     renderQuotes();
     renderSalesPipeline();
+    await loadOwnerAnalytics();
     status('[data-global-status]', dashboard.isOwner ? 'You can manage leads, review quotes, see payments and publish live client progress.' : 'Create a quote below. Approved payment and progress links can be shared with your client.');
   } catch (error) {
     if (error.status === 401) {
