@@ -65,7 +65,8 @@ export default async function handler(request) {
     const fees = tx.reduce((n,t)=>n+(Number(t.fee)||0),0);
     const net = tx.reduce((n,t)=>n+(Number(t.net)||0),0);
     const gross = blackOak.reduce((n,s)=>n+(Number(s.amount_total)||0),0);
-    const refunded = blackOak.reduce((n,s)=>n+(Number(s.amount_total)||0)-(Number(s.amount_subtotal)||0),0); // informational; authoritative refunds below where available
+    const refundTx = tx.filter(t=>['refund','payment_refund','payment_reversal'].includes(t.type));
+    const refunded = Math.abs(refundTx.reduce((n,t)=>n+(Number(t.amount)||0),0));
     const taxCollected = blackOak.reduce((n,s)=>n+(Number(s.total_details?.amount_tax)||0),0);
 
     const byEmail = new Map();
