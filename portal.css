@@ -195,3 +195,6 @@
 .status-pill.lost { border-color:#5c3838; color:#c98d8d; }
 @media(max-width:1050px) { .sales-lead-list { grid-template-columns:1fr; } }
 @media(max-width:700px) { .lead-manage { grid-template-columns:1fr; } }
+
+
+.owner-analytics{margin-bottom:24px}.analytics-metrics{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin:22px 0}.analytics-columns{display:grid;grid-template-columns:1fr 1.4fr;gap:24px}.analytics-list{display:grid;gap:8px;margin-top:12px;max-height:420px;overflow:auto}.analytics-list p{display:flex;justify-content:space-between;gap:16px;margin:0;padding:12px;border:1px solid rgba(255,255,255,.08);border-radius:10px}.analytics-list span{color:var(--muted,#aaa);text-align:right}@media(max-width:760px){.analytics-columns{grid-template-columns:1fr}.analytics-list p{display:block}.analytics-list span{display:block;text-align:left;margin-top:5px}}
