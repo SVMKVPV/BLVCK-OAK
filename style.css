@@ -1252,3 +1252,21 @@ footer p:last-child { text-align: right; }
   .sales-entry-grid > a { transition:none; }
   .sales-entry-grid > a:hover { transform:none; }
 }
+
+
+/* Portfolio visual grid */
+.concept-photo-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;align-items:stretch}
+.concept-photo-card{display:flex;flex-direction:column;min-width:0;overflow:hidden;border:1px solid rgba(240,237,229,.14);background:#101210;color:var(--paper);text-decoration:none;transition:transform .24s ease,border-color .24s ease,box-shadow .24s ease}
+.concept-photo-card:hover,.concept-photo-card:focus-visible{transform:translateY(-5px);border-color:rgba(212,174,88,.62);box-shadow:0 24px 65px rgba(0,0,0,.3);outline:none}
+.concept-browser-shot{position:relative;aspect-ratio:16/10;overflow:hidden;background:#171916;border-bottom:1px solid var(--line);pointer-events:none}
+.concept-browser-shot iframe{position:absolute;top:0;left:0;width:1600px;height:1000px;border:0;transform:scale(.25);transform-origin:top left;background:#111}
+.concept-browser-shot::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 62%,rgba(7,8,7,.62));transition:background .24s ease}
+.concept-photo-card:hover .concept-browser-shot::after{background:linear-gradient(180deg,transparent 72%,rgba(7,8,7,.45))}
+.concept-open-pill{position:absolute;right:14px;bottom:14px;z-index:2;padding:8px 10px;border:1px solid rgba(240,237,229,.24);background:rgba(8,9,9,.82);color:var(--gold-light);font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;backdrop-filter:blur(8px)}
+.concept-photo-card .concept-copy{display:grid;grid-template-columns:1fr auto;gap:5px 16px;align-items:end;padding:20px 21px 22px}
+.concept-photo-card .concept-copy p{grid-column:1/-1;margin:0;color:var(--gold);font-size:9px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
+.concept-photo-card .concept-copy h3{margin:0;font-family:'Cinzel',serif;font-size:22px;font-weight:500;line-height:1.2}
+.concept-photo-card .concept-copy>span{color:#8f9189;font-size:9px;white-space:nowrap}
+@media(max-width:980px){.concept-photo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.concept-browser-shot iframe{transform:scale(.22)}}
+@media(max-width:620px){.concept-photo-grid{grid-template-columns:1fr;gap:16px}.concept-browser-shot{aspect-ratio:16/9}.concept-browser-shot iframe{width:1400px;height:790px;transform:scale(.28)}.concept-photo-card .concept-copy{padding:17px 18px 19px}}
+@media(prefers-reduced-motion:reduce){.concept-photo-card{transition:none}.concept-photo-card:hover{transform:none}}
