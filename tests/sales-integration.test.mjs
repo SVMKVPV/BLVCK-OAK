@@ -14,7 +14,9 @@ test('public sales entry points and server routes are connected', async () => {
   assert.match(booking, /data-booking-form/);
   assert.match(config, /from = "\/api\/website-audit"/);
   assert.match(config, /from = "\/api\/book"/);
-  assert.match(build, /'audit\.html','book\.html','sales-config\.js','sales\.js'/);
+  for (const file of ['audit.html', 'book.html', 'sales-config.js', 'sales.js']) {
+    assert.ok(build.includes(`'${file}'`), `${file} should be included in the production build`);
+  }
 });
 
 test('lead pipeline stays inside the authenticated owner workspace', async () => {
