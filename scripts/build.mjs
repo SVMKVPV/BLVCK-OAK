@@ -13,7 +13,7 @@ for (const file of [
   'index.html','referrals.html','contact.html','privacy.html','terms.html','refunds.html',
   'portfolio.html','marketplace.html','marketplace.css','marketplace.js','quote.html','style.css','og.png','script.js',
   'partners.html','partners.js','portal.css','pay.html','pay.js','progress.html','progress.js',
-  'portfolio.js','quote-builder.js','audit.html','book.html','sales-config.js','sales.js'
+  'portfolio.js','quote-builder.js','audit.html','book.html','ai-generator.html','sales-config.js','sales.js'
 ]) {
   await cp(resolve(root, file), resolve(output, file));
 }
