@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080909">
+  <meta name="description" content="Generate an instant website concept for your business with the Black Oak AI Website Generator.">
+  <title>AI Website Generator — Black Oak</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#080909;--panel:#111310;--panel2:#171914;--paper:#f0ede4;--muted:#98998f;--line:#2b2d27;--gold:#d4ae58;--gold2:#f0d38c}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 85% 4%,rgba(212,174,88,.12),transparent 30%),var(--bg);color:var(--paper);font-family:'Plus Jakarta Sans',sans-serif}
+    a{color:inherit}.topbar{min-height:78px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(20px,5vw,72px);border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(8,9,9,.88);backdrop-filter:blur(18px);z-index:20}
+    .brand{font:700 19px 'Cinzel',serif;text-decoration:none;letter-spacing:.03em}.brand span{color:var(--gold)}.back{font-size:11px;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;color:#c9c8bf}
+    main{max-width:1480px;margin:auto;padding:70px clamp(20px,5vw,72px) 90px}.eyebrow{margin:0 0 18px;color:var(--gold);font-size:11px;font-weight:800;letter-spacing:.2em;text-transform:uppercase}
+    .intro{display:grid;grid-template-columns:1.15fr .85fr;gap:60px;align-items:end;margin-bottom:52px}.intro h1{margin:0;font:500 clamp(48px,7vw,100px)/.98 'Cinzel',serif;letter-spacing:-.045em}.intro h1 em{color:var(--gold2);font-style:normal}.intro-copy{max-width:560px;color:#aaa9a1;line-height:1.8;font-size:16px}.beta{display:inline-flex;margin-top:18px;border:1px solid rgba(212,174,88,.35);padding:8px 11px;color:var(--gold2);font-size:10px;letter-spacing:.12em;text-transform:uppercase}
+    .workspace{display:grid;grid-template-columns:minmax(320px,.72fr) minmax(0,1.28fr);gap:20px;align-items:start}.builder,.preview-shell{border:1px solid var(--line);background:rgba(17,19,16,.94)}.builder{padding:30px;position:sticky;top:98px}.builder h2{margin:0 0 8px;font:500 28px 'Cinzel',serif}.builder>p{margin:0 0 26px;color:var(--muted);font-size:13px;line-height:1.7}
+    .field{display:grid;gap:8px;margin:0 0 17px}.field label{font-size:10px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:#c7c6bc}.field input,.field select,.field textarea{width:100%;border:1px solid #34362f;background:#0c0d0c;color:var(--paper);padding:13px 14px;font:500 14px 'Plus Jakarta Sans',sans-serif;outline:none}.field textarea{min-height:86px;resize:vertical}.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold)}
+    .generate{width:100%;min-height:54px;border:0;background:linear-gradient(120deg,var(--gold2),#b78d38);color:#090a09;font-weight:900;letter-spacing:.11em;text-transform:uppercase;cursor:pointer}.generate:hover{filter:brightness(1.05)}.fine{margin-top:12px;color:#77796f;font-size:10px;line-height:1.6}
+    .preview-shell{overflow:hidden}.browserbar{height:48px;display:flex;align-items:center;gap:9px;padding:0 16px;border-bottom:1px solid var(--line);background:#0c0d0c}.dot{width:7px;height:7px;border-radius:50%;background:#494b44}.address{margin-left:8px;flex:1;max-width:420px;padding:7px 12px;background:#161814;color:#85877d;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .preview{--accent:#d4ae58;--accent2:#f0d38c;background:#0b0c0b;color:white;min-height:850px}.preview.light{background:#f5f1e7;color:#171815}.site-nav{display:flex;align-items:center;justify-content:space-between;padding:24px clamp(20px,4vw,48px);border-bottom:1px solid rgba(128,128,128,.22)}.site-logo{font-weight:900;letter-spacing:.04em}.site-links{display:flex;gap:22px;color:#aaa;font-size:11px}.site-cta{padding:10px 15px;background:var(--accent);color:#0a0a0a;text-decoration:none;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.08em}
+    .generated-hero{padding:clamp(58px,9vw,120px) clamp(22px,6vw,72px);position:relative;overflow:hidden}.generated-hero:after{content:'';position:absolute;width:360px;height:360px;border-radius:50%;right:-90px;top:-90px;border:1px solid color-mix(in srgb,var(--accent) 45%, transparent);box-shadow:0 0 0 45px color-mix(in srgb,var(--accent) 5%, transparent),0 0 0 90px color-mix(in srgb,var(--accent) 3%, transparent)}.mini-eyebrow{color:var(--accent2);font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase}.generated-hero h2{max-width:900px;margin:18px 0;font:600 clamp(42px,6vw,82px)/.99 'Cinzel',serif;letter-spacing:-.045em}.generated-hero p{max-width:620px;color:#a6a89f;font-size:15px;line-height:1.8}.light .generated-hero p{color:#61635c}.hero-buttons{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}.primary,.secondary{display:inline-flex;padding:14px 18px;text-decoration:none;font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}.primary{background:var(--accent);color:#090a09}.secondary{border:1px solid rgba(128,128,128,.35)}
+    .generated-section{padding:65px clamp(22px,6vw,72px);border-top:1px solid rgba(128,128,128,.22)}.generated-section h3{margin:0 0 28px;font:500 clamp(28px,4vw,48px) 'Cinzel',serif}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.card{padding:25px;border:1px solid rgba(128,128,128,.24);background:rgba(255,255,255,.025)}.card b{display:block;color:var(--accent2);font-size:10px;letter-spacing:.13em;text-transform:uppercase;margin-bottom:14px}.card strong{font:500 20px 'Cinzel',serif}.card p{color:#909289;font-size:12px;line-height:1.7}.light .card p{color:#696a63}.final-cta{text-align:center;padding:70px 24px;border-top:1px solid rgba(128,128,128,.22)}.final-cta h3{max-width:720px;margin:0 auto 25px;font:500 clamp(30px,4vw,56px) 'Cinzel',serif}
+    .handoff{margin-top:20px;padding:24px 28px;border:1px solid rgba(212,174,88,.35);background:rgba(212,174,88,.055);display:flex;align-items:center;justify-content:space-between;gap:20px}.handoff h3{margin:0 0 6px;font:500 22px 'Cinzel',serif}.handoff p{margin:0;color:#9b9c93;font-size:12px;line-height:1.7}.handoff a{flex:0 0 auto;padding:14px 18px;background:var(--gold);color:#090a09;text-decoration:none;font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
+    @media(max-width:980px){.intro,.workspace{grid-template-columns:1fr}.builder{position:static}.cards{grid-template-columns:1fr}.site-links{display:none}.preview{min-height:0}.handoff{align-items:flex-start;flex-direction:column}}
+  </style>
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="index.html"><span>Black</span> Oak</a><a class="back" href="index.html">← Back to home</a></header>
+  <main>
+    <section class="intro">
+      <div><p class="eyebrow">BLVCK OAK LAB / AI</p><h1>Describe it.<br><em>See it built.</em></h1></div>
+      <div><p class="intro-copy">Turn a rough business idea into an instant website direction. Add a few details and generate a tailored homepage concept you can use as the starting point for a Black Oak build.</p><span class="beta">Generator Beta · Free to try</span></div>
+    </section>
+
+    <section class="workspace">
+      <form class="builder" id="generator-form">
+        <h2>Build your concept</h2>
+        <p>Give the generator the same basics you would give a designer.</p>
+        <div class="field"><label for="business">Business name</label><input id="business" value="Northline Electrical" maxlength="60" required></div>
+        <div class="field"><label for="industry">Industry</label><select id="industry"><option>Electrician</option><option>Café / Restaurant</option><option>Landscaping</option><option>Cleaning</option><option>Mechanic / Automotive</option><option>Construction / Trade</option><option>Beauty / Wellness</option><option>Professional Services</option><option>E-commerce</option><option>Other</option></select></div>
+        <div class="field"><label for="offer">Main offer</label><input id="offer" value="Fast, reliable electrical work for Sydney homes and businesses" maxlength="120"></div>
+        <div class="field"><label for="audience">Ideal customer</label><input id="audience" value="Homeowners, builders and local businesses" maxlength="100"></div>
+        <div class="field"><label for="style">Visual direction</label><select id="style"><option value="dark">Premium / Dark</option><option value="light">Clean / Light</option><option value="bold">Bold / High Impact</option><option value="natural">Natural / Organic</option></select></div>
+        <div class="field"><label for="cta">Main call to action</label><input id="cta" value="Request a quote" maxlength="45"></div>
+        <div class="field"><label for="notes">Extra direction</label><textarea id="notes" placeholder="Example: emergency service, family owned, 15 years experience, Western Sydney..."></textarea></div>
+        <button class="generate" type="submit">Generate my website ↗</button>
+        <p class="fine">This free generator creates an instant concept in your browser. A Black Oak developer can turn the concept into a production website with custom content, integrations and hosting.</p>
+      </form>
+
+      <div>
+        <section class="preview-shell" aria-live="polite">
+          <div class="browserbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><div class="address" id="preview-address">northline-electrical.blvckoak-preview.com</div></div>
+          <div class="preview" id="site-preview">
+            <nav class="site-nav"><strong class="site-logo" id="preview-logo">NORTHLINE ELECTRICAL</strong><div class="site-links"><span>Services</span><span>About</span><span>Projects</span><span>Contact</span></div><a class="site-cta" href="#handoff" id="nav-cta">REQUEST A QUOTE</a></nav>
+            <section class="generated-hero">
+              <span class="mini-eyebrow" id="preview-industry">ELECTRICIAN · SYDNEY</span>
+              <h2 id="preview-headline">Powering better homes, businesses and builds.</h2>
+              <p id="preview-copy">Fast, reliable electrical work for Sydney homes and businesses. Built around clear communication, quality workmanship and a service experience customers can trust.</p>
+              <div class="hero-buttons"><a class="primary" href="#handoff" id="hero-cta">Request a quote</a><a class="secondary" href="#services-preview">Explore services</a></div>
+            </section>
+            <section class="generated-section" id="services-preview">
+              <span class="mini-eyebrow">WHAT WE DO</span><h3 id="services-title">Electrical work, without the runaround.</h3>
+              <div class="cards" id="service-cards"></div>
+            </section>
+            <section class="final-cta"><span class="mini-eyebrow">READY WHEN YOU ARE</span><h3 id="final-heading">Need an electrician you can actually rely on?</h3><a class="primary" href="#handoff" id="final-cta">Request a quote</a></section>
+          </div>
+        </section>
+        <aside class="handoff" id="handoff"><div><h3>Like the direction?</h3><p>Send this concept to Black Oak and we can turn it into a complete production website, customise the design and add the features your business needs.</p></div><a id="contact-link" href="contact.html?service=ai-website-generator#contact-title">Build this for me ↗</a></aside>
+      </div>
+    </section>
+  </main>
+<script>
+const form=document.getElementById('generator-form');
+const industries={
+  'Electrician':['Residential Electrical','Commercial Projects','Emergency & Repairs'],
+  'Café / Restaurant':['Menu & Specials','Reservations','Functions & Catering'],
+  'Landscaping':['Landscape Design','Construction','Garden Maintenance'],
+  'Cleaning':['Home Cleaning','Commercial Cleaning','Deep Cleans'],
+  'Mechanic / Automotive':['Logbook Servicing','Repairs & Diagnostics','Inspections'],
+  'Construction / Trade':['New Builds','Renovations','Project Support'],
+  'Beauty / Wellness':['Signature Services','Packages','Bookings'],
+  'Professional Services':['Strategy','Advisory','Ongoing Support'],
+  'E-commerce':['Best Sellers','New Arrivals','Customer Favourites'],
+  'Other':['Core Service','Popular Service','Custom Solutions']
+};
+const headlineMap={
+  'Electrician':'Powering better homes, businesses and builds.',
+  'Café / Restaurant':'Good food. Great atmosphere. Worth coming back for.',
+  'Landscaping':'Outdoor spaces designed to be lived in.',
+  'Cleaning':'A cleaner space, without losing your time.',
+  'Mechanic / Automotive':'Straight answers. Quality work. Back on the road.',
+  'Construction / Trade':'Built properly. Managed clearly. Finished with pride.',
+  'Beauty / Wellness':'Feel better. Look your best. Make time for you.',
+  'Professional Services':'Clear thinking for your next business move.',
+  'E-commerce':'Products people notice. An experience they remember.',
+  'Other':'A sharper way to present what you do.'
+};
+const styleMap={
+  dark:{a:'#d4ae58',b:'#f0d38c',light:false},
+  light:{a:'#a77a2a',b:'#bf8e34',light:true},
+  bold:{a:'#ff6a3d',b:'#ffb29a',light:false},
+  natural:{a:'#9eb27c',b:'#d7e0c1',light:false}
+};
+function slugify(v){return v.toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'your-business'}
+function esc(v){return String(v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function render(){
+  const business=document.getElementById('business').value.trim()||'Your Business';
+  const industry=document.getElementById('industry').value;
+  const offer=document.getElementById('offer').value.trim()||'A better experience built around what your customers actually need.';
+  const audience=document.getElementById('audience').value.trim()||'local customers';
+  const cta=document.getElementById('cta').value.trim()||'Get started';
+  const notes=document.getElementById('notes').value.trim();
+  const style=styleMap[document.getElementById('style').value]||styleMap.dark;
+  const preview=document.getElementById('site-preview');
+  preview.style.setProperty('--accent',style.a);preview.style.setProperty('--accent2',style.b);preview.classList.toggle('light',style.light);
+  document.getElementById('preview-logo').textContent=business.toUpperCase();
+  document.getElementById('preview-address').textContent=slugify(business)+'.blvckoak-preview.com';
+  document.getElementById('preview-industry').textContent=industry.toUpperCase()+' · BUILT FOR '+audience.toUpperCase().slice(0,42);
+  document.getElementById('preview-headline').textContent=headlineMap[industry]||headlineMap.Other;
+  document.getElementById('preview-copy').textContent=offer+'. '+(notes?notes+'. ':'')+'A focused experience designed to build trust and make the next step obvious.';
+  document.getElementById('nav-cta').textContent=cta.toUpperCase();
+  document.getElementById('hero-cta').textContent=cta;
+  document.getElementById('final-cta').textContent=cta;
+  document.getElementById('services-title').textContent='Built around what your customers need most.';
+  document.getElementById('final-heading').textContent='Ready to choose '+business+'?';
+  const services=industries[industry]||industries.Other;
+  document.getElementById('service-cards').innerHTML=services.map((s,i)=>'<article class="card"><b>0'+(i+1)+'</b><strong>'+esc(s)+'</strong><p>Clear, professional and easy to understand — presented around the outcome your customer is looking for.</p></article>').join('');
+  const params=new URLSearchParams({service:'ai-website-generator',business,industry,offer,cta});
+  document.getElementById('contact-link').href='contact.html?'+params.toString()+'#contact-title';
+}
+form.addEventListener('submit',e=>{e.preventDefault();render();document.querySelector('.preview-shell').scrollIntoView({behavior:'smooth',block:'start'})});
+render();
+</script>
+</body>
+</html>
