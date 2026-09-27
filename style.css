@@ -1472,7 +1472,8 @@ footer p:last-child { text-align: right; }
 .contact-shortcuts a { display:grid; gap:8px; padding:24px; border:1px solid var(--line); background:#111311; color:var(--paper); text-decoration:none; }
 .contact-shortcuts span { color:#92928b; font-size:11px; }
 .contact-shortcuts strong { color:var(--gold-light); font-size:13px; }
-.sales-dock { position:fixed; right:18px; bottom:18px; z-index:90; display:flex; overflow:hidden; border:1px solid rgba(212,174,88,.48); background:rgba(9,10,9,.94); box-shadow:0 18px 50px rgba(0,0,0,.42); backdrop-filter:blur(16px); }
+.sales-dock { position:fixed; right:18px; bottom:18px; z-index:90; display:flex; overflow:hidden; border:1px solid rgba(212,174,88,.48); background:rgba(9,10,9,.94); box-shadow:0 18px 50px rgba(0,0,0,.42); backdrop-filter:blur(16px); transition:opacity .35s ease,visibility .35s ease,transform .35s ease; }
+.oak-intro-active .sales-dock { opacity:0; visibility:hidden; pointer-events:none; transform:translateY(16px); }
 .sales-dock a { display:grid; gap:2px; min-width:126px; padding:12px 16px; color:var(--paper); font-size:10px; font-weight:700; text-decoration:none; }
 .sales-dock a + a { border-left:1px solid var(--line); }
 .sales-dock span { color:var(--gold); font-size:8px; letter-spacing:.12em; text-transform:uppercase; }
