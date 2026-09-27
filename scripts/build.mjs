@@ -11,7 +11,7 @@ await mkdir(output, { recursive: true });
 
 for (const file of [
   'index.html','referrals.html','contact.html','privacy.html','terms.html','refunds.html',
-  'portfolio.html','marketplace.html','marketplace.css','marketplace.js','quote.html','style.css','og.png','script.js',
+  'portfolio.html','marketplace.html','marketplace.css','marketplace.js','quote.html','style.css','og.png','cinematic-intro.js','script.js',
   'partners.html','partners.js','portal.css','pay.html','pay.js','progress.html','progress.js',
   'portfolio.js','quote-builder.js','audit.html','book.html','ai-generator.html','ai-generator.css','ai-generator.js','sales-config.js','sales.js',
   'robots.txt','sitemap.xml','favicon.ico','favicon.svg','apple-touch-icon.png','android-chrome-192x192.png','android-chrome-512x512.png','site.webmanifest'

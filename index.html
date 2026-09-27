@@ -80,12 +80,54 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=13">
+  <link rel="stylesheet" href="style.css?v=14">
+  <script src="cinematic-intro.js?v=1" defer></script>
   <script src="script.js?v=11" defer></script>
   <script src="sales-config.js?v=1" defer></script>
   <script src="sales.js?v=1" defer></script>
 </head>
 <body>
+  <section class="oak-origin" data-oak-origin aria-labelledby="oak-origin-title">
+    <div class="oak-origin-stage" data-oak-stage>
+      <canvas class="oak-origin-canvas" data-oak-canvas aria-hidden="true"></canvas>
+      <div class="oak-origin-grain" aria-hidden="true"></div>
+      <div class="oak-origin-brand" aria-hidden="true"><span>BLVCK</span> OAK <small>/ ORIGIN</small></div>
+
+      <div class="oak-origin-story" data-oak-story>
+        <article class="oak-origin-chapter is-active" data-oak-chapter="0">
+          <p>Chapter 01 / The source</p>
+          <h1 id="oak-origin-title">Every digital story<br><em>begins with a seed.</em></h1>
+          <span>Scroll to enter the BLVCK OAK journey.</span>
+        </article>
+        <article class="oak-origin-chapter" data-oak-chapter="1" aria-hidden="true">
+          <p>Chapter 02 / The canopy</p>
+          <h2>Every leaf holds<br><em>a world of its own.</em></h2>
+          <span>Websites shaped for different ambitions, industries and people.</span>
+        </article>
+        <article class="oak-origin-chapter" data-oak-chapter="2" aria-hidden="true">
+          <p>Chapter 03 / Transformation</p>
+          <h2>Nothing remarkable<br><em>stands still.</em></h2>
+          <span>Old forms become fuel. Strong ideas survive the fire.</span>
+        </article>
+        <article class="oak-origin-chapter" data-oak-chapter="3" aria-hidden="true">
+          <p>Chapter 04 / New growth</p>
+          <h2>From ash,<br><em>direction takes root.</em></h2>
+          <span>A sharper identity. A stronger system. A new beginning.</span>
+        </article>
+        <article class="oak-origin-chapter oak-origin-chapter-final" data-oak-chapter="4" aria-hidden="true">
+          <p>BLVCK OAK / Sydney, Australia</p>
+          <h2>The journey<br><em>begins here.</em></h2>
+          <span>Welcome to the official BLVCK OAK experience.</span>
+        </article>
+      </div>
+
+      <button class="oak-origin-skip" type="button" data-oak-skip>Skip intro <span aria-hidden="true">↘</span></button>
+      <div class="oak-origin-scroll" data-oak-scroll-cue aria-hidden="true"><i></i><span>Scroll to transform</span></div>
+      <div class="oak-origin-progress" aria-hidden="true"><span data-oak-progress></span></div>
+      <p class="sr-only">A scroll-controlled animation shows an old oak releasing website-shaped leaves. The leaves turn to flame and ash before a new oak grows and reveals the BLVCK OAK homepage.</p>
+    </div>
+  </section>
+
   <main>
     <div class="payment-notice" data-payment-notice role="status" hidden>
       <span data-payment-icon aria-hidden="true">✓</span>
