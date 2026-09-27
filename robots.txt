@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://blvckoak.com.au/sitemap.xml
