@@ -224,8 +224,10 @@
         const bark = context.createLinearGradient(startX, startY, endX, endY);
         const lit = ridge === 2 || ridge === 7;
         bark.addColorStop(0, lit ? '#51483c' : '#111315');
-        bark.addColorStop(0.36, lit ? '#8d8270' : '#272725');
-        bark.addColorStop(0.57, lit ? '#b3a48a' : '#35322c');
+        bark.addColorStop(0.32, lit ? '#a1a7a6' : '#272725');
+        bark.addColorStop(0.43, lit ? '#edf0e7' : '#454b49');
+        bark.addColorStop(0.48, lit ? '#b9beb4' : '#222625');
+        bark.addColorStop(0.57, lit ? '#d7c4a0' : '#35322c');
         bark.addColorStop(0.8, lit ? '#554b3c' : '#151719');
         bark.addColorStop(1, lit ? '#968975' : '#282724');
         context.globalAlpha = alpha;
@@ -273,8 +275,8 @@
       const points = side === 1 ? [-0.42, -0.22, 0, 0.23, 0.42] : [0.42, 0.23, 0, -0.22, -0.42];
       points.forEach((y) => {
         const spread = (0.16 + Math.sin((y + 0.58) / 1.16 * Math.PI) * 0.23) * size * side;
-        context.quadraticCurveTo(spread * 1.55, (y - side * 0.1) * size, spread, y * size);
-        context.quadraticCurveTo(spread * 0.55, (y + side * 0.075) * size, spread * 0.58, (y + side * 0.1) * size);
+        context.bezierCurveTo(spread * 1.1, (y - side * 0.11) * size, spread * 1.35, (y + side * 0.025) * size, spread * 0.9, (y + side * 0.055) * size);
+        context.quadraticCurveTo(spread * 0.66, (y + side * 0.075) * size, spread * 0.72, (y + side * 0.1) * size);
       });
       if (side === 1) context.quadraticCurveTo(size * 0.12, size * 0.5, 0, size * 0.58);
     }
@@ -305,6 +307,13 @@
     context.shadowBlur = 0;
     context.save();
     context.clip();
+    const sheenX = Math.sin(turn) * size * 0.23;
+    const sheen = context.createRadialGradient(sheenX, -size * 0.15, size * 0.025, sheenX, -size * 0.15, size * 0.46);
+    sheen.addColorStop(0, 'rgba(243,247,197,.43)');
+    sheen.addColorStop(0.35, 'rgba(208,223,149,.14)');
+    sheen.addColorStop(1, 'rgba(208,223,149,0)');
+    context.fillStyle = sheen;
+    context.fillRect(-size, -size, size * 2, size * 2);
     // Fine branching veins follow the lobes, with highlights on the folded ridge.
     for (let i = 0; i < 9; i += 1) {
       const yy = (-0.4 + i * 0.095) * size;
@@ -337,30 +346,29 @@
     context.stroke();
     context.restore();
   }
-  function drawFlame(x, y, size, alpha, time, phase) {
+  function drawEmbers(x, y, size, alpha, time, phase) {
     if (alpha <= 0.005) return;
     context.save();
-    context.translate(x, y);
     context.globalCompositeOperation = 'lighter';
-    const flicker = 0.84 + Math.sin(time * 0.012 + phase) * 0.13;
-    const glow = context.createRadialGradient(0, 0, 0, 0, 0, size * 1.15);
-    glow.addColorStop(0, `rgba(255,209,92,${alpha * 0.72})`);
-    glow.addColorStop(0.3, `rgba(255,86,16,${alpha * 0.52})`);
-    glow.addColorStop(1, 'rgba(255,44,0,0)');
-    context.fillStyle = glow;
-    context.beginPath();
-    context.arc(0, 0, size * 1.15, 0, TAU);
-    context.fill();
-
-    for (let flame = 0; flame < 3; flame += 1) {
-      const offset = (flame - 1) * size * 0.24;
-      const flameHeight = size * (0.8 + flame * 0.2) * flicker;
+    // Small incandescent fragments and soft halos, with no flame silhouettes.
+    for (let ember = 0; ember < 16; ember += 1) {
+      const life = (time * 0.00028 + ember / 16 + phase / TAU) % 1;
+      const angle = phase + ember * 2.399;
+      const ex = x + Math.cos(angle) * size * (0.15 + life * 1.15);
+      const ey = y - life * size * 2.4 + Math.sin(angle) * size * 0.3;
+      const radius = (1.3 + (ember % 4) * 0.65) * (1 - life * 0.55);
+      const opacity = alpha * Math.sin(life * Math.PI);
+      const glow = context.createRadialGradient(ex, ey, 0, ex, ey, radius * 5);
+      glow.addColorStop(0, `rgba(255,202,102,${opacity})`);
+      glow.addColorStop(0.2, `rgba(255,101,24,${opacity * 0.85})`);
+      glow.addColorStop(1, 'rgba(220,40,0,0)');
+      context.fillStyle = glow;
       context.beginPath();
-      context.moveTo(offset - size * 0.22, size * 0.34);
-      context.quadraticCurveTo(offset - size * 0.2, -flameHeight * 0.23, offset + Math.sin(time * 0.014 + flame) * size * 0.16, -flameHeight);
-      context.quadraticCurveTo(offset + size * 0.31, -flameHeight * 0.2, offset + size * 0.2, size * 0.34);
-      context.closePath();
-      context.fillStyle = flame === 1 ? `rgba(255,222,114,${alpha})` : `rgba(255,94,19,${alpha * 0.78})`;
+      context.arc(ex, ey, radius * 5, 0, TAU);
+      context.fill();
+      context.fillStyle = `rgba(255,222,155,${opacity})`;
+      context.beginPath();
+      context.ellipse(ex, ey, radius * 0.5, radius, angle, 0, TAU);
       context.fill();
     }
     context.restore();
@@ -383,8 +391,8 @@
       const leafAlpha = (1 - smoothstep(0.72, 0.99, burn)) * smoothstep(0.02, 0.1, 1 - progress);
       drawNaturalLeaf(leaf, x, y, size, rotation, turn, leafAlpha, burn);
 
-      const flameAmount = smoothstep(0.05, 0.34, burn) * (1 - smoothstep(0.68, 1, burn));
-      drawFlame(x, y + size * 0.12, size * 1.05, flameAmount, time, leaf.phase);
+      const emberAmount = smoothstep(0.05, 0.34, burn) * (1 - smoothstep(0.8, 1, burn));
+      drawEmbers(x, y + size * 0.12, size * 0.85, emberAmount, time, leaf.phase);
 
       const ashAmount = smoothstep(0.28, 0.82, burn);
       if (ashAmount > 0) {
