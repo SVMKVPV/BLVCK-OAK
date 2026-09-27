@@ -23,7 +23,8 @@ test('homepage connects the scroll-led BLVCK OAK origin sequence', async () => {
   assert.match(client, /buildTree\(1313/);
   assert.match(client, /drawNaturalLeaf/);
   assert.doesNotMatch(client, /drawWebsiteLeaf|websiteNames|leaf\.website/);
-  assert.match(client, /drawFlame/);
+  assert.match(client, /drawEmbers/);
+  assert.doesNotMatch(client, /drawFlame/);
   assert.match(client, /drawGroundAsh/);
   assert.match(client, /enterOfficialSite/);
   assert.match(build, /cinematic-intro\.js/);
