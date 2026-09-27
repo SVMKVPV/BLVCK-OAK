@@ -41,7 +41,7 @@
     const tips = [];
 
     function grow(x, y, length, angle, width, depth, generation) {
-      const bend = (random() - 0.5) * 0.08;
+      const bend = (random() - 0.5) * 0.32;
       const x2 = x + Math.cos(angle + bend) * length;
       const y2 = y + Math.sin(angle + bend) * length;
       segments.push({ x, y, x2, y2, width, generation, reveal: generation / (levels + 1) });
@@ -58,41 +58,29 @@
       }
     }
 
-    grow(0, 0, 1, -Math.PI / 2, 0.15, levels, 0);
+    grow(0, 0, 1, -Math.PI / 2, 0.34, levels, 0);
     return { segments, tips };
   }
 
   const oldTree = buildTree(1313, 5);
   const youngTree = buildTree(3131, 5);
-  const websiteNames = ['ELECTRIC', 'CAFÉ', 'HEALTH', 'ECOMMERCE', 'LANDSCAPE', 'AUTO', 'SOCIAL', 'CLEANING'];
-  const websitePalettes = [
-    ['#f1d48c', '#34332c', '#9f7a31'],
-    ['#ead8bd', '#56301e', '#d29b62'],
-    ['#dbeee7', '#163b3b', '#63a68f'],
-    ['#efd8ec', '#3d183e', '#c064b6'],
-    ['#d8e8c8', '#26341d', '#7ea158'],
-    ['#d4d7dc', '#20252d', '#727f91'],
-    ['#e6ddff', '#2d2047', '#9676d7'],
-    ['#d9eef1', '#17363b', '#6daab2'],
-  ];
   const leafRandom = seededRandom(8088);
-  const leaves = oldTree.tips.slice(0, 24).map((tip, index) => ({
+  const leaves = oldTree.tips.filter((_, index) => index % 2 === 0).map((tip, index) => ({
     ...tip,
     index,
-    website: websiteNames[index % websiteNames.length],
-    palette: websitePalettes[index % websitePalettes.length],
+    hue: 38 + leafRandom() * 48,
     z: leafRandom() * 1.4 - 0.7,
     rotation: leafRandom() * TAU,
     direction: leafRandom() > 0.5 ? 1 : -1,
     fallStart: 0.17 + (index % 9) * 0.011 + Math.floor(index / 9) * 0.018,
-    burnStart: 0.39 + (index % 6) * 0.026 + Math.floor(index / 6) * 0.012,
+    burnStart: 0.32 + (index % 6) * 0.018,
     drift: (leafRandom() - 0.5) * 0.34,
-    ash: Array.from({ length: 9 }, () => ({
+    ash: Array.from({ length: 22 }, () => ({
       x: leafRandom() * 2 - 1,
       y: leafRandom(),
       speed: 0.55 + leafRandom() * 1.15,
       phase: leafRandom() * TAU,
-      size: 0.55 + leafRandom() * 1.7,
+      size: 1.2 + leafRandom() * 3.1,
     })),
   }));
   const atmosphereRandom = seededRandom(4242);
@@ -214,27 +202,52 @@
       const endX = centerX + mix(segment.x, segment.x2, amount) * scale;
       const endY = groundY + mix(segment.y, segment.y2, amount) * scale;
       const widthScale = Math.max(0.55, segment.width * scale * mix(0.62, 1, amount));
-      const shimmer = 0.78 + Math.sin(index * 1.73) * 0.12;
-
-      context.beginPath();
-      context.moveTo(startX, startY);
-      context.quadraticCurveTo(
-        mix(startX, endX, 0.5) + Math.sin(index * 2.1) * scale * 0.012,
-        mix(startY, endY, 0.5),
-        endX,
-        endY,
-      );
-      context.lineWidth = widthScale * 1.45;
-      context.strokeStyle = `rgba(0,0,0,${alpha * 0.58})`;
-      context.stroke();
-      context.lineWidth = widthScale;
-      context.strokeStyle = isYoung
-        ? `rgba(${Math.round(116 + 65 * shimmer)},${Math.round(76 + 48 * shimmer)},31,${alpha})`
-        : `rgba(${Math.round(67 + 42 * shimmer)},${Math.round(51 + 28 * shimmer)},29,${alpha})`;
-      context.stroke();
-      context.lineWidth = Math.max(0.45, widthScale * 0.14);
-      context.strokeStyle = `rgba(241,212,140,${alpha * (isYoung ? 0.22 : 0.1)})`;
-      context.stroke();
+      const dx = endX - startX;
+      const dy = endY - startY;
+      const length = Math.max(1, Math.hypot(dx, dy));
+      const nx = -dy / length;
+      const ny = dx / length;
+      const bend = Math.sin(index * 2.1) * scale * 0.07;
+      // Swept, tapered bark strands create organic volume instead of straight rods.
+      for (let ridge = 0; ridge < 11; ridge += 1) {
+        const across = (ridge / 10 - 0.5) * widthScale;
+        const twist = Math.sin(index * 1.7 + ridge * 0.8) * widthScale * 0.21;
+        context.beginPath();
+        context.moveTo(startX + nx * across, startY + ny * across);
+        context.bezierCurveTo(
+          startX + dx * 0.3 + nx * (across + bend + twist),
+          startY + dy * 0.3 + ny * (across + bend + twist),
+          startX + dx * 0.72 + nx * (across * 0.72 - bend),
+          startY + dy * 0.72 + ny * (across * 0.72 - bend),
+          endX + nx * across * 0.55, endY + ny * across * 0.55
+        );
+        const bark = context.createLinearGradient(startX, startY, endX, endY);
+        const lit = ridge === 2 || ridge === 7;
+        bark.addColorStop(0, lit ? '#51483c' : '#111315');
+        bark.addColorStop(0.36, lit ? '#8d8270' : '#272725');
+        bark.addColorStop(0.57, lit ? '#b3a48a' : '#35322c');
+        bark.addColorStop(0.8, lit ? '#554b3c' : '#151719');
+        bark.addColorStop(1, lit ? '#968975' : '#282724');
+        context.globalAlpha = alpha;
+        context.lineWidth = Math.max(0.45, widthScale * (ridge === 0 || ridge === 10 ? 0.11 : 0.16));
+        context.strokeStyle = bark;
+        context.stroke();
+      }
+      // Sparse amber fissures echo the reference without turning all bark gold.
+      if (segment.generation < 3 && index % 3 === 0) {
+        context.beginPath();
+        context.moveTo(startX + dx * 0.18, startY + dy * 0.18);
+        context.bezierCurveTo(startX + dx * 0.4 + nx * bend, startY + dy * 0.4 + ny * bend,
+          startX + dx * 0.65 - nx * widthScale * 0.2, startY + dy * 0.65 - ny * widthScale * 0.2,
+          startX + dx * 0.84, startY + dy * 0.84);
+        context.strokeStyle = isYoung ? '#e3ba6b' : '#c28a42';
+        context.lineWidth = Math.max(0.6, widthScale * 0.032);
+        context.shadowColor = '#ffad3c';
+        context.shadowBlur = widthScale * 0.17;
+        context.stroke();
+        context.shadowBlur = 0;
+      }
+      context.globalAlpha = 1;
     });
 
     if (growth > 0.82) {
@@ -255,78 +268,75 @@
 
   function leafPath(size) {
     context.beginPath();
-    context.moveTo(0, -size * 0.56);
-    context.bezierCurveTo(size * 0.5, -size * 0.34, size * 0.56, size * 0.19, 0, size * 0.56);
-    context.bezierCurveTo(-size * 0.56, size * 0.19, -size * 0.5, -size * 0.34, 0, -size * 0.56);
+    context.moveTo(0, -size * 0.58);
+    for (const side of [1, -1]) {
+      const points = side === 1 ? [-0.42, -0.22, 0, 0.23, 0.42] : [0.42, 0.23, 0, -0.22, -0.42];
+      points.forEach((y) => {
+        const spread = (0.16 + Math.sin((y + 0.58) / 1.16 * Math.PI) * 0.23) * size * side;
+        context.quadraticCurveTo(spread * 1.55, (y - side * 0.1) * size, spread, y * size);
+        context.quadraticCurveTo(spread * 0.55, (y + side * 0.075) * size, spread * 0.58, (y + side * 0.1) * size);
+      });
+      if (side === 1) context.quadraticCurveTo(size * 0.12, size * 0.5, 0, size * 0.58);
+    }
     context.closePath();
   }
 
-  function drawWebsiteLeaf(leaf, x, y, size, rotation, turn, alpha, burn) {
+  function drawNaturalLeaf(leaf, x, y, size, rotation, turn, alpha, burn) {
     if (alpha <= 0.005) return;
-    const [paper, ink, accent] = leaf.palette;
-    const widthTurn = 0.28 + Math.abs(Math.cos(turn)) * 0.72;
     context.save();
     context.translate(x, y);
     context.rotate(rotation);
-    context.scale(widthTurn, 1);
+    context.scale(0.18 + Math.abs(Math.cos(turn)) * 0.82, 1);
     context.globalAlpha = alpha;
-
-    context.shadowColor = burn > 0 ? `rgba(255,107,24,${0.45 * burn})` : 'rgba(212,174,88,.22)';
-    context.shadowBlur = size * (0.22 + burn * 0.32);
+    const hue = leaf.hue ?? 72;
+    const light = 29 + Math.cos(turn) * 8;
+    const surface = context.createLinearGradient(-size * 0.45, -size * 0.2, size * 0.45, size * 0.25);
+    surface.addColorStop(0, `hsl(${hue} 35% 9%)`);
+    surface.addColorStop(0.38, `hsl(${hue} 43% ${light}%)`);
+    surface.addColorStop(0.49, `hsl(${hue} 48% 48%)`);
+    surface.addColorStop(0.52, `hsl(${hue} 42% 20%)`);
+    surface.addColorStop(0.82, `hsl(${hue} 36% 31%)`);
+    surface.addColorStop(1, `hsl(${hue} 30% 12%)`);
     leafPath(size);
-    context.fillStyle = burn > 0.15 ? ink : paper;
+    context.shadowColor = 'rgba(0,0,0,.65)';
+    context.shadowBlur = size * 0.12;
+    context.fillStyle = surface;
     context.fill();
     context.shadowBlur = 0;
+    context.save();
     context.clip();
-
-    context.fillStyle = ink;
-    context.fillRect(-size * 0.39, -size * 0.38, size * 0.78, size * 0.72);
-    context.fillStyle = accent;
-    context.fillRect(-size * 0.39, -size * 0.38, size * 0.78, size * 0.08);
-    context.fillStyle = 'rgba(255,255,255,.8)';
-    for (let dot = 0; dot < 3; dot += 1) context.fillRect(-size * (0.32 - dot * 0.07), -size * 0.355, size * 0.025, size * 0.025);
-    context.fillStyle = paper;
-    context.fillRect(-size * 0.3, -size * 0.21, size * 0.33, size * 0.055);
-    context.fillStyle = accent;
-    context.fillRect(-size * 0.3, -size * 0.11, size * 0.58, size * 0.16);
-    context.fillStyle = 'rgba(255,255,255,.28)';
-    context.fillRect(-size * 0.3, size * 0.095, size * 0.25, size * 0.07);
-    context.fillRect(size * 0.01, size * 0.095, size * 0.27, size * 0.07);
-    context.fillStyle = paper;
-    context.font = `800 ${Math.max(4.5, size * 0.075)}px Plus Jakarta Sans, sans-serif`;
-    context.textAlign = 'left';
-    context.textBaseline = 'middle';
-    context.fillText(leaf.website, -size * 0.3, size * 0.245, size * 0.58);
-
+    // Fine branching veins follow the lobes, with highlights on the folded ridge.
+    for (let i = 0; i < 9; i += 1) {
+      const yy = (-0.4 + i * 0.095) * size;
+      for (const side of [-1, 1]) {
+        context.beginPath();
+        context.moveTo(0, yy + size * 0.12);
+        context.quadraticCurveTo(side * size * 0.15, yy + size * 0.04, side * size * 0.38, yy - size * 0.06);
+        context.strokeStyle = 'rgba(213,210,131,.36)';
+        context.lineWidth = Math.max(0.35, size * 0.008);
+        context.stroke();
+      }
+    }
     if (burn > 0) {
-      const burnGradient = context.createLinearGradient(0, -size * 0.5, 0, size * 0.5);
-      burnGradient.addColorStop(0, `rgba(255,102,18,${burn * 0.15})`);
-      burnGradient.addColorStop(clamp(1 - burn), 'rgba(32,12,4,.12)');
-      burnGradient.addColorStop(clamp(1 - burn + 0.08), `rgba(255,103,17,${0.86 * burn})`);
-      burnGradient.addColorStop(clamp(1 - burn + 0.15), `rgba(13,8,5,${0.96 * burn})`);
-      context.fillStyle = burnGradient;
+      const char = context.createLinearGradient(0, -size * 0.6, 0, size * 0.6);
+      char.addColorStop(0, 'rgba(15,10,6,0)');
+      char.addColorStop(clamp(1 - burn - 0.08), 'rgba(30,12,3,.2)');
+      char.addColorStop(clamp(1 - burn), '#fff4a6');
+      char.addColorStop(clamp(1 - burn + 0.06), '#ff620c');
+      char.addColorStop(clamp(1 - burn + 0.15), '#100b09');
+      char.addColorStop(1, '#070606');
+      context.fillStyle = char;
       context.fillRect(-size, -size, size * 2, size * 2);
     }
     context.restore();
-
-    context.save();
-    context.globalAlpha = alpha;
-    context.translate(x, y);
-    context.rotate(rotation);
-    context.scale(widthTurn, 1);
-    leafPath(size);
-    context.lineWidth = Math.max(0.7, size * 0.022);
-    context.strokeStyle = burn > 0.1 ? `rgba(255,125,35,${0.5 + burn * 0.4})` : 'rgba(241,212,140,.76)';
-    context.stroke();
     context.beginPath();
-    context.moveTo(0, size * 0.54);
-    context.lineTo(0, -size * 0.48);
-    context.strokeStyle = burn > 0.1 ? 'rgba(255,175,70,.6)' : 'rgba(212,174,88,.42)';
-    context.lineWidth = Math.max(0.5, size * 0.012);
+    context.moveTo(0, size * 0.73);
+    context.quadraticCurveTo(size * 0.035, 0, 0, -size * 0.55);
+    context.lineWidth = Math.max(0.6, size * 0.018);
+    context.strokeStyle = burn > 0.1 ? '#ed8a32' : '#aca66c';
     context.stroke();
     context.restore();
   }
-
   function drawFlame(x, y, size, alpha, time, phase) {
     if (alpha <= 0.005) return;
     context.save();
@@ -357,7 +367,7 @@
   }
 
   function drawLeaves(centerX, groundY, treeScale, time) {
-    const count = width < 680 ? 14 : leaves.length;
+    const count = width < 680 ? 24 : leaves.length;
     leaves.slice(0, count).sort((a, b) => a.z - b.z).forEach((leaf) => {
       const fall = smoothstep(leaf.fallStart, leaf.fallStart + 0.31, progress);
       const burn = smoothstep(leaf.burnStart, leaf.burnStart + 0.2, progress);
@@ -365,16 +375,16 @@
       const baseY = groundY + leaf.y * treeScale;
       const sway = Math.sin(time * 0.0012 + leaf.phase + fall * 8) * (6 + fall * 34);
       const x = baseX + sway + leaf.drift * width * easeIn(fall) + pointer.x * 14 * (1 + leaf.z);
-      const y = baseY + easeIn(fall) * height * (0.68 + leaf.z * 0.07) + Math.sin(fall * Math.PI * 4 + leaf.phase) * 11;
+      const y = mix(baseY, groundY - height * (0.22 + leaf.z * 0.06), fall) + Math.sin(fall * Math.PI * 4 + leaf.phase) * 11;
       const depthScale = 0.78 + (leaf.z + 0.7) * 0.22;
       const size = clamp(treeScale * 0.16 * leaf.size * depthScale, 28, width < 680 ? 52 : 68);
       const rotation = leaf.rotation + fall * leaf.direction * 5.8 + Math.sin(time * 0.001 + leaf.phase) * 0.09;
       const turn = time * 0.0011 * leaf.direction + leaf.phase + fall * 7;
       const leafAlpha = (1 - smoothstep(0.72, 0.99, burn)) * smoothstep(0.02, 0.1, 1 - progress);
-      drawWebsiteLeaf(leaf, x, y, size, rotation, turn, leafAlpha, burn);
+      drawNaturalLeaf(leaf, x, y, size, rotation, turn, leafAlpha, burn);
 
       const flameAmount = smoothstep(0.05, 0.34, burn) * (1 - smoothstep(0.68, 1, burn));
-      drawFlame(x, y + size * 0.12, size * 0.44, flameAmount, time, leaf.phase);
+      drawFlame(x, y + size * 0.12, size * 1.05, flameAmount, time, leaf.phase);
 
       const ashAmount = smoothstep(0.28, 0.82, burn);
       if (ashAmount > 0) {
@@ -382,9 +392,11 @@
         leaf.ash.forEach((particle) => {
           const travel = ashAmount * particle.speed;
           const ashX = x + particle.x * size * (0.35 + travel) + Math.sin(time * 0.002 + particle.phase) * 7;
-          const ashY = y + size * 0.1 + travel * size * 1.55 + particle.y * size * 0.45;
-          context.globalAlpha = clamp((1 - travel) * ashAmount) * 0.72;
-          context.fillStyle = particle.phase > Math.PI ? '#ae6d31' : '#777168';
+          const ashY = y - travel * size * 2.9 + particle.y * size * 0.8;
+          context.globalAlpha = clamp((1.5 - travel) * ashAmount);
+          context.fillStyle = particle.phase > Math.PI ? '#ffbd62' : '#c6c0b6';
+          context.shadowColor = '#ff7920';
+          context.shadowBlur = particle.phase > Math.PI ? 9 : 0;
           context.fillRect(ashX, ashY, particle.size, particle.size * 1.8);
         });
         context.restore();
@@ -401,9 +413,9 @@
       const x = width * 0.5 + Math.cos(particle.angle) * radius;
       const rise = smoothstep(0.6, 0.82, progress) * particle.lift * height * 0.16;
       const y = groundY + Math.sin(particle.angle) * radius * 0.13 - rise + Math.sin(time * 0.0015 + particle.phase) * 4;
-      context.globalAlpha = visible * (0.15 + particle.lift * 0.55);
-      context.fillStyle = particle.index % 4 === 0 ? '#b77632' : '#5c5953';
-      context.fillRect(x, y, particle.size, particle.size * 1.7);
+      context.globalAlpha = visible * (0.45 + particle.lift * 0.5);
+      context.fillStyle = particle.index % 4 === 0 ? '#ffb657' : '#b4afa6';
+      context.fillRect(x, y, particle.size * 2, particle.size * 2.7);
     });
     context.restore();
   }
