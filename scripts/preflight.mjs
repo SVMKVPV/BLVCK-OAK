@@ -1,6 +1,6 @@
 import { access, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { NEARBY_BUSINESSES_ENABLED } from '../netlify/lib/launch-flags.mjs';
+import { NEARBY_BUSINESSES_ENABLED, SHOPS_ENABLED } from '../netlify/lib/launch-flags.mjs';
 
 const root = resolve(import.meta.dirname, '..');
 const failures = [];
@@ -14,6 +14,9 @@ const requiredFiles = [
   'progress.js',
   'portfolio.html',
   'portfolio.js',
+  'marketplace.html',
+  'marketplace.css',
+  'marketplace.js',
   'quote.html',
   'quote-builder.js',
   'netlify/functions/identity-validate.mjs',
@@ -59,6 +62,7 @@ const client = await readFile(resolve(root, 'script.js'), 'utf8');
 const cinematicIntro = await readFile(resolve(root, 'cinematic-intro.js'), 'utf8');
 const stylesheet = await readFile(resolve(root, 'style.css'), 'utf8');
 const redirects = await readFile(resolve(root, 'netlify.toml'), 'utf8');
+const marketplace = await readFile(resolve(root, 'marketplace.html'), 'utf8');
 
 if (!stylesheet.trimStart().startsWith(':root') || stylesheet.includes('\uFFFD')) {
   failures.push('style.css is not valid UTF-8 CSS.');
@@ -71,6 +75,9 @@ if (!/data-oak-origin/.test(index) || !/cinematic-intro\.js/.test(index)) {
 }
 if (!/prefers-reduced-motion/.test(cinematicIntro) || !/data-oak-skip/.test(index)) {
   failures.push('Homepage cinematic intro is missing motion accessibility controls.');
+}
+if (SHOPS_ENABLED && (!/marketplace\.css/.test(marketplace) || !/marketplace\.js/.test(marketplace) || !/data-product-grid/.test(marketplace))) {
+  failures.push('Live Marketplace is missing its catalogue assets or product-grid hook.');
 }
 
 if (/buy\.stripe\.com\/test_/i.test(index) || /buy\.stripe\.com\/test_/i.test(client)) {

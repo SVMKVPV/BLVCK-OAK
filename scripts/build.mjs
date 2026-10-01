@@ -24,4 +24,4 @@ await cp(resolve(root, 'previews'), resolve(output, 'previews'), { recursive: tr
 await prepareRelease(output);
 await markUnavailableLinks(output);
 
-console.log('Black Oak public client built successfully. New shops and community remain Coming soon; private prototypes are excluded.');
+console.log('Black Oak public client built successfully. Marketplace is live; community and nearby discovery remain Coming soon.');

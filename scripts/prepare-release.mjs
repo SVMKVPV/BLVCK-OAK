@@ -1,9 +1,12 @@
 import { readdir, readFile, writeFile, rm } from 'node:fs/promises';
 import { resolve, relative, extname } from 'node:path';
+import { SHOPS_ENABLED } from '../netlify/lib/launch-flags.mjs';
 
 export const upcoming = Object.freeze({
-  'marketplace.html': ['Shops & businesses', 'Discover a business.<br>Find your next chapter.', 'A planned directory of active shops and businesses for sale, online and in the real world.', ['Active businesses', 'Businesses for sale', 'Online businesses', 'Physical shops']],
-  'shops.html': ['Shops & businesses', 'Discover a business.<br>Find your next chapter.', 'A planned directory of active shops and businesses for sale, online and in the real world.', ['Active businesses', 'Businesses for sale', 'Online businesses', 'Physical shops']],
+  ...(!SHOPS_ENABLED ? {
+    'marketplace.html': ['Website marketplace', 'Browse it. Preview it.<br>Make it yours.', 'A storefront of Black Oak website directions, currently being prepared for launch.', ['Industry concepts', 'Website previews', 'Saved favourites', 'Project shortlists']],
+    'shops.html': ['Website marketplace', 'Browse it. Preview it.<br>Make it yours.', 'A storefront of Black Oak website directions, currently being prepared for launch.', ['Industry concepts', 'Website previews', 'Saved favourites', 'Project shortlists']],
+  } : {}),
   'community.html': ['Design community', 'Good work deserves<br>to be seen.', 'A future home for designers and business owners to share website designs, build a portfolio and discover each other.', ['Website showcases', 'Creator portfolios', 'Discover & save', 'Share your work']],
   'nearby.html': ['Nearby business finder', 'Your next introduction<br>could be nearby.', 'The Google Maps-powered business finder is not available yet. Location searches are disabled while this feature is being prepared.', ['Local discovery', 'Business categories', 'Website information', 'Partner workspace']],
   'login.html': ['Owner dashboard', 'A new workspace<br>is on its way.', 'The redesigned owner dashboard and Google sign-in are not ready yet. Existing email-code access remains available through the partner workspace.', ['Owner overview', 'Project activity', 'Private insights', 'Google sign-in']],
@@ -27,7 +30,7 @@ export function landingPage(filename) {
   const is404 = filename === '404.html';
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b0d0e"><meta name="robots" content="noindex,follow"><meta name="description" content="${escape(description)}"><title>${escape(name)} — Coming soon | BLVCK OAK</title><link rel="stylesheet" href="/release.css"></head>
-<body class="upcoming-body"><header class="upcoming-nav"><a class="upcoming-brand" href="/index.html">BLVCK OAK</a><nav aria-label="Primary navigation"><a href="/portfolio.html">Portfolio</a><a href="/shops.html">Shops</a><a href="/community.html">Community</a><a href="/contact.html">Contact</a></nav></header><main class="upcoming-main"><p class="upcoming-kicker">BLVCK OAK / ${escape(name)}</p><div class="upcoming-layout"><div>${badge}<h1>${title}</h1><p class="upcoming-copy">${escape(description)}</p><div class="upcoming-actions"><a href="/portfolio.html">Explore our portfolio ↗</a><a href="${filename === 'login.html' ? '/partners.html' : '/contact.html'}">${filename === 'login.html' ? 'Email-code workspace' : 'Contact BLVCK OAK'} ↗</a></div></div><aside class="upcoming-panel" aria-label="Planned features"><p>${is404 ? 'Find your way back' : 'In development / not live'}</p>${(features.length ? features : ['Website portfolio', 'Get in touch', 'Return to the homepage']).map((f,i)=>`<div class="upcoming-row"><span>0${i+1}</span><strong>${escape(f)}</strong></div>`).join('')}</aside></div><p class="upcoming-note">${filename === 'shops.html' || filename === 'marketplace.html' ? 'Listings and business-sale enquiries are not open. No active or for-sale businesses are being advertised here yet.' : filename === 'community.html' ? 'Posting, profiles, comments and messaging are not open. The prototype is being developed privately.' : 'No launch date has been announced.'} ${is404 ? '<a href="/index.html">Return to the homepage ↗</a>' : 'This page is an announcement, not an operational feature.'}</p></main><script src="/release.js" defer></script></body></html>`;
+<body class="upcoming-body"><header class="upcoming-nav"><a class="upcoming-brand" href="/index.html">BLVCK OAK</a><nav aria-label="Primary navigation"><a href="/portfolio.html">Portfolio</a><a href="/marketplace.html">Marketplace</a><a href="/community.html">Community</a><a href="/contact.html">Contact</a></nav></header><main class="upcoming-main"><p class="upcoming-kicker">BLVCK OAK / ${escape(name)}</p><div class="upcoming-layout"><div>${badge}<h1>${title}</h1><p class="upcoming-copy">${escape(description)}</p><div class="upcoming-actions"><a href="/portfolio.html">Explore our portfolio ↗</a><a href="${filename === 'login.html' ? '/partners.html' : '/contact.html'}">${filename === 'login.html' ? 'Email-code workspace' : 'Contact BLVCK OAK'} ↗</a></div></div><aside class="upcoming-panel" aria-label="Planned features"><p>${is404 ? 'Find your way back' : 'In development / not live'}</p>${(features.length ? features : ['Website portfolio', 'Get in touch', 'Return to the homepage']).map((f,i)=>`<div class="upcoming-row"><span>0${i+1}</span><strong>${escape(f)}</strong></div>`).join('')}</aside></div><p class="upcoming-note">${filename === 'community.html' ? 'Posting, profiles, comments and messaging are not open. The prototype is being developed privately.' : 'No launch date has been announced.'} ${is404 ? '<a href="/index.html">Return to the homepage ↗</a>' : 'This page is an announcement, not an operational feature.'}</p></main><script src="/release.js" defer></script></body></html>`;
 }
 
 export const releaseJs = `(() => {
@@ -109,8 +112,8 @@ export async function prepareRelease(output) {
   await writeFile(resolve(output, 'release.css'), releaseCss);
   await writeFile(resolve(output, 'release.js'), releaseJs);
   for (const name of Object.keys(upcoming)) await writeFile(resolve(output, name), landingPage(name));
-  // The actual new prototypes are NOT stored in this public repository or site.
-  for (const name of ['assets/black-oak-brand-film.mp4', 'intro-video.js', 'marketplace.js']) await rm(resolve(output, name), { force: true });
+  // Large startup-only media and its bootstrap are excluded from the public release.
+  for (const name of ['assets/black-oak-brand-film.mp4', 'intro-video.js', ...(!SHOPS_ENABLED ? ['marketplace.js'] : [])]) await rm(resolve(output, name), { force: true });
   const paths = await filesBelow(output);
   const available = new Set(paths.map(path => relative(output,path).replaceAll('\\','/')));
   const documents = new Map();
@@ -119,9 +122,9 @@ export async function prepareRelease(output) {
     let html = gateLeadFinder(removeStartupVideo(await readFile(path,'utf8')));
     if (!html.includes('/release.css')) html = html.replace('</head>', '<link rel="stylesheet" href="/release.css">\n<script src="/release.js" defer></script>\n</head>');
     if (key === 'index.html') {
-      const section = '<section class="release-discover" aria-labelledby="discover-next"><p class="section-label">The next chapter</p><h2 id="discover-next">Discover. Connect. Grow.</h2><p>We are building new ways to find businesses and share great website design.</p><nav aria-label="Upcoming features"><a href="/shops.html">Shops &amp; businesses</a><a href="/community.html">Design community</a><a href="/nearby.html">Nearby business finder</a></nav></section>';
+      const section = '<section class="release-discover" aria-labelledby="discover-next"><p class="section-label">The next chapter</p><h2 id="discover-next">Discover. Connect. Grow.</h2><p>Shop our website styles, explore the portfolio and see what Black Oak is building next.</p><nav aria-label="Marketplace and upcoming features"><a href="/marketplace.html">Shop website styles</a><a href="/community.html">Design community</a><a href="/nearby.html">Nearby business finder</a></nav></section>';
       html = html.replace(/<section\b[^>]*id="approach"[^>]*>/, match => section + '\n' + match);
-      html = html.replace(/(<a\b[^>]*href="portfolio\.html"[^>]*>[\s\S]*?<\/a>)/g, '$1<a href="/shops.html">Shops</a><a href="/community.html">Community</a>');
+      html = html.replace(/(<a\b[^>]*href="portfolio\.html"[^>]*>[\s\S]*?<\/a>)/g, '$1<a href="/marketplace.html">Marketplace</a><a href="/community.html">Community</a>');
     }
     documents.set(key, html);
   }
@@ -130,6 +133,6 @@ export async function prepareRelease(output) {
   const home = await readFile(resolve(output,'index.html'),'utf8');
   if (/intro-video\.js|<video\b[^>]*autoplay|black-oak-brand-film\.mp4/i.test(home)) throw new Error('Startup video must not ship in the public homepage.');
   if (!home.includes('discover-next')) throw new Error('Upcoming feature entry points were not added to the homepage.');
-  await writeFile(resolve(output,'release-status.json'), JSON.stringify({ version: 'coming-soon-2026-09-25', commit: process.env.COMMIT_REF || process.env.GITHUB_SHA || null, nearby: 'coming_soon', shops: 'coming_soon', community: 'coming_soon', startupVideo: false, localLinksMarked: report },null,2));
-  console.log(`Public release prepared: ${documents.size} HTML pages; ${report.length} unavailable local links marked Coming soon. Private prototypes excluded.`);
+  await writeFile(resolve(output,'release-status.json'), JSON.stringify({ version: 'marketplace-live-2026-10-01', commit: process.env.COMMIT_REF || process.env.GITHUB_SHA || null, nearby: 'coming_soon', shops: SHOPS_ENABLED ? 'live' : 'coming_soon', marketplace: SHOPS_ENABLED ? 'live' : 'coming_soon', community: 'coming_soon', startupVideo: false, localLinksMarked: report },null,2));
+  console.log(`Public release prepared: marketplace live, ${documents.size} HTML pages and ${report.length} unavailable local links marked Coming soon.`);
 }

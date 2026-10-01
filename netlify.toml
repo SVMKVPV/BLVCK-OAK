@@ -105,6 +105,24 @@
   to = "/.netlify/functions/enterprise-offer-stats"
   status = 200
 
+[[redirects]]
+  from = "/shops"
+  to = "/marketplace.html"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/shops.html"
+  to = "/marketplace.html"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/marketplace"
+  to = "/marketplace.html"
+  status = 301
+  force = true
+
 # The previous external ecommerce preview returned HTTP 401 to public visitors.
 [[redirects]]
   from = "/previews/ecommerce.html"
