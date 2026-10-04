@@ -62,6 +62,7 @@ export function packageCheckoutParameters({
     success_url: successUrl.toString(),
     cancel_url: cancelUrl.toString(),
     billing_address_collection: 'required',
+    integration_identifier: 'blvckoak_web_qnrzmvka',
     expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
     metadata,
     ...(isSubscription

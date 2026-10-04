@@ -267,7 +267,8 @@ export function maintenanceCheckoutParameters(quote, attempt) {
   if (!maintenance.enabled) throw new PortalError('Monthly maintenance was not included in this agreement.', 409);
   const metadata = { checkout_version: MAINTENANCE_VERSION, quote_id: quote.id, attempt_id: attempt.id };
   return {
-    mode: 'subscription', payment_method_types: ['card'], customer_email: quote.customerEmail,
+    mode: 'subscription', customer_email: quote.customerEmail,
+    integration_identifier: 'blvckoak_maint_kjrmwqta',
     billing_address_collection: 'required', client_reference_id: quote.id, metadata,
     subscription_data: { metadata },
     success_url: maintenanceReturnLink(quote, 'returned'),
