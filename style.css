@@ -80,6 +80,7 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px soli
 }
 .oak-origin-video {
   opacity: 0;
+  object-fit: contain;
   background: #010101;
   pointer-events: none;
 }
