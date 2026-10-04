@@ -127,8 +127,8 @@ Use test data only:
 1. Activate the Stripe account and complete all business verification.
 2. Add your settlement bank account and payout schedule in Stripe.
 3. Create a separate live webhook endpoint with the same URL and event list. Test and live webhook secrets are different.
-4. Replace Netlify’s test Stripe values with `sk_live_...` and the live `whsec_...`.
-5. Run `pnpm run preflight:live` in an environment containing the production values.
+4. In Netlify's **Production** deploy context, replace test Stripe values with a least-privilege `rk_live_...` key where possible (or `sk_live_...`) and the live `whsec_...`. Keep `sk_test_...` or `rk_test_...` credentials limited to Deploy Previews and local development.
+5. Ensure production secrets are available to both Builds and Functions. Production deploys run `pnpm run preflight:live` automatically and stop before publishing if a sandbox key is configured.
 6. Redeploy, then make the smallest safe real payment and refund test.
 7. Verify customer receipts, the owner alert, the bank payout record and accounting reconciliation.
 
