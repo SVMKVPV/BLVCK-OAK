@@ -85,3 +85,8 @@ test('feature APIs reject guests before invoking external services or parsing pa
   }
   assert.equal((await session(new Request('https://blvckoak.com.au/.netlify/functions/site-session'))).status,401);
 });
+test('release verification accepts authentication denial from the protected contact endpoint',async()=>{
+  const smoke = await readFile(new URL('../scripts/release-smoke.mjs',import.meta.url),'utf8');
+  assert.match(smoke,/check\(base,'\/api\/contact',\[401,403\]\)/);
+  assert.doesNotMatch(smoke,/check\(base,'\/api\/contact',\[405\]\)/);
+});
