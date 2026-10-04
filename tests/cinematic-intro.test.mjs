@@ -11,19 +11,21 @@ test('homepage connects the scroll-led BLVCK OAK origin sequence', async () => {
     read('cinematic-intro.js'),
     read('scripts/build.mjs'),
     read('package.json'),
-    readFile(new URL('../assets/obsidian-oak-scroll.mp4', import.meta.url)),
+    readFile(new URL('../assets/obsidian-oak-scroll-ccw.mp4', import.meta.url)),
   ]);
 
   assert.match(html, /data-oak-origin/);
   assert.match(html, /data-oak-canvas/);
   assert.match(html, /data-oak-video/);
-  assert.match(html, /assets\/obsidian-oak-scroll\.mp4/);
+  assert.match(html, /data-orientation="portrait-ccw"/);
+  assert.match(html, /assets\/obsidian-oak-scroll-ccw\.mp4/);
   assert.doesNotMatch(html, /data-oak-video[^>]*autoplay/);
   assert.match(html, /data-oak-chapter="4"/);
   assert.match(html, /data-oak-skip/);
   assert.ok(html.indexOf('data-oak-origin') < html.indexOf('<main>'));
   assert.match(css, /\.oak-origin-stage\s*\{/);
   assert.match(css, /position:\s*sticky/);
+  assert.match(css, /\.oak-origin-video\s*\{[^}]*object-fit:\s*contain/);
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
   assert.match(client, /THREE\.REVISION !== '160'/);
   assert.match(client, /VIDEO_END_SECONDS = 9\.4/);

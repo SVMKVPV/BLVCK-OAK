@@ -40,7 +40,6 @@
   let activeChapter = -1;
   let introVisible = true;
   let frameId = 0;
-  let videoScrubFrame = 0;
   let videoReelFrame = 0;
   let videoReelStartedAt = 0;
   let previousVideoReelTime = 0;
@@ -62,20 +61,18 @@
 
   function queueVideoScrub(force = false) {
     if (!(video instanceof HTMLVideoElement) || !videoReady) return;
-    if (videoScrubFrame && !force) return;
-    videoScrubFrame = window.requestAnimationFrame(() => {
-      videoScrubFrame = 0;
-      if (video.seeking && !force) return;
-      const target = clamp(storyProgress) * videoDuration;
-      if (Math.abs(video.currentTime - target) < 1 / 48) return;
-      try {
-        // currentTime requests the exact decoded frame. fastSeek deliberately is
-        // not used because it may stop on an earlier keyframe.
-        video.currentTime = target;
-      } catch (error) {
-        startProceduralFallback(error);
-      }
-    });
+    // Only one seek is allowed at a time. If progress changes while a seek is
+    // active, the seeked listener calls this again using the latest progress.
+    if (video.seeking && !force) return;
+    const target = clamp(storyProgress) * videoDuration;
+    if (Math.abs(video.currentTime - target) < 1 / 48) return;
+    try {
+      // currentTime requests the exact decoded frame. fastSeek deliberately is
+      // not used because it may stop on an earlier keyframe.
+      video.currentTime = target;
+    } catch (error) {
+      startProceduralFallback(error);
+    }
   }
 
   function animateVideoReel(now) {
@@ -945,7 +942,6 @@
     visibilityObserver.disconnect();
     reducedMotion.removeEventListener?.('change', handleVideoMotionPreference);
     cancelAnimationFrame(frameId);
-    cancelAnimationFrame(videoScrubFrame);
     cancelAnimationFrame(videoReelFrame);
   }, { once: true });
 })();
