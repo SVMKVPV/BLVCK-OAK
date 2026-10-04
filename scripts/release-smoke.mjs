@@ -94,7 +94,9 @@ try {
   await check(base,'/unavailable-links.js',[200],/coming-soon-chip/);
   await check(base,'/api/partners/auth',[405]);
   await check(base,'/api/partners',[401,403]);
-  await check(base,'/api/contact',[405]);
+  // Feature endpoints authenticate before method validation so anonymous smoke
+  // requests cannot use status differences to probe their accepted methods.
+  await check(base,'/api/contact',[401,403]);
   await check(base,'/api/stripe/webhook',[405]);
   await check(base,'/api/businesses/nearby',[503],/COMING_SOON/,{method:'POST',headers:{'Content-Type':'application/json','Origin':base},body:'{}'});
   await check(base,'/release-verification-missing-page',[404],/Coming soon/);
