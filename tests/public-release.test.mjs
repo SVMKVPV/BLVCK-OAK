@@ -12,9 +12,10 @@ test('release gates expose the marketplace while unfinished features remain disa
   assert.equal(SHOPS_ENABLED,true);
   assert.equal(COMMUNITY_ENABLED,false);
 });
-test('startup video and bootstrap are absent; unrelated videos remain', () => {
-  const result = removeStartupVideo('<script src="intro-video.js" defer></script><video autoplay><source src="assets/black-oak-brand-film.mp4"></video><video controls src="demo.mp4"></video>');
-  assert.doesNotMatch(result, /intro-video|black-oak-brand-film|autoplay/);
+test('retired startup bootstrap is absent; explicit non-autoplay videos remain', () => {
+  const result = removeStartupVideo('<script src="intro-video.js" defer></script><video data-intro autoplay src="startup.mp4"></video><video controls src="assets/black-oak-brand-film.mp4"></video><video controls src="demo.mp4"></video>');
+  assert.doesNotMatch(result, /intro-video|data-intro|startup\.mp4|autoplay/);
+  assert.match(result, /black-oak-brand-film\.mp4/);
   assert.match(result, /demo.mp4/);
 });
 test('Maps search is unavailable without JavaScript and retains portal hooks', () => {
@@ -69,7 +70,7 @@ test('release builds keep the marketplace live, mark unavailable links and exclu
     assert.equal(report.community,'coming_soon');
     assert.equal(report.nearby,'coming_soon');
     assert.equal(report.localLinksMarked.length,1);
-    await assert.rejects(readFile(join(dir,'assets/black-oak-brand-film.mp4')),{code:'ENOENT'});
+    assert.equal(await readFile(join(dir,'assets/black-oak-brand-film.mp4'),'utf8'),'fixture');
     assert.match(await readFile(join(dir,'marketplace.js'),'utf8'),/MARKETPLACE_LIVE/);
     assert.match(await readFile(join(dir,'marketplace.html'),'utf8'),/data-product-grid/);
   } finally { await rm(dir,{recursive:true,force:true}); }
