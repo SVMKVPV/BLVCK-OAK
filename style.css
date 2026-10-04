@@ -70,12 +70,22 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px soli
   position: absolute;
   z-index: 1;
   inset: 0;
+  display: block;
   width: 100%;
   height: 100%;
   opacity: calc(1 - var(--oak-exit));
   transform: scale(calc(1 + var(--oak-exit) * .025));
   transition: opacity .08s linear;
 }
+.oak-origin.is-reel-render {
+  height: 100vh;
+  height: 100svh;
+  min-height: 720px;
+}
+.oak-origin.is-reel-render .oak-origin-stage { min-height: 720px; }
+.oak-origin.is-reel-render .oak-origin-scroll,
+.oak-origin.is-reel-render .oak-origin-progress { display: none; }
+.oak-origin.is-webgl-fallback .oak-origin-canvas { opacity: .82; }
 .oak-origin-grain {
   position: absolute;
   z-index: 4;
