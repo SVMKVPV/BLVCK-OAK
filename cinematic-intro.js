@@ -10,6 +10,7 @@
 (() => {
   const intro = document.querySelector('[data-oak-origin]');
   const stage = document.querySelector('[data-oak-stage]');
+  const video = document.querySelector('[data-oak-video]');
   const canvas = document.querySelector('[data-oak-canvas]');
   const skipButton = document.querySelector('[data-oak-skip]');
   const chapters = [...document.querySelectorAll('[data-oak-chapter]')];
@@ -26,6 +27,7 @@
   const HEADER_LOOP_SECONDS = 72;
   const REEL_LOOP_SECONDS = 8;
   const REEL_BEAT_SECONDS = 3;
+  const VIDEO_END_SECONDS = 9.4;
   const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
   const mix = (start, end, amount) => start + (end - start) * amount;
   const smoothstep = (start, end, value) => {
@@ -38,6 +40,13 @@
   let activeChapter = -1;
   let introVisible = true;
   let frameId = 0;
+  let videoScrubFrame = 0;
+  let videoReelFrame = 0;
+  let videoReelStartedAt = 0;
+  let previousVideoReelTime = 0;
+  let videoReady = false;
+  let videoDuration = VIDEO_END_SECONDS;
+  let threeStarted = false;
   let rendererCleanup = () => {};
   const pointer = { x: 0, y: 0, targetX: 0, targetY: 0 };
 
@@ -51,6 +60,65 @@
     });
   }
 
+  function queueVideoScrub(force = false) {
+    if (!(video instanceof HTMLVideoElement) || !videoReady) return;
+    if (videoScrubFrame && !force) return;
+    videoScrubFrame = window.requestAnimationFrame(() => {
+      videoScrubFrame = 0;
+      if (video.seeking && !force) return;
+      const target = clamp(storyProgress) * videoDuration;
+      if (Math.abs(video.currentTime - target) < 1 / 48) return;
+      try {
+        // currentTime requests the exact decoded frame. fastSeek deliberately is
+        // not used because it may stop on an earlier keyframe.
+        video.currentTime = target;
+      } catch (error) {
+        startProceduralFallback(error);
+      }
+    });
+  }
+
+  function animateVideoReel(now) {
+    videoReelFrame = 0;
+    if (!videoReady || threeStarted || reducedMotion.matches || !reelMode) return;
+    if (!videoReelStartedAt) videoReelStartedAt = now;
+    const cycle = ((now - videoReelStartedAt) / 1000) % REEL_LOOP_SECONDS;
+    if (cycle < previousVideoReelTime) previousVideoReelTime = 0;
+    applyStoryProgress(cycle / REEL_LOOP_SECONDS);
+    if (previousVideoReelTime < REEL_BEAT_SECONDS && cycle >= REEL_BEAT_SECONDS) {
+      window.dispatchEvent(new CustomEvent('blvckoak:beat-drop', {
+        detail: { at: REEL_BEAT_SECONDS, loop: REEL_LOOP_SECONDS },
+      }));
+    }
+    previousVideoReelTime = cycle;
+    videoReelFrame = window.requestAnimationFrame(animateVideoReel);
+  }
+
+  function activateVideo() {
+    if (!(video instanceof HTMLVideoElement)) return;
+    const availableDuration = Number.isFinite(video.duration) ? video.duration : VIDEO_END_SECONDS;
+    videoDuration = Math.max(0, Math.min(VIDEO_END_SECONDS, availableDuration - 1 / 48));
+    video.pause();
+    videoReady = true;
+    intro.classList.add('is-video-ready');
+    queueVideoScrub(true);
+    if (reelMode && !reducedMotion.matches && !videoReelFrame) {
+      videoReelStartedAt = 0;
+      videoReelFrame = window.requestAnimationFrame(animateVideoReel);
+    }
+  }
+
+  function handleVideoMotionPreference() {
+    intro.classList.toggle('is-reduced-motion', reducedMotion.matches);
+    if (skipButton) skipButton.firstChild.textContent = reducedMotion.matches ? 'Enter site ' : 'Skip intro ';
+    cancelAnimationFrame(videoReelFrame);
+    videoReelFrame = 0;
+    videoReelStartedAt = 0;
+    if (reducedMotion.matches) applyStoryProgress(0.9);
+    else if (reelMode && videoReady) videoReelFrame = window.requestAnimationFrame(animateVideoReel);
+    else updateScrollProgress();
+  }
+
   function applyStoryProgress(value) {
     storyProgress = clamp(value);
     const chapter = storyProgress < 0.155 ? 0
@@ -62,6 +130,7 @@
     intro.style.setProperty('--oak-progress', storyProgress.toFixed(4));
     intro.style.setProperty('--oak-exit', smoothstep(0.955, 1, storyProgress).toFixed(4));
     intro.classList.toggle('has-progress', storyProgress > 0.025);
+    queueVideoScrub();
   }
 
   function updateScrollProgress() {
@@ -100,6 +169,15 @@
   intro.classList.toggle('is-reel-render', reelMode);
   intro.classList.toggle('is-reduced-motion', reducedMotion.matches);
   if (skipButton && reducedMotion.matches) skipButton.firstChild.textContent = 'Enter site ';
+  if (video instanceof HTMLVideoElement) {
+    video.addEventListener('loadedmetadata', activateVideo, { once: true });
+    video.addEventListener('loadeddata', activateVideo, { once: true });
+    video.addEventListener('seeked', () => queueVideoScrub());
+    video.addEventListener('error', () => startProceduralFallback(video.error || new Error('The cinematic MP4 could not be decoded.')), { once: true });
+    if (video.readyState >= HTMLMediaElement.HAVE_METADATA) activateVideo();
+    else video.load();
+  }
+  reducedMotion.addEventListener?.('change', handleVideoMotionPreference);
 
   function seededRandom(seed) {
     let value = seed >>> 0;
@@ -845,10 +923,29 @@
     }
   }
 
-  loadThree().then(initThree).catch(showFallback);
+  function startProceduralFallback(error) {
+    if (threeStarted) return;
+    threeStarted = true;
+    cancelAnimationFrame(videoReelFrame);
+    videoReelFrame = 0;
+    videoReady = false;
+    intro.classList.remove('is-video-ready');
+    intro.classList.add('is-video-fallback');
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      console.warn('BLVCK OAK video intro fallback:', error);
+    }
+    loadThree().then(initThree).catch(showFallback);
+  }
+
+  if (!(video instanceof HTMLVideoElement)) {
+    startProceduralFallback(new Error('The cinematic video element is unavailable.'));
+  }
   window.addEventListener('pagehide', () => {
     rendererCleanup();
     visibilityObserver.disconnect();
+    reducedMotion.removeEventListener?.('change', handleVideoMotionPreference);
     cancelAnimationFrame(frameId);
+    cancelAnimationFrame(videoScrubFrame);
+    cancelAnimationFrame(videoReelFrame);
   }, { once: true });
 })();

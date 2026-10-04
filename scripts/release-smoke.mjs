@@ -82,7 +82,7 @@ async function externalLinks() {
 try {
   const base = await deployment(); result.baseUrl=base;
   const home = await check(base,'/',[200],/discover-next/);
-  if (/intro-video\.js|black-oak-brand-film\.mp4|<video\b[^>]*autoplay/i.test(home)) throw new Error('The deployed homepage still references a startup video.');
+  if (/intro-video\.js|<video\b[^>]*autoplay|<video\b[^>]*(?:data-intro|startup)/i.test(home)) throw new Error('The deployed homepage still references an autoplay startup video.');
   for(const path of ['/marketplace','/marketplace.html','/shops','/shops.html']) await check(base,path,[200],/data-product-grid/);
   for(const path of ['/community.html','/nearby.html','/login.html','/coming-soon.html']) await check(base,path,[200],/Coming soon/);
   await check(base,'/partners.html',[200],/data-lead-search[^>]+hidden/);

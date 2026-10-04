@@ -66,6 +66,7 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px soli
   height: 31%;
   background: linear-gradient(180deg, transparent, rgba(2, 3, 3, .72) 58%, #030404);
 }
+.oak-origin-video,
 .oak-origin-canvas {
   position: absolute;
   z-index: 1;
@@ -73,10 +74,19 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px soli
   display: block;
   width: 100%;
   height: 100%;
-  opacity: calc(1 - var(--oak-exit));
+  object-fit: cover;
   transform: scale(calc(1 + var(--oak-exit) * .025));
   transition: opacity .08s linear;
 }
+.oak-origin-video {
+  opacity: 0;
+  background: #010101;
+  pointer-events: none;
+}
+.oak-origin-canvas { opacity: 0; }
+.oak-origin.is-video-ready .oak-origin-video { opacity: calc(1 - var(--oak-exit)); }
+.oak-origin.is-video-fallback .oak-origin-video { opacity: 0; }
+.oak-origin.is-video-fallback .oak-origin-canvas { opacity: calc(1 - var(--oak-exit)); }
 .oak-origin.is-reel-render {
   height: 100vh;
   height: 100svh;
@@ -85,7 +95,7 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px soli
 .oak-origin.is-reel-render .oak-origin-stage { min-height: 720px; }
 .oak-origin.is-reel-render .oak-origin-scroll,
 .oak-origin.is-reel-render .oak-origin-progress { display: none; }
-.oak-origin.is-webgl-fallback .oak-origin-canvas { opacity: .82; }
+.oak-origin.is-video-fallback.is-webgl-fallback .oak-origin-canvas { opacity: .82; }
 .oak-origin-grain {
   position: absolute;
   z-index: 4;
@@ -274,6 +284,7 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px soli
   .oak-origin-progress { display: none; }
   .oak-origin-chapter { transition: none; }
   .oak-origin-skip span { transform: none; }
+  .oak-origin-video, .oak-origin-canvas { transition: none; }
 }
 noscript .oak-origin { display: none; }
 noscript + main .site-header { opacity: 1; visibility: visible; pointer-events: auto; transform: none; }

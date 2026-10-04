@@ -65,8 +65,7 @@ async function filesBelow(directory) {
 
 export function removeStartupVideo(html) {
   return html.replace(/<script\b[^>]*\bsrc=["'][^"']*intro-video[^"']*["'][^>]*>\s*<\/script>/gi, '')
-    .replace(/<video\b[\s\S]*?<\/video>/gi, block => /black-oak-brand-film|data-intro|startup/i.test(block) ? '' : block)
-    .replace(/<link\b[^>]*href=["'][^"']*black-oak-brand-film\.mp4[^"']*["'][^>]*>/gi, '');
+    .replace(/<video\b[\s\S]*?<\/video>/gi, block => /data-intro|startup/i.test(block) ? '' : block);
 }
 
 export function gateLeadFinder(html) {
@@ -112,8 +111,9 @@ export async function prepareRelease(output) {
   await writeFile(resolve(output, 'release.css'), releaseCss);
   await writeFile(resolve(output, 'release.js'), releaseJs);
   for (const name of Object.keys(upcoming)) await writeFile(resolve(output, name), landingPage(name));
-  // Large startup-only media and its bootstrap are excluded from the public release.
-  for (const name of ['assets/black-oak-brand-film.mp4', 'intro-video.js', ...(!SHOPS_ENABLED ? ['marketplace.js'] : [])]) await rm(resolve(output, name), { force: true });
+  // The retired autoplay bootstrap stays excluded. Explicit, non-autoplay
+  // campaign and scroll-scrubbed media remain part of the public release.
+  for (const name of ['intro-video.js', ...(!SHOPS_ENABLED ? ['marketplace.js'] : [])]) await rm(resolve(output, name), { force: true });
   const paths = await filesBelow(output);
   const available = new Set(paths.map(path => relative(output,path).replaceAll('\\','/')));
   const documents = new Map();
@@ -131,7 +131,7 @@ export async function prepareRelease(output) {
   const report = [];
   for (const [file, html] of documents) await writeFile(resolve(output,file), rewriteLinks(html,file,documents,available,report));
   const home = await readFile(resolve(output,'index.html'),'utf8');
-  if (/intro-video\.js|<video\b[^>]*autoplay|black-oak-brand-film\.mp4/i.test(home)) throw new Error('Startup video must not ship in the public homepage.');
+  if (/intro-video\.js|<video\b[^>]*autoplay|<video\b[^>]*(?:data-intro|startup)/i.test(home)) throw new Error('Autoplay startup video must not ship in the public homepage.');
   if (!home.includes('discover-next')) throw new Error('Upcoming feature entry points were not added to the homepage.');
   await writeFile(resolve(output,'release-status.json'), JSON.stringify({ version: 'marketplace-live-2026-10-01', commit: process.env.COMMIT_REF || process.env.GITHUB_SHA || null, nearby: 'coming_soon', shops: SHOPS_ENABLED ? 'live' : 'coming_soon', marketplace: SHOPS_ENABLED ? 'live' : 'coming_soon', community: 'coming_soon', startupVideo: false, localLinksMarked: report },null,2));
   console.log(`Public release prepared: marketplace live, ${documents.size} HTML pages and ${report.length} unavailable local links marked Coming soon.`);

@@ -5,16 +5,20 @@ import test from 'node:test';
 const read = (file) => readFile(new URL(`../${file}`, import.meta.url), 'utf8');
 
 test('homepage connects the scroll-led BLVCK OAK origin sequence', async () => {
-  const [html, css, client, build, packageJson] = await Promise.all([
+  const [html, css, client, build, packageJson, cinematicVideo] = await Promise.all([
     read('index.html'),
     read('style.css'),
     read('cinematic-intro.js'),
     read('scripts/build.mjs'),
     read('package.json'),
+    readFile(new URL('../assets/obsidian-oak-scroll.mp4', import.meta.url)),
   ]);
 
   assert.match(html, /data-oak-origin/);
   assert.match(html, /data-oak-canvas/);
+  assert.match(html, /data-oak-video/);
+  assert.match(html, /assets\/obsidian-oak-scroll\.mp4/);
+  assert.doesNotMatch(html, /data-oak-video[^>]*autoplay/);
   assert.match(html, /data-oak-chapter="4"/);
   assert.match(html, /data-oak-skip/);
   assert.ok(html.indexOf('data-oak-origin') < html.indexOf('<main>'));
@@ -22,6 +26,9 @@ test('homepage connects the scroll-led BLVCK OAK origin sequence', async () => {
   assert.match(css, /position:\s*sticky/);
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
   assert.match(client, /THREE\.REVISION !== '160'/);
+  assert.match(client, /VIDEO_END_SECONDS = 9\.4/);
+  assert.match(client, /video\.currentTime = target/);
+  assert.match(client, /startProceduralFallback/);
   assert.match(client, /new THREE\.WebGLRenderer/);
   assert.match(client, /new THREE\.MeshPhysicalMaterial/);
   assert.match(client, /new THREE\.InstancedMesh/);
@@ -36,4 +43,5 @@ test('homepage connects the scroll-led BLVCK OAK origin sequence', async () => {
   assert.match(build, /cinematic-intro\.js/);
   assert.match(build, /three\.module\.min\.js/);
   assert.match(packageJson, /"three":\s*"0\.160\.0"/);
+  assert.ok(cinematicVideo.byteLength > 1_000_000);
 });
