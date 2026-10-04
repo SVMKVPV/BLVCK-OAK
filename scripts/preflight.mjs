@@ -93,7 +93,7 @@ for (const route of ['/api/partners/auth', '/api/partners', '/api/businesses/nea
 if (process.argv.includes('--live')) {
   const expected = [
     ['SITE_URL', (value) => /^https:\/\/[^\s]+$/i.test(value)],
-    ['STRIPE_SECRET_KEY', (value) => /^sk_live_/.test(value)],
+    ['STRIPE_SECRET_KEY', (value) => /^(?:sk|rk)_live_/.test(value)],
     ['STRIPE_WEBHOOK_SECRET', (value) => /^whsec_/.test(value)],
     ['STRIPE_CONNECT_CLIENT_ID', (value) => /^ca_[A-Za-z0-9]+$/.test(value)],
     ['STRIPE_CONNECT_WEBHOOK_SECRET', (value) => /^whsec_/.test(value)],
