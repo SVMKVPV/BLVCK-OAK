@@ -1,3 +1,4 @@
+import { featureAccess } from '../lib/feature-access.mjs';
 import { getStripe, json } from '../lib/referrals.mjs';
 import { PortalError, assertSameOrigin, clientError, portalStore, quoteIdPattern, readBody, safeEqual, tokenPattern } from '../lib/portal-auth.mjs';
 import { publicQuote } from '../lib/quotes.mjs';
@@ -16,6 +17,8 @@ function paymentFailure(error) {
 }
 
 export default async function handler(request) {
+  const denied = await featureAccess(request);
+  if (denied) return denied;
   if (request.method !== 'POST') return json({ error: 'Method not allowed.' }, 405);
   try {
     assertSameOrigin(request);

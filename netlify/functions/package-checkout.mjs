@@ -1,3 +1,4 @@
+import { featureAccess } from '../lib/feature-access.mjs';
 import {
   CHECKOUT_VERSION,
   ENTERPRISE_REFERRAL_DISCOUNT_PERCENT,
@@ -72,6 +73,8 @@ export function packageCheckoutParameters({
 }
 
 export default async function handler(request) {
+  const denied = await featureAccess(request);
+  if (denied) return denied;
   if (request.method !== 'POST') return json({ error: 'Method not allowed.' }, 405);
 
   try {

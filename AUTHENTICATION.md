@@ -57,3 +57,9 @@ The browser never receives secret Stripe, Resend or Google keys. Stripe webhook 
 ## Deploy-preview isolation
 
 Netlify Blobs store names are stable in production and automatically namespaced outside production using the deploy/branch context. Preview and development deployments therefore do not read or mutate production partner sessions, referral records, rewards or sales leads. Keep preview Stripe and email credentials disabled or test-only in Netlify environment-variable contexts.
+
+## Website feature access
+
+The homepage remains publicly scrollable. `site-access.js`, injected into every published HTML page by the build, checks the existing HttpOnly session through `site-session`. Feature interactions require login; direct feature-page visits return through `partners.html?next=...`. Home, email-code login, and policy/referral-rule pages remain readable. Same-origin return URLs preserve query parameters and fragments. The server independently requires an active account for checkout, contact, booking, website audit, private quote payment and progress endpoints. Private client tokens remain required in addition to account login.
+
+Returning home does not clear, replace or renew the session. It remains valid for the existing 12-hour lifetime, until logout or account disablement. Login status is checked again after back/forward restoration and window focus; no session tokens are stored in JavaScript storage.

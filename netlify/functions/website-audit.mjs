@@ -1,3 +1,4 @@
+import { featureAccess } from '../lib/feature-access.mjs';
 import { lookup } from 'node:dns/promises';
 import http from 'node:http';
 import https from 'node:https';
@@ -59,6 +60,8 @@ async function fetchPublicPage(initial) {
 }
 
 export default async function handler(request) {
+  const denied = await featureAccess(request);
+  if (denied) return denied;
   if (request.method !== 'POST') return json({ error: 'Method not allowed.' }, 405);
   try {
     const body = await request.json();

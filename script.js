@@ -537,7 +537,9 @@ contactForm?.addEventListener('submit', async (event) => {
 
 const requestedPackage = pageParameters.get('package');
 if (requestedPackage && packageCatalog[requestedPackage]) {
-  window.setTimeout(() => openCheckout(requestedPackage), 0);
+  (window.blackOakAccess?.ready || Promise.resolve(false)).then(signedIn => {
+    if (signedIn) window.setTimeout(() => openCheckout(requestedPackage), 0);
+  });
 }
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');

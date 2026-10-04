@@ -1,3 +1,4 @@
+import { featureAccess } from '../lib/feature-access.mjs';
 import { emailShell, escapeHtml, getOwnerEmail, sendEmail } from '../lib/email.mjs';
 import { json } from '../lib/referrals.mjs';
 import { createSalesLead } from '../lib/sales-leads.mjs';
@@ -6,6 +7,8 @@ const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export const config = { rateLimit: { action: 'rate_limit', aggregateBy: ['domain', 'ip'], windowSize: 60, windowLimit: 3 } };
 
 export default async function handler(request) {
+  const denied = await featureAccess(request);
+  if (denied) return denied;
   if (request.method !== 'POST') return json({ error: 'Method not allowed.' }, 405);
   try {
     const body = await request.json();

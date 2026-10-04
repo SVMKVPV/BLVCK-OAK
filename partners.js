@@ -311,6 +311,14 @@ $('[data-analytics-search]')?.addEventListener('input',()=>{clearTimeout(analyti
 async function loadDashboard() {
   try {
     dashboard = await api('/api/partners');
+    const next = new URLSearchParams(location.search).get('next');
+    if (next && next.startsWith('/') && !next.startsWith('//') && !/[\\\r\n]/.test(next)) {
+      const destination = new URL(next, location.origin);
+      if (destination.origin === location.origin && !/^\/partners(?:\.html)?\/?$/.test(destination.pathname)) {
+        location.replace(destination.pathname + destination.search + destination.hash);
+        return;
+      }
+    }
     $('[data-auth-panel]').hidden = true; $('[data-dashboard]').hidden = false; $('[data-signout]').hidden = false;
     $('[data-workspace-title]').textContent = dashboard.isOwner ? 'Your clients. Your control.' : 'Welcome, ' + dashboard.account.name.split(' ')[0] + '.';
     $('[data-role-tag]').textContent = dashboard.isOwner ? 'Owner workspace' : 'Partner workspace';
