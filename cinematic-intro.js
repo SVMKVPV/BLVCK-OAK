@@ -1,5 +1,12 @@
 'use strict';
 
+/*
+ * BLVCK OAK cinematic origin — Three.js r160.
+ *
+ * Website mode is scroll-driven and completes a seamless 72-second orbit.
+ * Reels capture mode: open /?oak-render=reel in a 9:16 viewport. Its
+ * eight-second loop triggers the molten-gold beat drop at exactly 3 seconds.
+ */
 (() => {
   const intro = document.querySelector('[data-oak-origin]');
   const stage = document.querySelector('[data-oak-stage]');
@@ -9,118 +16,30 @@
   const officialSite = document.querySelector('main');
   if (!intro || !stage || !(canvas instanceof HTMLCanvasElement) || !officialSite) return;
 
-  const context = canvas.getContext('2d', { alpha: false, desynchronized: true });
-  if (!context) return;
-
+  const scriptBase = new URL('.', document.currentScript?.src || document.baseURI);
+  const query = new URLSearchParams(window.location.search);
+  const reelMode = query.get('oak-render') === 'reel' || stage.dataset.oakRender === 'reel';
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const coarsePointer = window.matchMedia('(pointer: coarse)');
   const TAU = Math.PI * 2;
+  const DEG_15 = Math.PI / 12;
+  const HEADER_LOOP_SECONDS = 72;
+  const REEL_LOOP_SECONDS = 8;
+  const REEL_BEAT_SECONDS = 3;
   const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
   const mix = (start, end, amount) => start + (end - start) * amount;
   const smoothstep = (start, end, value) => {
-    const progress = clamp((value - start) / (end - start));
-    return progress * progress * (3 - 2 * progress);
+    const amount = clamp((value - start) / Math.max(0.00001, end - start));
+    return amount * amount * (3 - 2 * amount);
   };
-  const easeOut = (value) => 1 - (1 - value) ** 3;
-  const easeIn = (value) => value ** 3;
+  const easeOut = (value) => 1 - (1 - clamp(value)) ** 3;
 
-  function seededRandom(seed) {
-    let value = seed >>> 0;
-    return () => {
-      value += 0x6D2B79F5;
-      let result = value;
-      result = Math.imul(result ^ (result >>> 15), result | 1);
-      result ^= result + Math.imul(result ^ (result >>> 7), result | 61);
-      return ((result ^ (result >>> 14)) >>> 0) / 4294967296;
-    };
-  }
-
-  function buildTree(seed, levels = 5) {
-    const random = seededRandom(seed);
-    const segments = [];
-    const tips = [];
-
-    function grow(x, y, length, angle, width, depth, generation) {
-      const bend = (random() - 0.5) * 0.32;
-      const x2 = x + Math.cos(angle + bend) * length;
-      const y2 = y + Math.sin(angle + bend) * length;
-      segments.push({ x, y, x2, y2, width, generation, reveal: generation / (levels + 1) });
-      if (depth === 0) {
-        tips.push({ x: x2, y: y2, phase: random() * TAU, size: 0.72 + random() * 0.5 });
-        return;
-      }
-      const spread = 0.28 + random() * 0.16 + generation * 0.008;
-      const nextLength = length * (0.72 + random() * 0.1);
-      grow(x2, y2, nextLength, angle - spread, width * 0.7, depth - 1, generation + 1);
-      grow(x2, y2, nextLength * (0.92 + random() * 0.13), angle + spread, width * 0.68, depth - 1, generation + 1);
-      if (depth > 2 && random() > 0.6) {
-        grow(x2, y2, nextLength * 0.74, angle + (random() - 0.5) * 0.24, width * 0.54, depth - 2, generation + 1);
-      }
-    }
-
-    grow(0, 0, 1, -Math.PI / 2, 0.34, levels, 0);
-    return { segments, tips };
-  }
-
-  const oldTree = buildTree(1313, 5);
-  const youngTree = buildTree(3131, 5);
-  const leafRandom = seededRandom(8088);
-  const leaves = oldTree.tips.filter((_, index) => index % 2 === 0).map((tip, index) => ({
-    ...tip,
-    index,
-    hue: 38 + leafRandom() * 48,
-    z: leafRandom() * 1.4 - 0.7,
-    rotation: leafRandom() * TAU,
-    direction: leafRandom() > 0.5 ? 1 : -1,
-    fallStart: 0.17 + (index % 9) * 0.011 + Math.floor(index / 9) * 0.018,
-    burnStart: 0.32 + (index % 6) * 0.018,
-    drift: (leafRandom() - 0.5) * 0.34,
-    ash: Array.from({ length: 22 }, () => ({
-      x: leafRandom() * 2 - 1,
-      y: leafRandom(),
-      speed: 0.55 + leafRandom() * 1.15,
-      phase: leafRandom() * TAU,
-      size: 1.2 + leafRandom() * 3.1,
-    })),
-  }));
-  const atmosphereRandom = seededRandom(4242);
-  const atmosphere = Array.from({ length: 92 }, () => ({
-    x: atmosphereRandom(),
-    y: atmosphereRandom(),
-    depth: 0.15 + atmosphereRandom() * 0.85,
-    phase: atmosphereRandom() * TAU,
-    warm: atmosphereRandom() > 0.72,
-  }));
-  const groundAsh = Array.from({ length: 110 }, (_, index) => ({
-    angle: atmosphereRandom() * TAU,
-    radius: atmosphereRandom(),
-    phase: atmosphereRandom() * TAU,
-    lift: atmosphereRandom(),
-    size: 0.4 + atmosphereRandom() * 1.4,
-    index,
-  }));
-
-  let width = 1;
-  let height = 1;
-  let deviceScale = 1;
-  let progress = 0;
+  let storyProgress = reducedMotion.matches ? 0.9 : 0;
   let activeChapter = -1;
   let introVisible = true;
   let frameId = 0;
-  let lastFrame = 0;
+  let rendererCleanup = () => {};
   const pointer = { x: 0, y: 0, targetX: 0, targetY: 0 };
-
-  function resize() {
-    const rect = stage.getBoundingClientRect();
-    width = Math.max(1, rect.width);
-    height = Math.max(1, rect.height);
-    deviceScale = Math.min(window.devicePixelRatio || 1, coarsePointer.matches ? 1.35 : 1.7);
-    canvas.width = Math.round(width * deviceScale);
-    canvas.height = Math.round(height * deviceScale);
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
-    draw(performance.now());
-  }
 
   function setChapter(index) {
     if (index === activeChapter) return;
@@ -132,374 +51,27 @@
     });
   }
 
-  function updateProgress() {
-    const rect = intro.getBoundingClientRect();
-    const travel = Math.max(1, intro.offsetHeight - window.innerHeight);
-    progress = reducedMotion.matches ? 0.9 : clamp(-rect.top / travel);
-    const chapter = progress < 0.155 ? 0
-      : progress < 0.345 ? 1
-        : progress < 0.615 ? 2
-          : progress < 0.84 ? 3
+  function applyStoryProgress(value) {
+    storyProgress = clamp(value);
+    const chapter = storyProgress < 0.155 ? 0
+      : storyProgress < 0.345 ? 1
+        : storyProgress < 0.615 ? 2
+          : storyProgress < 0.84 ? 3
             : 4;
     setChapter(chapter);
-    intro.style.setProperty('--oak-progress', progress.toFixed(4));
-    intro.style.setProperty('--oak-exit', smoothstep(0.955, 1, progress).toFixed(4));
-    intro.classList.toggle('has-progress', progress > 0.025);
-    const introIsActive = rect.bottom > window.innerHeight * 0.42 && rect.top < window.innerHeight * 0.55;
-    document.body.classList.toggle('oak-intro-active', introIsActive);
+    intro.style.setProperty('--oak-progress', storyProgress.toFixed(4));
+    intro.style.setProperty('--oak-exit', smoothstep(0.955, 1, storyProgress).toFixed(4));
+    intro.classList.toggle('has-progress', storyProgress > 0.025);
   }
 
-  function drawBackground(time) {
-    const horizon = height * 0.82;
-    const background = context.createLinearGradient(0, 0, 0, height);
-    background.addColorStop(0, '#020303');
-    background.addColorStop(0.56, '#080909');
-    background.addColorStop(1, '#030404');
-    context.fillStyle = background;
-    context.fillRect(0, 0, width, height);
-
-    const fireLevel = smoothstep(0.34, 0.57, progress) * (1 - smoothstep(0.69, 0.79, progress));
-    const growthLevel = smoothstep(0.62, 0.9, progress);
-    const glowX = width * (0.54 + pointer.x * 0.012);
-    const glowY = mix(horizon, height * 0.68, growthLevel);
-    const glow = context.createRadialGradient(glowX, glowY, 0, glowX, glowY, width * 0.5);
-    glow.addColorStop(0, `rgba(202, ${Math.round(mix(111, 166, growthLevel))}, ${Math.round(mix(35, 80, growthLevel))}, ${0.055 + fireLevel * 0.11 + growthLevel * 0.045})`);
-    glow.addColorStop(0.4, `rgba(104,63,24,${0.025 + fireLevel * 0.045})`);
-    glow.addColorStop(1, 'rgba(0,0,0,0)');
-    context.fillStyle = glow;
-    context.fillRect(0, 0, width, height);
-
-    context.save();
-    atmosphere.forEach((particle) => {
-      const drift = ((particle.y + time * 0.000005 * particle.depth) % 1) * height;
-      const x = particle.x * width + Math.sin(time * 0.00017 + particle.phase) * 16 * particle.depth + pointer.x * 19 * particle.depth;
-      const alpha = (0.04 + particle.depth * 0.12) * (particle.warm ? 1 + fireLevel * 1.6 : 1);
-      context.beginPath();
-      context.arc(x, drift, 0.45 + particle.depth * 1.05, 0, TAU);
-      context.fillStyle = particle.warm ? `rgba(226,151,62,${alpha})` : `rgba(228,221,203,${alpha * 0.6})`;
-      context.fill();
-    });
-    context.restore();
-
-    context.fillStyle = 'rgba(3,4,4,.62)';
-    context.beginPath();
-    context.ellipse(width * 0.5, horizon + height * 0.1, width * 0.55, height * 0.17, 0, 0, TAU);
-    context.fill();
-  }
-
-  function drawTree(tree, centerX, groundY, scale, alpha, growth, isYoung = false) {
-    if (alpha <= 0.002 || growth <= 0.002) return;
-    context.save();
-    context.lineCap = 'round';
-    context.lineJoin = 'round';
-    tree.segments.forEach((segment, index) => {
-      const revealLength = 0.17 + segment.generation * 0.014;
-      const localGrowth = clamp((growth - segment.reveal * 0.7) / revealLength);
-      if (localGrowth <= 0) return;
-      const amount = easeOut(localGrowth);
-      const startX = centerX + segment.x * scale;
-      const startY = groundY + segment.y * scale;
-      const endX = centerX + mix(segment.x, segment.x2, amount) * scale;
-      const endY = groundY + mix(segment.y, segment.y2, amount) * scale;
-      const widthScale = Math.max(0.55, segment.width * scale * mix(0.62, 1, amount));
-      const dx = endX - startX;
-      const dy = endY - startY;
-      const length = Math.max(1, Math.hypot(dx, dy));
-      const nx = -dy / length;
-      const ny = dx / length;
-      const bend = Math.sin(index * 2.1) * scale * 0.07;
-      // Swept, tapered bark strands create organic volume instead of straight rods.
-      for (let ridge = 0; ridge < 11; ridge += 1) {
-        const across = (ridge / 10 - 0.5) * widthScale;
-        const twist = Math.sin(index * 1.7 + ridge * 0.8) * widthScale * 0.21;
-        context.beginPath();
-        context.moveTo(startX + nx * across, startY + ny * across);
-        context.bezierCurveTo(
-          startX + dx * 0.3 + nx * (across + bend + twist),
-          startY + dy * 0.3 + ny * (across + bend + twist),
-          startX + dx * 0.72 + nx * (across * 0.72 - bend),
-          startY + dy * 0.72 + ny * (across * 0.72 - bend),
-          endX + nx * across * 0.55, endY + ny * across * 0.55
-        );
-        const bark = context.createLinearGradient(startX, startY, endX, endY);
-        const lit = ridge === 2 || ridge === 7;
-        bark.addColorStop(0, lit ? '#51483c' : '#111315');
-        bark.addColorStop(0.32, lit ? '#a1a7a6' : '#272725');
-        bark.addColorStop(0.43, lit ? '#edf0e7' : '#454b49');
-        bark.addColorStop(0.48, lit ? '#b9beb4' : '#222625');
-        bark.addColorStop(0.57, lit ? '#d7c4a0' : '#35322c');
-        bark.addColorStop(0.8, lit ? '#554b3c' : '#151719');
-        bark.addColorStop(1, lit ? '#968975' : '#282724');
-        context.globalAlpha = alpha;
-        context.lineWidth = Math.max(0.45, widthScale * (ridge === 0 || ridge === 10 ? 0.11 : 0.16));
-        context.strokeStyle = bark;
-        context.stroke();
-      }
-      // Sparse amber fissures echo the reference without turning all bark gold.
-      if (segment.generation < 3 && index % 3 === 0) {
-        context.beginPath();
-        context.moveTo(startX + dx * 0.18, startY + dy * 0.18);
-        context.bezierCurveTo(startX + dx * 0.4 + nx * bend, startY + dy * 0.4 + ny * bend,
-          startX + dx * 0.65 - nx * widthScale * 0.2, startY + dy * 0.65 - ny * widthScale * 0.2,
-          startX + dx * 0.84, startY + dy * 0.84);
-        context.strokeStyle = isYoung ? '#e3ba6b' : '#c28a42';
-        context.lineWidth = Math.max(0.6, widthScale * 0.032);
-        context.shadowColor = '#ffad3c';
-        context.shadowBlur = widthScale * 0.17;
-        context.stroke();
-        context.shadowBlur = 0;
-      }
-      context.globalAlpha = 1;
-    });
-
-    if (growth > 0.82) {
-      const rootGrowth = smoothstep(0.82, 1, growth);
-      for (let index = 0; index < 7; index += 1) {
-        const direction = index % 2 ? 1 : -1;
-        const rootLength = scale * (0.18 + index * 0.025) * rootGrowth;
-        context.beginPath();
-        context.moveTo(centerX, groundY - 2);
-        context.quadraticCurveTo(centerX + direction * rootLength * 0.42, groundY + scale * 0.035, centerX + direction * rootLength, groundY + scale * 0.055);
-        context.lineWidth = Math.max(0.8, scale * 0.018 * (1 - index * 0.08));
-        context.strokeStyle = `rgba(111,76,34,${alpha * 0.55})`;
-        context.stroke();
-      }
+  function updateScrollProgress() {
+    const rect = intro.getBoundingClientRect();
+    if (!reelMode) {
+      const travel = Math.max(1, intro.offsetHeight - window.innerHeight);
+      applyStoryProgress(reducedMotion.matches ? 0.9 : -rect.top / travel);
     }
-    context.restore();
-  }
-
-  function leafPath(size) {
-    context.beginPath();
-    context.moveTo(0, -size * 0.58);
-    for (const side of [1, -1]) {
-      const points = side === 1 ? [-0.42, -0.22, 0, 0.23, 0.42] : [0.42, 0.23, 0, -0.22, -0.42];
-      points.forEach((y) => {
-        const spread = (0.16 + Math.sin((y + 0.58) / 1.16 * Math.PI) * 0.23) * size * side;
-        context.bezierCurveTo(spread * 1.1, (y - side * 0.11) * size, spread * 1.35, (y + side * 0.025) * size, spread * 0.9, (y + side * 0.055) * size);
-        context.quadraticCurveTo(spread * 0.66, (y + side * 0.075) * size, spread * 0.72, (y + side * 0.1) * size);
-      });
-      if (side === 1) context.quadraticCurveTo(size * 0.12, size * 0.5, 0, size * 0.58);
-    }
-    context.closePath();
-  }
-
-  function drawNaturalLeaf(leaf, x, y, size, rotation, turn, alpha, burn) {
-    if (alpha <= 0.005) return;
-    context.save();
-    context.translate(x, y);
-    context.rotate(rotation);
-    context.scale(0.18 + Math.abs(Math.cos(turn)) * 0.82, 1);
-    context.globalAlpha = alpha;
-    const hue = leaf.hue ?? 72;
-    const light = 29 + Math.cos(turn) * 8;
-    const surface = context.createLinearGradient(-size * 0.45, -size * 0.2, size * 0.45, size * 0.25);
-    surface.addColorStop(0, `hsl(${hue} 35% 9%)`);
-    surface.addColorStop(0.38, `hsl(${hue} 43% ${light}%)`);
-    surface.addColorStop(0.49, `hsl(${hue} 48% 48%)`);
-    surface.addColorStop(0.52, `hsl(${hue} 42% 20%)`);
-    surface.addColorStop(0.82, `hsl(${hue} 36% 31%)`);
-    surface.addColorStop(1, `hsl(${hue} 30% 12%)`);
-    leafPath(size);
-    context.shadowColor = 'rgba(0,0,0,.65)';
-    context.shadowBlur = size * 0.12;
-    context.fillStyle = surface;
-    context.fill();
-    context.shadowBlur = 0;
-    context.save();
-    context.clip();
-    const sheenX = Math.sin(turn) * size * 0.23;
-    const sheen = context.createRadialGradient(sheenX, -size * 0.15, size * 0.025, sheenX, -size * 0.15, size * 0.46);
-    sheen.addColorStop(0, 'rgba(243,247,197,.43)');
-    sheen.addColorStop(0.35, 'rgba(208,223,149,.14)');
-    sheen.addColorStop(1, 'rgba(208,223,149,0)');
-    context.fillStyle = sheen;
-    context.fillRect(-size, -size, size * 2, size * 2);
-    // Fine branching veins follow the lobes, with highlights on the folded ridge.
-    for (let i = 0; i < 9; i += 1) {
-      const yy = (-0.4 + i * 0.095) * size;
-      for (const side of [-1, 1]) {
-        context.beginPath();
-        context.moveTo(0, yy + size * 0.12);
-        context.quadraticCurveTo(side * size * 0.15, yy + size * 0.04, side * size * 0.38, yy - size * 0.06);
-        context.strokeStyle = 'rgba(213,210,131,.36)';
-        context.lineWidth = Math.max(0.35, size * 0.008);
-        context.stroke();
-      }
-    }
-    if (burn > 0) {
-      const char = context.createLinearGradient(0, -size * 0.6, 0, size * 0.6);
-      char.addColorStop(0, 'rgba(15,10,6,0)');
-      char.addColorStop(clamp(1 - burn - 0.08), 'rgba(30,12,3,.2)');
-      char.addColorStop(clamp(1 - burn), '#fff4a6');
-      char.addColorStop(clamp(1 - burn + 0.06), '#ff620c');
-      char.addColorStop(clamp(1 - burn + 0.15), '#100b09');
-      char.addColorStop(1, '#070606');
-      context.fillStyle = char;
-      context.fillRect(-size, -size, size * 2, size * 2);
-    }
-    context.restore();
-    context.beginPath();
-    context.moveTo(0, size * 0.73);
-    context.quadraticCurveTo(size * 0.035, 0, 0, -size * 0.55);
-    context.lineWidth = Math.max(0.6, size * 0.018);
-    context.strokeStyle = burn > 0.1 ? '#ed8a32' : '#aca66c';
-    context.stroke();
-    context.restore();
-  }
-  function drawEmbers(x, y, size, alpha, time, phase) {
-    if (alpha <= 0.005) return;
-    context.save();
-    context.globalCompositeOperation = 'lighter';
-    // Small incandescent fragments and soft halos, with no flame silhouettes.
-    for (let ember = 0; ember < 16; ember += 1) {
-      const life = (time * 0.00028 + ember / 16 + phase / TAU) % 1;
-      const angle = phase + ember * 2.399;
-      const ex = x + Math.cos(angle) * size * (0.15 + life * 1.15);
-      const ey = y - life * size * 2.4 + Math.sin(angle) * size * 0.3;
-      const radius = (1.3 + (ember % 4) * 0.65) * (1 - life * 0.55);
-      const opacity = alpha * Math.sin(life * Math.PI);
-      const glow = context.createRadialGradient(ex, ey, 0, ex, ey, radius * 5);
-      glow.addColorStop(0, `rgba(255,202,102,${opacity})`);
-      glow.addColorStop(0.2, `rgba(255,101,24,${opacity * 0.85})`);
-      glow.addColorStop(1, 'rgba(220,40,0,0)');
-      context.fillStyle = glow;
-      context.beginPath();
-      context.arc(ex, ey, radius * 5, 0, TAU);
-      context.fill();
-      context.fillStyle = `rgba(255,222,155,${opacity})`;
-      context.beginPath();
-      context.ellipse(ex, ey, radius * 0.5, radius, angle, 0, TAU);
-      context.fill();
-    }
-    context.restore();
-  }
-
-  function drawLeaves(centerX, groundY, treeScale, time) {
-    const count = width < 680 ? 24 : leaves.length;
-    leaves.slice(0, count).sort((a, b) => a.z - b.z).forEach((leaf) => {
-      const fall = smoothstep(leaf.fallStart, leaf.fallStart + 0.31, progress);
-      const burn = smoothstep(leaf.burnStart, leaf.burnStart + 0.2, progress);
-      const baseX = centerX + leaf.x * treeScale;
-      const baseY = groundY + leaf.y * treeScale;
-      const sway = Math.sin(time * 0.0012 + leaf.phase + fall * 8) * (6 + fall * 34);
-      const x = baseX + sway + leaf.drift * width * easeIn(fall) + pointer.x * 14 * (1 + leaf.z);
-      const y = mix(baseY, groundY - height * (0.22 + leaf.z * 0.06), fall) + Math.sin(fall * Math.PI * 4 + leaf.phase) * 11;
-      const depthScale = 0.78 + (leaf.z + 0.7) * 0.22;
-      const size = clamp(treeScale * 0.16 * leaf.size * depthScale, 28, width < 680 ? 52 : 68);
-      const rotation = leaf.rotation + fall * leaf.direction * 5.8 + Math.sin(time * 0.001 + leaf.phase) * 0.09;
-      const turn = time * 0.0011 * leaf.direction + leaf.phase + fall * 7;
-      const leafAlpha = (1 - smoothstep(0.72, 0.99, burn)) * smoothstep(0.02, 0.1, 1 - progress);
-      drawNaturalLeaf(leaf, x, y, size, rotation, turn, leafAlpha, burn);
-
-      const emberAmount = smoothstep(0.05, 0.34, burn) * (1 - smoothstep(0.8, 1, burn));
-      drawEmbers(x, y + size * 0.12, size * 0.85, emberAmount, time, leaf.phase);
-
-      const ashAmount = smoothstep(0.28, 0.82, burn);
-      if (ashAmount > 0) {
-        context.save();
-        leaf.ash.forEach((particle) => {
-          const travel = ashAmount * particle.speed;
-          const ashX = x + particle.x * size * (0.35 + travel) + Math.sin(time * 0.002 + particle.phase) * 7;
-          const ashY = y - travel * size * 2.9 + particle.y * size * 0.8;
-          context.globalAlpha = clamp((1.5 - travel) * ashAmount);
-          context.fillStyle = particle.phase > Math.PI ? '#ffbd62' : '#c6c0b6';
-          context.shadowColor = '#ff7920';
-          context.shadowBlur = particle.phase > Math.PI ? 9 : 0;
-          context.fillRect(ashX, ashY, particle.size, particle.size * 1.8);
-        });
-        context.restore();
-      }
-    });
-  }
-
-  function drawGroundAsh(time, groundY) {
-    const visible = smoothstep(0.5, 0.72, progress) * (1 - smoothstep(0.9, 1, progress) * 0.45);
-    if (visible <= 0.001) return;
-    context.save();
-    groundAsh.forEach((particle) => {
-      const radius = Math.sqrt(particle.radius) * width * 0.28;
-      const x = width * 0.5 + Math.cos(particle.angle) * radius;
-      const rise = smoothstep(0.6, 0.82, progress) * particle.lift * height * 0.16;
-      const y = groundY + Math.sin(particle.angle) * radius * 0.13 - rise + Math.sin(time * 0.0015 + particle.phase) * 4;
-      context.globalAlpha = visible * (0.45 + particle.lift * 0.5);
-      context.fillStyle = particle.index % 4 === 0 ? '#ffb657' : '#b4afa6';
-      context.fillRect(x, y, particle.size * 2, particle.size * 2.7);
-    });
-    context.restore();
-  }
-
-  function drawYoungLeaves(centerX, groundY, treeScale, growth, time) {
-    if (growth < 0.48) return;
-    const alpha = smoothstep(0.48, 0.82, growth);
-    const count = width < 680 ? 18 : 28;
-    context.save();
-    youngTree.tips.slice(0, count).forEach((tip, index) => {
-      const reveal = smoothstep(0.46 + (index % 7) * 0.035, 0.72 + (index % 7) * 0.035, growth);
-      if (reveal <= 0) return;
-      const x = centerX + tip.x * treeScale + Math.sin(time * 0.001 + tip.phase) * 2.5;
-      const y = groundY + tip.y * treeScale;
-      const size = treeScale * 0.055 * tip.size * reveal;
-      context.save();
-      context.translate(x, y);
-      context.rotate(Math.sin(tip.phase) * 0.7);
-      context.scale(0.62, 1);
-      leafPath(size);
-      const leafGlow = context.createLinearGradient(0, -size, 0, size);
-      leafGlow.addColorStop(0, '#f2d891');
-      leafGlow.addColorStop(0.55, '#bb8e3e');
-      leafGlow.addColorStop(1, '#5f4927');
-      context.globalAlpha = alpha * reveal;
-      context.shadowColor = 'rgba(212,174,88,.5)';
-      context.shadowBlur = size * 0.8;
-      context.fillStyle = leafGlow;
-      context.fill();
-      context.restore();
-    });
-    context.restore();
-  }
-
-  function draw(time) {
-    if (!width || !height) return;
-    pointer.x += (pointer.targetX - pointer.x) * 0.045;
-    pointer.y += (pointer.targetY - pointer.y) * 0.045;
-    context.setTransform(deviceScale, 0, 0, deviceScale, 0, 0);
-    context.clearRect(0, 0, width, height);
-    drawBackground(time);
-
-    const mobile = width < 680;
-    const groundY = height * (mobile ? 0.9 : 0.91);
-    const oldCenterX = width * (mobile ? 0.53 : 0.72) + pointer.x * 13;
-    const oldScale = Math.min(width * (mobile ? 0.17 : 0.19), height * 0.225) * (1 + smoothstep(0, 0.34, progress) * 0.055);
-    const oldTreeAlpha = 1 - smoothstep(0.5, 0.72, progress);
-    drawTree(oldTree, oldCenterX, groundY, oldScale, oldTreeAlpha, 1, false);
-    drawLeaves(oldCenterX, groundY, oldScale, time);
-    drawGroundAsh(time, groundY);
-
-    const youngGrowth = smoothstep(0.625, 0.91, progress);
-    if (youngGrowth > 0) {
-      const youngCenterX = width * 0.5 + pointer.x * 6;
-      const youngScale = Math.min(width * (mobile ? 0.16 : 0.145), height * 0.205);
-      const seedGlow = context.createRadialGradient(youngCenterX, groundY, 0, youngCenterX, groundY, youngScale * 0.72);
-      seedGlow.addColorStop(0, `rgba(241,212,140,${0.18 * (1 - youngGrowth) + 0.08})`);
-      seedGlow.addColorStop(1, 'rgba(212,174,88,0)');
-      context.fillStyle = seedGlow;
-      context.fillRect(youngCenterX - youngScale, groundY - youngScale, youngScale * 2, youngScale * 2);
-      drawTree(youngTree, youngCenterX, groundY, youngScale, smoothstep(0.02, 0.18, youngGrowth), youngGrowth, true);
-      drawYoungLeaves(youngCenterX, groundY, youngScale, youngGrowth, time);
-    }
-
-    const foreground = context.createLinearGradient(0, height * 0.76, 0, height);
-    foreground.addColorStop(0, 'rgba(3,4,4,0)');
-    foreground.addColorStop(1, 'rgba(1,2,2,.82)');
-    context.fillStyle = foreground;
-    context.fillRect(0, height * 0.72, width, height * 0.28);
-  }
-
-  function animate(time) {
-    frameId = window.requestAnimationFrame(animate);
-    if (!introVisible || document.hidden || reducedMotion.matches || time - lastFrame < 16) return;
-    lastFrame = time;
-    draw(time);
+    const active = rect.bottom > window.innerHeight * 0.42 && rect.top < window.innerHeight * 0.55;
+    document.body.classList.toggle('oak-intro-active', active);
   }
 
   function enterOfficialSite() {
@@ -523,23 +95,760 @@
     introVisible = entry.isIntersecting;
   }, { threshold: 0 });
   visibilityObserver.observe(intro);
-
-  window.addEventListener('scroll', updateProgress, { passive: true });
-  window.addEventListener('resize', () => {
-    resize();
-    updateProgress();
-  }, { passive: true });
-  reducedMotion.addEventListener?.('change', () => {
-    intro.classList.toggle('is-reduced-motion', reducedMotion.matches);
-    if (skipButton) skipButton.firstChild.textContent = reducedMotion.matches ? 'Enter site ' : 'Skip intro ';
-    updateProgress();
-    draw(performance.now());
-  });
-
+  window.addEventListener('scroll', updateScrollProgress, { passive: true });
+  updateScrollProgress();
+  intro.classList.toggle('is-reel-render', reelMode);
   intro.classList.toggle('is-reduced-motion', reducedMotion.matches);
   if (skipButton && reducedMotion.matches) skipButton.firstChild.textContent = 'Enter site ';
-  updateProgress();
-  resize();
-  if (!reducedMotion.matches) frameId = window.requestAnimationFrame(animate);
-  window.addEventListener('pagehide', () => window.cancelAnimationFrame(frameId), { once: true });
+
+  function seededRandom(seed) {
+    let value = seed >>> 0;
+    return () => {
+      value += 0x6D2B79F5;
+      let result = value;
+      result = Math.imul(result ^ (result >>> 15), result | 1);
+      result ^= result + Math.imul(result ^ (result >>> 7), result | 61);
+      return ((result ^ (result >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  async function loadThree() {
+    const candidates = [
+      new URL('vendor/three.module.min.js?v=160', scriptBase),
+      new URL('node_modules/three/build/three.module.min.js?v=160', scriptBase),
+    ];
+    let lastError;
+    for (const candidate of candidates) {
+      try {
+        return await import(candidate.href);
+      } catch (error) {
+        lastError = error;
+      }
+    }
+    throw lastError || new Error('Three.js r160 could not be loaded.');
+  }
+
+  function createRadialTexture(THREE, inner, middle, outer) {
+    const textureCanvas = document.createElement('canvas');
+    textureCanvas.width = 256;
+    textureCanvas.height = 128;
+    const context = textureCanvas.getContext('2d');
+    const gradient = context.createRadialGradient(128, 64, 0, 128, 64, 128);
+    gradient.addColorStop(0, inner);
+    gradient.addColorStop(0.2, middle);
+    gradient.addColorStop(0.54, outer);
+    gradient.addColorStop(1, 'rgba(0,0,0,0)');
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, 256, 128);
+    const texture = new THREE.CanvasTexture(textureCanvas);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    return texture;
+  }
+
+  function generateTreeData(THREE, seed, maxDepth) {
+    const random = seededRandom(seed);
+    const segments = [];
+    const tips = [];
+    const worldUp = new THREE.Vector3(0, 1, 0);
+
+    function grow(start, inputDirection, length, radius, depth, generation) {
+      const direction = inputDirection.clone().normalize();
+      let side = new THREE.Vector3().crossVectors(worldUp, direction);
+      if (side.lengthSq() < 0.001) side.set(1, 0, 0);
+      side.normalize();
+      const normal = new THREE.Vector3().crossVectors(direction, side).normalize();
+      const bend = side.clone().multiplyScalar((random() - 0.5) * length * 0.18)
+        .add(normal.clone().multiplyScalar((random() - 0.5) * length * 0.13));
+      const end = start.clone().addScaledVector(direction, length).add(bend);
+      segments.push({
+        start: start.clone(),
+        end,
+        radius,
+        generation,
+        reveal: generation / (maxDepth + 1) + random() * 0.025,
+        phase: random() * TAU,
+      });
+      if (depth <= 0 || radius < 0.024) {
+        tips.push({ position: end.clone(), phase: random() * TAU, size: 0.72 + random() * 0.55 });
+        return;
+      }
+      const childCount = depth > maxDepth - 3 && random() > 0.64 ? 3 : 2;
+      const baseAzimuth = random() * TAU;
+      for (let index = 0; index < childCount; index += 1) {
+        const azimuth = baseAzimuth + index * TAU / childCount + (random() - 0.5) * 0.46;
+        const spread = 0.34 + generation * 0.018 + random() * 0.23;
+        const childDirection = direction.clone().multiplyScalar(Math.cos(spread))
+          .addScaledVector(side, Math.sin(spread) * Math.cos(azimuth))
+          .addScaledVector(normal, Math.sin(spread) * Math.sin(azimuth))
+          .normalize();
+        grow(
+          end,
+          childDirection,
+          length * (0.68 + random() * 0.1),
+          radius * (0.62 + random() * 0.08),
+          depth - 1,
+          generation + 1,
+        );
+      }
+    }
+
+    const root = new THREE.Vector3(0, -3.05, 0);
+    grow(root, new THREE.Vector3(0.02, 1, 0.01), 1.66, 0.5, maxDepth, 0);
+    for (let index = 0; index < 8; index += 1) {
+      const angle = index / 8 * TAU + random() * 0.28;
+      const length = 1.15 + random() * 0.95;
+      const end = root.clone().add(new THREE.Vector3(
+        Math.cos(angle) * length,
+        -0.18 - random() * 0.22,
+        Math.sin(angle) * length * 0.58,
+      ));
+      segments.push({
+        start: root.clone(),
+        end,
+        radius: 0.2 - index * 0.01,
+        generation: 0,
+        reveal: 0.78 + index * 0.018,
+        phase: random() * TAU,
+      });
+    }
+    return { segments, tips, maxDepth };
+  }
+
+  function cylinderMatrix(THREE, start, end, radius, radialScale = 1) {
+    const direction = end.clone().sub(start);
+    const length = Math.max(0.0001, direction.length());
+    const position = start.clone().add(end).multiplyScalar(0.5);
+    const quaternion = new THREE.Quaternion().setFromUnitVectors(
+      new THREE.Vector3(0, 1, 0),
+      direction.normalize(),
+    );
+    const scale = new THREE.Vector3(radius * radialScale, length, radius * radialScale);
+    return new THREE.Matrix4().compose(position, quaternion, scale);
+  }
+
+  function createTreeMaterials(THREE, reflection = false) {
+    if (reflection) {
+      return {
+        branch: new THREE.MeshPhysicalMaterial({
+          color: 0x111111,
+          metalness: 1,
+          roughness: 0.08,
+          clearcoat: 1,
+          clearcoatRoughness: 0.04,
+          transparent: true,
+          opacity: 0.13,
+          depthWrite: false,
+        }),
+        vein: new THREE.MeshBasicMaterial({
+          color: 0xd49a3a,
+          transparent: true,
+          opacity: 0.12,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+        }),
+        halo: new THREE.MeshBasicMaterial({
+          color: 0xff6a00,
+          transparent: true,
+          opacity: 0.04,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+        }),
+        bud: new THREE.MeshBasicMaterial({
+          color: 0xd4ae58,
+          transparent: true,
+          opacity: 0.08,
+          depthWrite: false,
+        }),
+      };
+    }
+    return {
+      branch: new THREE.MeshPhysicalMaterial({
+        color: 0x0a0a0a,
+        metalness: 0.95,
+        roughness: 0.15,
+        clearcoat: 1,
+        clearcoatRoughness: 0.06,
+        emissive: 0xffa500,
+        emissiveIntensity: 0.015,
+        transparent: true,
+        opacity: 1,
+      }),
+      vein: new THREE.MeshBasicMaterial({
+        color: 0xffbd57,
+        transparent: true,
+        opacity: 0.88,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        toneMapped: false,
+      }),
+      halo: new THREE.MeshBasicMaterial({
+        color: 0xff5a00,
+        transparent: true,
+        opacity: 0.22,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        toneMapped: false,
+      }),
+      bud: new THREE.MeshPhysicalMaterial({
+        color: 0x25170a,
+        metalness: 0.55,
+        roughness: 0.2,
+        clearcoat: 1,
+        emissive: 0xff9f24,
+        emissiveIntensity: 1.2,
+        transparent: true,
+        opacity: 0,
+      }),
+    };
+  }
+
+  function createTreeLevel(THREE, data, materials, generationLimit, radialSegments) {
+    const group = new THREE.Group();
+    const segments = data.segments
+      .filter((segment) => segment.generation <= generationLimit)
+      .sort((a, b) => a.reveal - b.reveal);
+    const branchGeometry = new THREE.CylinderGeometry(0.68, 1, 1, radialSegments, 1, false);
+    const branchMesh = new THREE.InstancedMesh(branchGeometry, materials.branch, Math.max(1, segments.length));
+    branchMesh.instanceMatrix.setUsage(THREE.StaticDrawUsage);
+    branchMesh.castShadow = radialSegments >= 7;
+    branchMesh.receiveShadow = true;
+    branchMesh.frustumCulled = false;
+    segments.forEach((segment, index) => {
+      branchMesh.setMatrixAt(index, cylinderMatrix(THREE, segment.start, segment.end, segment.radius));
+    });
+    branchMesh.instanceMatrix.needsUpdate = true;
+    branchMesh.userData.total = segments.length;
+    branchMesh.userData.kind = 'branch';
+    group.add(branchMesh);
+
+    const veinRuns = [];
+    const up = new THREE.Vector3(0, 1, 0);
+    segments.forEach((segment, segmentIndex) => {
+      if (segment.generation > Math.min(generationLimit, 5)) return;
+      const direction = segment.end.clone().sub(segment.start).normalize();
+      let side = new THREE.Vector3().crossVectors(direction, up);
+      if (side.lengthSq() < 0.001) side.set(0, 0, 1);
+      side.normalize();
+      const normal = new THREE.Vector3().crossVectors(direction, side).normalize();
+      const runCount = segment.generation < 2 ? 3 : segment.generation < 4 ? 2 : 1;
+      for (let run = 0; run < runCount; run += 1) {
+        const angle = segment.phase + run * 2.31;
+        const offset = side.clone().multiplyScalar(Math.cos(angle) * segment.radius * 0.82)
+          .addScaledVector(normal, Math.sin(angle) * segment.radius * 0.82);
+        const fromAmount = 0.08 + run * 0.22 + (segmentIndex % 3) * 0.025;
+        const toAmount = Math.min(0.94, fromAmount + 0.3 + (segmentIndex % 4) * 0.045);
+        const start = segment.start.clone().lerp(segment.end, fromAmount).add(offset);
+        const end = segment.start.clone().lerp(segment.end, toAmount)
+          .add(offset.clone().multiplyScalar(0.72))
+          .addScaledVector(side, Math.sin(segment.phase * 2 + run) * segment.radius * 0.18);
+        veinRuns.push({
+          start,
+          end,
+          radius: Math.max(0.012, segment.radius * 0.075),
+          reveal: segment.reveal,
+        });
+      }
+    });
+    veinRuns.sort((a, b) => a.reveal - b.reveal);
+
+    const veinGeometry = new THREE.CylinderGeometry(0.72, 1, 1, Math.max(4, radialSegments - 2), 1, false);
+    const veinCore = new THREE.InstancedMesh(veinGeometry, materials.vein, Math.max(1, veinRuns.length));
+    const veinHalo = new THREE.InstancedMesh(veinGeometry, materials.halo, Math.max(1, veinRuns.length));
+    veinCore.frustumCulled = false;
+    veinHalo.frustumCulled = false;
+    veinRuns.forEach((vein, index) => {
+      veinCore.setMatrixAt(index, cylinderMatrix(THREE, vein.start, vein.end, vein.radius));
+      veinHalo.setMatrixAt(index, cylinderMatrix(THREE, vein.start, vein.end, vein.radius, 2.8));
+    });
+    veinCore.instanceMatrix.needsUpdate = true;
+    veinHalo.instanceMatrix.needsUpdate = true;
+    veinCore.userData.total = veinRuns.length;
+    veinHalo.userData.total = veinRuns.length;
+    veinCore.userData.kind = 'vein';
+    veinHalo.userData.kind = 'vein';
+    group.add(veinHalo, veinCore);
+
+    const tips = data.tips.filter((_, index) => index % (generationLimit >= 6 ? 2 : 4) === 0);
+    const budGeometry = new THREE.IcosahedronGeometry(1, radialSegments >= 7 ? 1 : 0);
+    const buds = new THREE.InstancedMesh(budGeometry, materials.bud, Math.max(1, tips.length));
+    buds.frustumCulled = false;
+    tips.forEach((tip, index) => {
+      const scale = 0.045 * tip.size;
+      buds.setMatrixAt(index, new THREE.Matrix4().compose(
+        tip.position,
+        new THREE.Quaternion(),
+        new THREE.Vector3(scale, scale * 1.6, scale),
+      ));
+    });
+    buds.instanceMatrix.needsUpdate = true;
+    buds.userData.total = tips.length;
+    buds.userData.kind = 'bud';
+    group.add(buds);
+    group.userData.renderMeshes = [branchMesh, veinHalo, veinCore, buds];
+    return group;
+  }
+
+  function createTreeLOD(THREE, data, options = {}) {
+    const materials = createTreeMaterials(THREE, Boolean(options.reflection));
+    const lod = new THREE.LOD();
+    const levels = options.reflection
+      ? [
+        { generation: 4, radial: 5, distance: 0 },
+        { generation: 2, radial: 4, distance: 17 },
+      ]
+      : coarsePointer.matches
+        ? [
+          { generation: 6, radial: 7, distance: 0 },
+          { generation: 4, radial: 5, distance: 16 },
+          { generation: 2, radial: 4, distance: 25 },
+        ]
+        : [
+          { generation: data.maxDepth, radial: 10, distance: 0 },
+          { generation: 5, radial: 7, distance: 16 },
+          { generation: 3, radial: 5, distance: 25 },
+        ];
+    levels.forEach((level) => {
+      lod.addLevel(createTreeLevel(THREE, data, materials, level.generation, level.radial), level.distance);
+    });
+    lod.autoUpdate = true;
+    return { lod, materials, levels: lod.levels.map((level) => level.object) };
+  }
+
+  function setTreeGrowth(tree, growth) {
+    const visibleGrowth = clamp(growth);
+    tree.lod.visible = visibleGrowth > 0.005;
+    tree.levels.forEach((level) => {
+      level.userData.renderMeshes.forEach((mesh) => {
+        const total = mesh.userData.total || 0;
+        mesh.count = Math.round(total * (mesh.userData.kind === 'bud'
+          ? smoothstep(0.66, 1, visibleGrowth)
+          : easeOut(visibleGrowth)));
+        mesh.visible = mesh.count > 0;
+      });
+    });
+  }
+
+  function setTreeAppearance(tree, opacity, heat, pulse, growth) {
+    const visibleOpacity = clamp(opacity);
+    tree.materials.branch.opacity = visibleOpacity;
+    tree.materials.branch.emissiveIntensity = 0.015 + heat * 0.18 + pulse * 0.025;
+    tree.materials.vein.opacity = visibleOpacity * (0.66 + pulse * 0.28 + heat * 0.42);
+    tree.materials.halo.opacity = visibleOpacity * (0.12 + pulse * 0.14 + heat * 0.34);
+    tree.materials.bud.opacity = visibleOpacity * smoothstep(0.62, 0.92, growth);
+    tree.materials.bud.emissiveIntensity = 0.9 + pulse * 1.3 + heat * 0.6;
+    setTreeGrowth(tree, growth);
+  }
+
+  function createParticleCloud(THREE, count, texture, color, size, additive = false) {
+    const random = seededRandom(count * 911 + color);
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(count * 3);
+    const seeds = new Float32Array(count * 7);
+    for (let index = 0; index < count; index += 1) {
+      const offset = index * 7;
+      for (let item = 0; item < 7; item += 1) seeds[offset + item] = random();
+    }
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const material = new THREE.PointsMaterial({
+      color,
+      size,
+      map: texture,
+      transparent: true,
+      opacity: 0,
+      alphaTest: 0.004,
+      depthWrite: false,
+      sizeAttenuation: true,
+      blending: additive ? THREE.AdditiveBlending : THREE.NormalBlending,
+      toneMapped: !additive,
+    });
+    const points = new THREE.Points(geometry, material);
+    points.frustumCulled = false;
+    points.userData.seeds = seeds;
+    points.userData.count = count;
+    return points;
+  }
+
+  function updateAmbientDust(points, time, strength) {
+    const positions = points.geometry.attributes.position.array;
+    const seeds = points.userData.seeds;
+    for (let index = 0; index < points.userData.count; index += 1) {
+      const seed = index * 7;
+      const position = index * 3;
+      const cycle = (seeds[seed + 1] + time * (0.01 + seeds[seed + 3] * 0.018)) % 1;
+      positions[position] = (seeds[seed] - 0.5) * 17 + Math.sin(time * 0.23 + seeds[seed + 4] * TAU) * 0.24;
+      positions[position + 1] = -4 + cycle * 11;
+      positions[position + 2] = (seeds[seed + 2] - 0.5) * 8;
+    }
+    points.geometry.attributes.position.needsUpdate = true;
+    points.material.opacity = 0.13 + strength * 0.16;
+  }
+
+  function updateRisingParticles(points, time, originX, strength, mode) {
+    const positions = points.geometry.attributes.position.array;
+    const seeds = points.userData.seeds;
+    const verticalRange = mode === 'ember' ? 7 : 9;
+    for (let index = 0; index < points.userData.count; index += 1) {
+      const seed = index * 7;
+      const position = index * 3;
+      const speed = mode === 'ember' ? 0.13 + seeds[seed + 3] * 0.24 : 0.035 + seeds[seed + 3] * 0.08;
+      const cycle = (seeds[seed + 1] + time * speed) % 1;
+      const radius = (0.25 + seeds[seed] * 2.2) * (0.45 + cycle);
+      const angle = seeds[seed + 4] * TAU + time * (0.32 + seeds[seed + 5] * 0.5);
+      positions[position] = originX + Math.cos(angle) * radius;
+      positions[position + 1] = -2.8 + cycle * verticalRange;
+      positions[position + 2] = (seeds[seed + 2] - 0.5) * 3.2 + Math.sin(angle) * 0.35;
+    }
+    points.geometry.attributes.position.needsUpdate = true;
+    points.material.opacity = strength * (mode === 'ember' ? 0.92 : 0.48);
+    points.visible = strength > 0.005;
+  }
+
+  function updateExplosion(points, originX, amount, age) {
+    const positions = points.geometry.attributes.position.array;
+    const seeds = points.userData.seeds;
+    for (let index = 0; index < points.userData.count; index += 1) {
+      const seed = index * 7;
+      const position = index * 3;
+      const theta = seeds[seed] * TAU;
+      const z = seeds[seed + 1] * 2 - 1;
+      const radial = Math.sqrt(Math.max(0, 1 - z * z));
+      const distance = easeOut(age) * (1.5 + seeds[seed + 2] * 7.5);
+      positions[position] = originX + Math.cos(theta) * radial * distance;
+      positions[position + 1] = 0.1 + z * distance * 0.78;
+      positions[position + 2] = Math.sin(theta) * radial * distance;
+    }
+    points.geometry.attributes.position.needsUpdate = true;
+    points.material.opacity = amount * (1 - age) * 1.35;
+    points.visible = amount > 0.005;
+  }
+
+  function createFogBank(THREE, texture, count) {
+    const random = seededRandom(4471);
+    const group = new THREE.Group();
+    for (let index = 0; index < count; index += 1) {
+      const material = new THREE.SpriteMaterial({
+        map: texture,
+        color: index % 3 === 0 ? 0x6f4c2d : 0x3d3a36,
+        transparent: true,
+        opacity: 0.025,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+      });
+      const sprite = new THREE.Sprite(material);
+      sprite.position.set((random() - 0.5) * 13, -2.8 + random() * 6, -2 + random() * 3);
+      sprite.scale.set(4 + random() * 6, 1.3 + random() * 2.4, 1);
+      sprite.userData = {
+        baseX: sprite.position.x,
+        baseY: sprite.position.y,
+        phase: random() * TAU,
+        speed: 0.06 + random() * 0.12,
+      };
+      group.add(sprite);
+    }
+    return group;
+  }
+
+  function updateFogBank(group, time, fire, ash) {
+    group.children.forEach((sprite, index) => {
+      sprite.position.x = sprite.userData.baseX + Math.sin(time * sprite.userData.speed + sprite.userData.phase) * 0.65;
+      sprite.position.y = sprite.userData.baseY + Math.sin(time * 0.08 + sprite.userData.phase) * 0.22;
+      sprite.material.opacity = 0.018 + ash * 0.07 + fire * (index % 3 === 0 ? 0.055 : 0.015);
+      sprite.material.rotation = Math.sin(time * 0.035 + sprite.userData.phase) * 0.08;
+    });
+  }
+
+  function initThree(THREE) {
+    if (!THREE || THREE.REVISION !== '160') throw new Error('BLVCK OAK requires Three.js r160.');
+
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      antialias: !coarsePointer.matches,
+      alpha: false,
+      powerPreference: 'high-performance',
+      stencil: false,
+    });
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 0.88;
+    renderer.shadowMap.enabled = !coarsePointer.matches;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.setClearColor(0x010101, 1);
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x010101);
+    scene.fog = new THREE.FogExp2(0x030303, 0.052);
+    const camera = new THREE.PerspectiveCamera(39, 1, 0.1, 70);
+    camera.position.set(0, 0.65, 12);
+
+    scene.add(new THREE.HemisphereLight(0x4a4135, 0x010101, 0.48));
+    const keyLight = new THREE.SpotLight(0xfff2d3, 115, 34, Math.PI / 5, 0.72, 1.2);
+    keyLight.position.set(-6, 8, 9);
+    keyLight.target.position.set(1.8, 0.3, 0);
+    keyLight.castShadow = !coarsePointer.matches;
+    keyLight.shadow.mapSize.set(1024, 1024);
+    scene.add(keyLight, keyLight.target);
+    const rimLight = new THREE.SpotLight(0x6f8fac, 82, 30, Math.PI / 4, 0.8, 1.4);
+    rimLight.position.set(8, 4, -5);
+    rimLight.target.position.set(2, 0, 0);
+    scene.add(rimLight, rimLight.target);
+    const moltenLight = new THREE.PointLight(0xff7a12, 0, 15, 1.8);
+    moltenLight.position.set(2.3, 0.15, 1.5);
+    scene.add(moltenLight);
+
+    const wall = new THREE.Mesh(
+      new THREE.PlaneGeometry(32, 20),
+      new THREE.MeshPhysicalMaterial({
+        color: 0x060606,
+        metalness: 0.72,
+        roughness: 0.24,
+        clearcoat: 0.82,
+        clearcoatRoughness: 0.18,
+      }),
+    );
+    wall.position.set(0, 1, -3.05);
+    wall.receiveShadow = true;
+    scene.add(wall);
+
+    const mirrorPanel = new THREE.Mesh(
+      new THREE.PlaneGeometry(6.4, 11),
+      new THREE.MeshPhysicalMaterial({
+        color: 0x090909,
+        metalness: 1,
+        roughness: 0.035,
+        clearcoat: 1,
+        transparent: true,
+        opacity: 0.62,
+      }),
+    );
+    mirrorPanel.position.set(-4.1, 0.35, -2.96);
+    scene.add(mirrorPanel);
+
+    const floor = new THREE.Mesh(
+      new THREE.PlaneGeometry(30, 22),
+      new THREE.MeshPhysicalMaterial({
+        color: 0x030303,
+        metalness: 0.82,
+        roughness: 0.28,
+        transparent: true,
+        opacity: 0.9,
+      }),
+    );
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = -3.42;
+    floor.receiveShadow = true;
+    scene.add(floor);
+
+    const maxDepth = coarsePointer.matches ? 6 : 7;
+    const oldData = generateTreeData(THREE, 0xB10C0A, maxDepth);
+    const youngData = generateTreeData(THREE, 0xF1A551, maxDepth);
+    const oldTree = createTreeLOD(THREE, oldData);
+    const youngTree = createTreeLOD(THREE, youngData);
+    const reflectionTree = createTreeLOD(THREE, oldData, { reflection: true });
+    scene.add(oldTree.lod, youngTree.lod, reflectionTree.lod);
+    reflectionTree.lod.position.set(-3.15, -0.15, -2.72);
+    reflectionTree.lod.scale.set(-0.66, 0.66, 0.1);
+    reflectionTree.lod.rotation.y = -0.22;
+
+    const glowTexture = createRadialTexture(
+      THREE,
+      'rgba(255,242,196,1)',
+      'rgba(255,151,45,.78)',
+      'rgba(255,120,18,.12)',
+    );
+    const ashTexture = createRadialTexture(
+      THREE,
+      'rgba(235,229,217,.75)',
+      'rgba(151,143,132,.28)',
+      'rgba(151,143,132,.08)',
+    );
+    const fogTexture = createRadialTexture(
+      THREE,
+      'rgba(204,184,151,.2)',
+      'rgba(91,80,67,.11)',
+      'rgba(40,36,32,.04)',
+    );
+    const qualityScale = coarsePointer.matches ? 0.55 : 1;
+    const dust = createParticleCloud(THREE, Math.round(420 * qualityScale), ashTexture, 0xd8cbb7, 0.045);
+    const embers = createParticleCloud(THREE, Math.round(280 * qualityScale), glowTexture, 0xffa02d, 0.075, true);
+    const ash = createParticleCloud(THREE, Math.round(340 * qualityScale), ashTexture, 0xaaa39a, 0.065);
+    const explosion = createParticleCloud(THREE, Math.round(320 * qualityScale), glowTexture, 0xffa02d, 0.12, true);
+    const fogBank = createFogBank(THREE, fogTexture, coarsePointer.matches ? 6 : 11);
+    scene.add(dust, embers, ash, explosion, fogBank);
+
+    let mobile = false;
+    let startTime = performance.now();
+    let lastFrame = 0;
+    let previousReelTime = 0;
+    let destroyed = false;
+
+    function resize() {
+      const rect = stage.getBoundingClientRect();
+      const width = Math.max(1, rect.width);
+      const height = Math.max(1, rect.height);
+      mobile = width < 760;
+      const pixelRatioCap = mobile || coarsePointer.matches ? 1.25 : 1.7;
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, pixelRatioCap));
+      renderer.setSize(width, height, false);
+      camera.aspect = width / height;
+      camera.fov = reelMode ? 47 : mobile ? 51 : 39;
+      camera.updateProjectionMatrix();
+    }
+
+    function reelStory(cycle) {
+      if (cycle < 2.55) return mix(0.08, 0.42, smoothstep(0, 2.55, cycle));
+      if (cycle < 4.65) return mix(0.42, 0.7, smoothstep(2.55, 4.65, cycle));
+      if (cycle < 7.15) return mix(0.7, 0.96, smoothstep(4.65, 7.15, cycle));
+      return mix(0.96, 0.08, smoothstep(7.15, REEL_LOOP_SECONDS, cycle));
+    }
+
+    function render(time, progress, reelCycle = 0) {
+      pointer.x += (pointer.targetX - pointer.x) * 0.045;
+      pointer.y += (pointer.targetY - pointer.y) * 0.045;
+      const pulse = 0.5 + 0.5 * Math.sin(time * 1.45);
+      const fire = smoothstep(0.27, 0.43, progress) * (1 - smoothstep(0.63, 0.74, progress));
+      const ashAmount = smoothstep(0.43, 0.58, progress) * (1 - smoothstep(0.84, 0.97, progress));
+      const newGrowth = smoothstep(0.62, 0.92, progress);
+      const oldGrowth = 0.58 + smoothstep(0, 0.14, progress) * 0.42;
+      const oldOpacity = 1 - smoothstep(0.48, 0.72, progress) * 0.93;
+      let beatAmount;
+      let beatAge;
+
+      if (reelMode) {
+        const age = reelCycle - REEL_BEAT_SECONDS;
+        beatAge = clamp(age / 1.35);
+        beatAmount = age >= 0 && age < 1.35 ? 1 - smoothstep(0, 1.35, age) : 0;
+        if (previousReelTime < REEL_BEAT_SECONDS && reelCycle >= REEL_BEAT_SECONDS) {
+          window.dispatchEvent(new CustomEvent('blvckoak:beat-drop', {
+            detail: { at: REEL_BEAT_SECONDS, loop: REEL_LOOP_SECONDS },
+          }));
+        }
+        previousReelTime = reelCycle;
+      } else {
+        beatAge = smoothstep(0.43, 0.58, progress);
+        beatAmount = Math.exp(-(((progress - 0.49) / 0.055) ** 2));
+      }
+
+      const heat = clamp(fire + beatAmount * 0.9);
+      setTreeAppearance(oldTree, oldOpacity, heat, pulse, oldGrowth);
+      setTreeAppearance(youngTree, newGrowth, heat * 0.35, pulse, newGrowth);
+      setTreeGrowth(reflectionTree, Math.max(oldGrowth * oldOpacity, newGrowth));
+      reflectionTree.materials.branch.opacity = 0.035 + oldOpacity * 0.09;
+      reflectionTree.materials.vein.opacity = 0.035 + heat * 0.09 + newGrowth * 0.05;
+      reflectionTree.materials.halo.opacity = 0.015 + heat * 0.04;
+      reflectionTree.materials.bud.opacity = newGrowth * 0.05;
+
+      const loopFraction = reelMode
+        ? reelCycle / REEL_LOOP_SECONDS
+        : (time % HEADER_LOOP_SECONDS) / HEADER_LOOP_SECONDS;
+      const orbit = loopFraction * TAU + (reelMode ? 0 : progress * 0.58);
+      const swayCycles = reelMode ? 1 : 6;
+      const sway = Math.sin(loopFraction * TAU * swayCycles) * DEG_15;
+      const baseX = mobile ? 0.55 : 2.55;
+      const centeredX = mix(baseX, 0, smoothstep(0.82, 0.97, progress));
+
+      oldTree.lod.position.set(centeredX, -0.08, 0);
+      youngTree.lod.position.set(centeredX, -0.08, 0.02);
+      oldTree.lod.rotation.set(0, orbit, sway);
+      youngTree.lod.rotation.set(0, orbit + 0.08, sway * 0.72);
+      oldTree.lod.scale.setScalar(1 - smoothstep(0.48, 0.72, progress) * 0.07);
+      youngTree.lod.scale.set(
+        mix(0.54, 1, newGrowth),
+        mix(0.045, 1, easeOut(newGrowth)),
+        mix(0.54, 1, newGrowth),
+      );
+      reflectionTree.lod.rotation.y = -orbit * 0.38 - 0.22;
+      reflectionTree.lod.visible = !mobile;
+      mirrorPanel.visible = !mobile;
+
+      updateAmbientDust(dust, time, ashAmount);
+      updateRisingParticles(embers, time, centeredX, clamp(fire + beatAmount), 'ember');
+      updateRisingParticles(ash, time, centeredX, ashAmount, 'ash');
+      updateExplosion(explosion, centeredX, beatAmount, beatAge);
+      updateFogBank(fogBank, time, fire, ashAmount);
+      moltenLight.position.x = centeredX;
+      moltenLight.intensity = 8 + pulse * 7 + heat * 78 + beatAmount * 125;
+      scene.fog.density = 0.042 + ashAmount * 0.034 + fire * 0.009;
+      renderer.toneMappingExposure = 0.82 + heat * 0.15 + beatAmount * 0.22;
+      camera.position.x = pointer.x * 0.75 + (reelMode ? 0 : -0.18);
+      camera.position.y = 0.55 - pointer.y * 0.42;
+      camera.position.z = reelMode ? 12.9 : mobile ? 13.6 : 12;
+      camera.lookAt(centeredX * (mobile ? 0.35 : 0.46), -0.1, 0);
+      renderer.render(scene, camera);
+    }
+
+    function animate(now) {
+      frameId = window.requestAnimationFrame(animate);
+      if (destroyed || !introVisible || document.hidden) return;
+      const minimumFrame = coarsePointer.matches ? 1000 / 30 : 1000 / 60;
+      if (now - lastFrame < minimumFrame) return;
+      lastFrame = now;
+      const time = (now - startTime) / 1000;
+      const reelCycle = time % REEL_LOOP_SECONDS;
+      const progress = reelMode ? reelStory(reelCycle) : storyProgress;
+      if (reelMode) applyStoryProgress(progress);
+      render(time, progress, reelCycle);
+    }
+
+    function renderReducedMotion() {
+      applyStoryProgress(0.9);
+      render(4.5, 0.9, 4.5);
+    }
+
+    const resizeHandler = () => {
+      resize();
+      updateScrollProgress();
+      if (reducedMotion.matches) renderReducedMotion();
+    };
+    const motionHandler = () => {
+      intro.classList.toggle('is-reduced-motion', reducedMotion.matches);
+      if (skipButton) skipButton.firstChild.textContent = reducedMotion.matches ? 'Enter site ' : 'Skip intro ';
+      cancelAnimationFrame(frameId);
+      startTime = performance.now();
+      resize();
+      if (reducedMotion.matches) renderReducedMotion();
+      else frameId = window.requestAnimationFrame(animate);
+    };
+
+    window.addEventListener('resize', resizeHandler, { passive: true });
+    reducedMotion.addEventListener?.('change', motionHandler);
+    canvas.addEventListener('webglcontextlost', (event) => {
+      event.preventDefault();
+      intro.classList.add('is-webgl-fallback');
+      cancelAnimationFrame(frameId);
+    });
+    resize();
+    if (reducedMotion.matches) renderReducedMotion();
+    else frameId = window.requestAnimationFrame(animate);
+
+    rendererCleanup = () => {
+      destroyed = true;
+      cancelAnimationFrame(frameId);
+      window.removeEventListener('resize', resizeHandler);
+      reducedMotion.removeEventListener?.('change', motionHandler);
+      scene.traverse((object) => {
+        object.geometry?.dispose?.();
+        if (Array.isArray(object.material)) object.material.forEach((material) => material.dispose());
+        else object.material?.dispose?.();
+      });
+      glowTexture.dispose();
+      ashTexture.dispose();
+      fogTexture.dispose();
+      renderer.dispose();
+    };
+  }
+
+  function showFallback(error) {
+    intro.classList.add('is-webgl-fallback');
+    canvas.style.background = 'radial-gradient(circle at 68% 48%, rgba(255,153,45,.16), transparent 12%), radial-gradient(circle at 62% 54%, rgba(212,174,88,.08), transparent 34%), #020202';
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      console.warn('BLVCK OAK WebGL intro fallback:', error);
+    }
+  }
+
+  loadThree().then(initThree).catch(showFallback);
+  window.addEventListener('pagehide', () => {
+    rendererCleanup();
+    visibilityObserver.disconnect();
+    cancelAnimationFrame(frameId);
+  }, { once: true });
 })();

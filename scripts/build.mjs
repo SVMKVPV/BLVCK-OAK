@@ -21,6 +21,11 @@ for (const file of [
 
 await cp(resolve(root, 'assets'), resolve(output, 'assets'), { recursive: true });
 await cp(resolve(root, 'previews'), resolve(output, 'previews'), { recursive: true });
+await mkdir(resolve(output, 'vendor'), { recursive: true });
+await cp(
+  resolve(root, 'node_modules/three/build/three.module.min.js'),
+  resolve(output, 'vendor/three.module.min.js'),
+);
 await prepareRelease(output);
 await markUnavailableLinks(output);
 
