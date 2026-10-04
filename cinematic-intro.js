@@ -1,545 +1,335 @@
-'use strict';
+/**
+ * BLVCK-OAK — cinematic-intro.js v2.0
+ * Professional 3D Oak System | Three.js r160 + WebGL2
+ * Drop-in replacement for /cinematic-intro.js
+ * 
+ * Author: BLVCK OAK Upgrade Kit
+ * Stack: Three.js, L-System, PBR, InstancedMesh, Volumetric Fog
+ */
 
-(() => {
-  const intro = document.querySelector('[data-oak-origin]');
-  const stage = document.querySelector('[data-oak-stage]');
-  const canvas = document.querySelector('[data-oak-canvas]');
-  const skipButton = document.querySelector('[data-oak-skip]');
-  const chapters = [...document.querySelectorAll('[data-oak-chapter]')];
-  const officialSite = document.querySelector('main');
-  if (!intro || !stage || !(canvas instanceof HTMLCanvasElement) || !officialSite) return;
+// --- IMPORTMAP (add to <head>) ---
+// <script type="importmap">
+// {
+//   "imports": {
+//     "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+//     "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+//   }
+// }
+// </script>
 
-  const context = canvas.getContext('2d', { alpha: false, desynchronized: true });
-  if (!context) return;
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const coarsePointer = window.matchMedia('(pointer: coarse)');
-  const TAU = Math.PI * 2;
-  const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
-  const mix = (start, end, amount) => start + (end - start) * amount;
-  const smoothstep = (start, end, value) => {
-    const progress = clamp((value - start) / (end - start));
-    return progress * progress * (3 - 2 * progress);
-  };
-  const easeOut = (value) => 1 - (1 - value) ** 3;
-  const easeIn = (value) => value ** 3;
+class RealisticOak {
+  constructor(scene) {
+    this.scene = scene;
+    this.group = new THREE.Group();
+    this.barkMaterial = null;
+    this.leafMaterial = null;
+    this.leaves = null;
+    this.branchMeshes = [];
+    this.growthFactor = 0.01; // 0 -> ash, 1 -> full
+    this.initMaterials();
+    this.generateLSystem({
+      axiom: 'X',
+      rules: { 'X': 'F-[[X]+X]+F[+FX]-X', 'F': 'FF' },
+      iterations: 5,
+      angle: 25 * Math.PI / 180,
+      length: 0.28,
+      decay: 0.72
+    });
+    this.initLeaves();
+    this.initGround();
+    scene.add(this.group);
+  }
 
-  function seededRandom(seed) {
-    let value = seed >>> 0;
-    return () => {
-      value += 0x6D2B79F5;
-      let result = value;
-      result = Math.imul(result ^ (result >>> 15), result | 1);
-      result ^= result + Math.imul(result ^ (result >>> 7), result | 61);
-      return ((result ^ (result >>> 14)) >>> 0) / 4294967296;
+  initMaterials() {
+    const texLoader = new THREE.TextureLoader();
+    
+    // --- BARK PBR ---
+    const barkNormal = texLoader.load('https://threejs.org/examples/textures/brick_bump.jpg');
+    const barkRoughness = texLoader.load('https://threejs.org/examples/textures/terrain/grasslight-big.jpg');
+    barkNormal.wrapS = barkNormal.wrapT = THREE.RepeatWrapping;
+    
+    this.barkMaterial = new THREE.MeshStandardMaterial({
+      color: 0x1a1410,
+      roughness: 0.85,
+      metalness: 0.02,
+      normalMap: barkNormal,
+      normalScale: new THREE.Vector2(0.8, 0.8),
+      roughnessMap: barkRoughness,
+      envMapIntensity: 0.35
+    });
+
+    // --- LEAF SSS MATERIAL ---
+    const leafAlpha = texLoader.load('/assets/oak-leaf-alpha.png');
+    this.leafMaterial = new THREE.MeshStandardMaterial({
+      color: 0x2a4a18,
+      emissive: 0x11200a,
+      emissiveIntensity: 0.15,
+      roughness: 0.45,
+      metalness: 0.0,
+      side: THREE.DoubleSide,
+      alphaMap: leafAlpha,
+      transparent: true,
+      alphaTest: 0.5,
+      // Fake SSS via emissive + transmission
+    });
+    this.leafMaterial.onBeforeCompile = (shader) => {
+      shader.fragmentShader = shader.fragmentShader.replace(
+        '#include <dithering_fragment>',
+        `float sss = pow(dot(vNormal, vec3(0.0, 1.0, 0.0)), 2.0) * 0.35;
+          gl_FragColor.rgb += sss * vec3(0.4, 0.7, 0.2);
+          #include <dithering_fragment>`
+      );
     };
   }
 
-  function buildTree(seed, levels = 5) {
-    const random = seededRandom(seed);
-    const segments = [];
-    const tips = [];
-
-    function grow(x, y, length, angle, width, depth, generation) {
-      const bend = (random() - 0.5) * 0.32;
-      const x2 = x + Math.cos(angle + bend) * length;
-      const y2 = y + Math.sin(angle + bend) * length;
-      segments.push({ x, y, x2, y2, width, generation, reveal: generation / (levels + 1) });
-      if (depth === 0) {
-        tips.push({ x: x2, y: y2, phase: random() * TAU, size: 0.72 + random() * 0.5 });
-        return;
-      }
-      const spread = 0.28 + random() * 0.16 + generation * 0.008;
-      const nextLength = length * (0.72 + random() * 0.1);
-      grow(x2, y2, nextLength, angle - spread, width * 0.7, depth - 1, generation + 1);
-      grow(x2, y2, nextLength * (0.92 + random() * 0.13), angle + spread, width * 0.68, depth - 1, generation + 1);
-      if (depth > 2 && random() > 0.6) {
-        grow(x2, y2, nextLength * 0.74, angle + (random() - 0.5) * 0.24, width * 0.54, depth - 2, generation + 1);
-      }
+  // L-SYSTEM BRANCHING WITH TAPER
+  generateLSystem(params) {
+    let str = params.axiom;
+    for(let i=0;i<params.iterations;i++){
+      let next='';
+      for(let c of str) next += params.rules[c] || c;
+      str = next;
     }
 
-    grow(0, 0, 1, -Math.PI / 2, 0.34, levels, 0);
-    return { segments, tips };
+    const stack = [];
+    let pos = new THREE.Vector3(0,0,0);
+    let dir = new THREE.Vector3(0,1,0);
+    let depth = 0;
+    let thickness = 0.22;
+
+    const branch = (start, end, r) => {
+      const h = start.distanceTo(end);
+      const geo = new THREE.CylinderGeometry(r*0.62, r, h, 8);
+      geo.translate(0, h/2, 0);
+      const mesh = new THREE.Mesh(geo, this.barkMaterial);
+      mesh.position.copy(start);
+      mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), 
+        new THREE.Vector3().subVectors(end,start).normalize());
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      this.group.add(mesh);
+      this.branchMeshes.push({ mesh, baseScale: h, depth });
+      
+      // Collect leaf points at terminal branches
+      if(depth > 3 && Math.random() > 0.3) this.leafPoints.push(end.clone());
+    };
+
+    this.leafPoints = [];
+    let quaternion = new THREE.Quaternion();
+
+    for(let c of str){
+      if(c==='F'){
+        const next = pos.clone().add(dir.clone().multiplyScalar(params.length * Math.pow(params.decay, depth)));
+        branch(pos, next, thickness * Math.pow(0.72, depth));
+        pos.copy(next);
+      } else if(c==='+'){
+        const axis = new THREE.Vector3(0,0,1);
+        quaternion.setFromAxisAngle(axis, params.angle + (Math.random()-0.5)*0.2);
+        dir.applyQuaternion(quaternion);
+      } else if(c==='-'){
+        const axis = new THREE.Vector3(0,0,1);
+        quaternion.setFromAxisAngle(axis, -params.angle + (Math.random()-0.5)*0.2);
+        dir.applyQuaternion(quaternion);
+      } else if(c==='['){
+        stack.push({ pos: pos.clone(), dir: dir.clone(), depth, thickness });
+        depth++; thickness *= 0.7;
+      } else if(c===']'){
+        const s = stack.pop();
+        pos.copy(s.pos); dir.copy(s.dir); depth=s.depth; thickness=s.thickness;
+      }
+    }
   }
 
-  const oldTree = buildTree(1313, 5);
-  const youngTree = buildTree(3131, 5);
-  const leafRandom = seededRandom(8088);
-  const leaves = oldTree.tips.filter((_, index) => index % 2 === 0).map((tip, index) => ({
-    ...tip,
-    index,
-    hue: 38 + leafRandom() * 48,
-    z: leafRandom() * 1.4 - 0.7,
-    rotation: leafRandom() * TAU,
-    direction: leafRandom() > 0.5 ? 1 : -1,
-    fallStart: 0.17 + (index % 9) * 0.011 + Math.floor(index / 9) * 0.018,
-    burnStart: 0.32 + (index % 6) * 0.018,
-    drift: (leafRandom() - 0.5) * 0.34,
-    ash: Array.from({ length: 22 }, () => ({
-      x: leafRandom() * 2 - 1,
-      y: leafRandom(),
-      speed: 0.55 + leafRandom() * 1.15,
-      phase: leafRandom() * TAU,
-      size: 1.2 + leafRandom() * 3.1,
-    })),
-  }));
-  const atmosphereRandom = seededRandom(4242);
-  const atmosphere = Array.from({ length: 92 }, () => ({
-    x: atmosphereRandom(),
-    y: atmosphereRandom(),
-    depth: 0.15 + atmosphereRandom() * 0.85,
-    phase: atmosphereRandom() * TAU,
-    warm: atmosphereRandom() > 0.72,
-  }));
-  const groundAsh = Array.from({ length: 110 }, (_, index) => ({
-    angle: atmosphereRandom() * TAU,
-    radius: atmosphereRandom(),
-    phase: atmosphereRandom() * TAU,
-    lift: atmosphereRandom(),
-    size: 0.4 + atmosphereRandom() * 1.4,
-    index,
-  }));
+  initLeaves() {
+    const leafGeo = new THREE.PlaneGeometry(0.18, 0.22);
+    const count = 3000;
+    this.leaves = new THREE.InstancedMesh(leafGeo, this.leafMaterial, count);
+    this.leaves.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    this.leaves.castShadow = true;
+    this.leaves.frustumCulled = true;
 
-  let width = 1;
-  let height = 1;
-  let deviceScale = 1;
-  let progress = 0;
-  let activeChapter = -1;
-  let introVisible = true;
-  let frameId = 0;
-  let lastFrame = 0;
-  const pointer = { x: 0, y: 0, targetX: 0, targetY: 0 };
-
-  function resize() {
-    const rect = stage.getBoundingClientRect();
-    width = Math.max(1, rect.width);
-    height = Math.max(1, rect.height);
-    deviceScale = Math.min(window.devicePixelRatio || 1, coarsePointer.matches ? 1.35 : 1.7);
-    canvas.width = Math.round(width * deviceScale);
-    canvas.height = Math.round(height * deviceScale);
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
-    draw(performance.now());
+    const dummy = new THREE.Object3D();
+    const color = new THREE.Color();
+    
+    for(let i=0;i<count;i++){
+      const p = this.leafPoints[i % this.leafPoints.length]
+        .clone()
+        .add(new THREE.Vector3(
+          (Math.random()-0.5)*0.6,
+          (Math.random()-0.5)*0.4,
+          (Math.random()-0.5)*0.6
+        ));
+      dummy.position.copy(p);
+      dummy.rotation.set(
+        Math.random()*Math.PI,
+        Math.random()*Math.PI,
+        Math.random()*Math.PI
+      );
+      const s = 0.8 + Math.random()*0.6;
+      dummy.scale.set(s,s,s);
+      dummy.updateMatrix();
+      this.leaves.setMatrixAt(i, dummy.matrix);
+      
+      // Variant green
+      color.setHSL(0.28 + Math.random()*0.08, 0.6, 0.25 + Math.random()*0.2);
+      this.leaves.setColorAt(i, color);
+    }
+    this.leaves.instanceMatrix.needsUpdate = true;
+    if(this.leaves.instanceColor) this.leaves.instanceColor.needsUpdate = true;
+    this.group.add(this.leaves);
   }
 
-  function setChapter(index) {
-    if (index === activeChapter) return;
-    activeChapter = index;
-    chapters.forEach((chapter, chapterIndex) => {
-      const selected = chapterIndex === index;
-      chapter.classList.toggle('is-active', selected);
-      chapter.setAttribute('aria-hidden', String(!selected));
+  initGround() {
+    const geo = new THREE.CircleGeometry(8, 64);
+    const mat = new THREE.MeshStandardMaterial({
+      color: 0x0d0f0a,
+      roughness: 0.95,
+      metalness: 0.0,
     });
-  }
+    const ground = new THREE.Mesh(geo, mat);
+    ground.rotation.x = -Math.PI/2;
+    ground.receiveShadow = true;
+    this.group.add(ground);
 
-  function updateProgress() {
-    const rect = intro.getBoundingClientRect();
-    const travel = Math.max(1, intro.offsetHeight - window.innerHeight);
-    progress = reducedMotion.matches ? 0.9 : clamp(-rect.top / travel);
-    const chapter = progress < 0.155 ? 0
-      : progress < 0.345 ? 1
-        : progress < 0.615 ? 2
-          : progress < 0.84 ? 3
-            : 4;
-    setChapter(chapter);
-    intro.style.setProperty('--oak-progress', progress.toFixed(4));
-    intro.style.setProperty('--oak-exit', smoothstep(0.955, 1, progress).toFixed(4));
-    intro.classList.toggle('has-progress', progress > 0.025);
-    const introIsActive = rect.bottom > window.innerHeight * 0.42 && rect.top < window.innerHeight * 0.55;
-    document.body.classList.toggle('oak-intro-active', introIsActive);
-  }
-
-  function drawBackground(time) {
-    const horizon = height * 0.82;
-    const background = context.createLinearGradient(0, 0, 0, height);
-    background.addColorStop(0, '#020303');
-    background.addColorStop(0.56, '#080909');
-    background.addColorStop(1, '#030404');
-    context.fillStyle = background;
-    context.fillRect(0, 0, width, height);
-
-    const fireLevel = smoothstep(0.34, 0.57, progress) * (1 - smoothstep(0.69, 0.79, progress));
-    const growthLevel = smoothstep(0.62, 0.9, progress);
-    const glowX = width * (0.54 + pointer.x * 0.012);
-    const glowY = mix(horizon, height * 0.68, growthLevel);
-    const glow = context.createRadialGradient(glowX, glowY, 0, glowX, glowY, width * 0.5);
-    glow.addColorStop(0, `rgba(202, ${Math.round(mix(111, 166, growthLevel))}, ${Math.round(mix(35, 80, growthLevel))}, ${0.055 + fireLevel * 0.11 + growthLevel * 0.045})`);
-    glow.addColorStop(0.4, `rgba(104,63,24,${0.025 + fireLevel * 0.045})`);
-    glow.addColorStop(1, 'rgba(0,0,0,0)');
-    context.fillStyle = glow;
-    context.fillRect(0, 0, width, height);
-
-    context.save();
-    atmosphere.forEach((particle) => {
-      const drift = ((particle.y + time * 0.000005 * particle.depth) % 1) * height;
-      const x = particle.x * width + Math.sin(time * 0.00017 + particle.phase) * 16 * particle.depth + pointer.x * 19 * particle.depth;
-      const alpha = (0.04 + particle.depth * 0.12) * (particle.warm ? 1 + fireLevel * 1.6 : 1);
-      context.beginPath();
-      context.arc(x, drift, 0.45 + particle.depth * 1.05, 0, TAU);
-      context.fillStyle = particle.warm ? `rgba(226,151,62,${alpha})` : `rgba(228,221,203,${alpha * 0.6})`;
-      context.fill();
+    // Moss detail plane
+    const mossGeo = new THREE.CircleGeometry(3.2, 32);
+    const mossMat = new THREE.MeshStandardMaterial({
+      color: 0x1e2f15, roughness: 1.0, emissive: 0x0a1a05, emissiveIntensity: 0.12
     });
-    context.restore();
-
-    context.fillStyle = 'rgba(3,4,4,.62)';
-    context.beginPath();
-    context.ellipse(width * 0.5, horizon + height * 0.1, width * 0.55, height * 0.17, 0, 0, TAU);
-    context.fill();
+    const moss = new THREE.Mesh(mossGeo, mossMat);
+    moss.rotation.x = -Math.PI/2;
+    moss.position.y = 0.01;
+    moss.receiveShadow = true;
+    this.group.add(moss);
   }
 
-  function drawTree(tree, centerX, groundY, scale, alpha, growth, isYoung = false) {
-    if (alpha <= 0.002 || growth <= 0.002) return;
-    context.save();
-    context.lineCap = 'round';
-    context.lineJoin = 'round';
-    tree.segments.forEach((segment, index) => {
-      const revealLength = 0.17 + segment.generation * 0.014;
-      const localGrowth = clamp((growth - segment.reveal * 0.7) / revealLength);
-      if (localGrowth <= 0) return;
-      const amount = easeOut(localGrowth);
-      const startX = centerX + segment.x * scale;
-      const startY = groundY + segment.y * scale;
-      const endX = centerX + mix(segment.x, segment.x2, amount) * scale;
-      const endY = groundY + mix(segment.y, segment.y2, amount) * scale;
-      const widthScale = Math.max(0.55, segment.width * scale * mix(0.62, 1, amount));
-      const dx = endX - startX;
-      const dy = endY - startY;
-      const length = Math.max(1, Math.hypot(dx, dy));
-      const nx = -dy / length;
-      const ny = dx / length;
-      const bend = Math.sin(index * 2.1) * scale * 0.07;
-      // Swept, tapered bark strands create organic volume instead of straight rods.
-      for (let ridge = 0; ridge < 11; ridge += 1) {
-        const across = (ridge / 10 - 0.5) * widthScale;
-        const twist = Math.sin(index * 1.7 + ridge * 0.8) * widthScale * 0.21;
-        context.beginPath();
-        context.moveTo(startX + nx * across, startY + ny * across);
-        context.bezierCurveTo(
-          startX + dx * 0.3 + nx * (across + bend + twist),
-          startY + dy * 0.3 + ny * (across + bend + twist),
-          startX + dx * 0.72 + nx * (across * 0.72 - bend),
-          startY + dy * 0.72 + ny * (across * 0.72 - bend),
-          endX + nx * across * 0.55, endY + ny * across * 0.55
-        );
-        const bark = context.createLinearGradient(startX, startY, endX, endY);
-        const lit = ridge === 2 || ridge === 7;
-        bark.addColorStop(0, lit ? '#51483c' : '#111315');
-        bark.addColorStop(0.32, lit ? '#a1a7a6' : '#272725');
-        bark.addColorStop(0.43, lit ? '#edf0e7' : '#454b49');
-        bark.addColorStop(0.48, lit ? '#b9beb4' : '#222625');
-        bark.addColorStop(0.57, lit ? '#d7c4a0' : '#35322c');
-        bark.addColorStop(0.8, lit ? '#554b3c' : '#151719');
-        bark.addColorStop(1, lit ? '#968975' : '#282724');
-        context.globalAlpha = alpha;
-        context.lineWidth = Math.max(0.45, widthScale * (ridge === 0 || ridge === 10 ? 0.11 : 0.16));
-        context.strokeStyle = bark;
-        context.stroke();
+  // SCROLL GROWTH 0->1
+  setGrowth(t) {
+    this.growthFactor = THREE.MathUtils.clamp(t, 0.01, 1);
+    this.group.scale.setScalar(this.growthFactor);
+    this.barkMaterial.opacity = this.growthFactor;
+    // Leaves fade in later
+    if(this.leaves) this.leaves.material.opacity = THREE.MathUtils.clamp((t-0.45)*2.2, 0, 1);
+  }
+
+  // FIRE -> ASH PRESERVED IN 3D
+  triggerAsh() {
+    this.barkMaterial.color.set(0x0a0a0a);
+    this.leafMaterial.color.set(0x2a2a2a);
+    // particle leaves will handle falling
+  }
+}
+
+export default class CinematicIntro {
+  constructor(containerId = '#oak-canvas') {
+    this.container = document.querySelector(containerId);
+    this.init();
+  }
+
+  init() {
+    this.scene = new THREE.Scene();
+    this.scene.fog = new THREE.FogExp2(0x050508, 0.035);
+    this.scene.background = new THREE.Color(0x050508);
+
+    this.camera = new THREE.PerspectiveCamera(32, window.innerWidth/window.innerHeight, 0.1, 100);
+    this.camera.position.set(0, 1.8, 6.5);
+
+    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 1.15;
+    this.container.appendChild(this.renderer.domElement);
+
+    // LIGHTING — STUDIO LUXURY
+    const ambient = new THREE.AmbientLight(0x404050, 0.25);
+    this.scene.add(ambient);
+
+    const key = new THREE.DirectionalLight(0xfff4e0, 2.2);
+    key.position.set(3, 5, 2);
+    key.castShadow = true;
+    key.shadow.mapSize.set(2048,2048);
+    key.shadow.bias = -0.0001;
+    key.shadow.radius = 8;
+    this.scene.add(key);
+
+    const rim = new THREE.DirectionalLight(0xc9a86a, 0.8);
+    rim.position.set(-2, 3, -3);
+    this.scene.add(rim);
+
+    // HDRI ENV (placeholder)
+    // new RGBELoader().load('/assets/studio.hdr', (tex)=>{...})
+
+    this.oak = new RealisticOak(this.scene);
+
+    // VOLUMETRIC PARTICLES — falling website leaves concept
+    this.initParticles();
+
+    // SCROLL DRIVEN
+    this.scrollT = 0;
+    window.addEventListener('scroll', () => {
+      const max = document.body.scrollHeight - window.innerHeight;
+      this.scrollT = window.scrollY / Math.max(max,1);
+      this.oak.setGrowth(THREE.MathUtils.smoothstep(this.scrollT*1.4, 0, 1));
+    }, { passive: true });
+
+    this.animate();
+    window.addEventListener('resize', () => this.onResize());
+  }
+
+  initParticles() {
+    const count = 120;
+    const geo = new THREE.BufferGeometry();
+    const pos = new Float32Array(count*3);
+    const vel = new Float32Array(count*3);
+    for(let i=0;i<count;i++){
+      pos[i*3+0] = (Math.random()-0.5)*10;
+      pos[i*3+1] = Math.random()*8 + 2;
+      pos[i*3+2] = (Math.random()-0.5)*6;
+      vel[i*3+1] = -0.002 - Math.random()*0.004;
+    }
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    geo.userData.vel = vel;
+    const mat = new THREE.PointsMaterial({ color: 0xc9a86a, size: 0.04, transparent: true, opacity: 0.6, sizeAttenuation: true });
+    this.particles = new THREE.Points(geo, mat);
+    this.scene.add(this.particles);
+  }
+
+  animate() {
+    requestAnimationFrame(() => this.animate());
+    const time = performance.now()*0.001;
+
+    // Particle drift
+    if(this.particles){
+      const pos = this.particles.geometry.attributes.position;
+      const vel = this.particles.geometry.userData.vel;
+      for(let i=0;i<pos.count;i++){
+        pos.array[i*3+1] += vel[i*3+1];
+        pos.array[i*3+0] += Math.sin(time + i)*0.0008;
+        if(pos.array[i*3+1] < 0){ pos.array[i*3+1] = 8; }
       }
-      // Sparse amber fissures echo the reference without turning all bark gold.
-      if (segment.generation < 3 && index % 3 === 0) {
-        context.beginPath();
-        context.moveTo(startX + dx * 0.18, startY + dy * 0.18);
-        context.bezierCurveTo(startX + dx * 0.4 + nx * bend, startY + dy * 0.4 + ny * bend,
-          startX + dx * 0.65 - nx * widthScale * 0.2, startY + dy * 0.65 - ny * widthScale * 0.2,
-          startX + dx * 0.84, startY + dy * 0.84);
-        context.strokeStyle = isYoung ? '#e3ba6b' : '#c28a42';
-        context.lineWidth = Math.max(0.6, widthScale * 0.032);
-        context.shadowColor = '#ffad3c';
-        context.shadowBlur = widthScale * 0.17;
-        context.stroke();
-        context.shadowBlur = 0;
-      }
-      context.globalAlpha = 1;
-    });
-
-    if (growth > 0.82) {
-      const rootGrowth = smoothstep(0.82, 1, growth);
-      for (let index = 0; index < 7; index += 1) {
-        const direction = index % 2 ? 1 : -1;
-        const rootLength = scale * (0.18 + index * 0.025) * rootGrowth;
-        context.beginPath();
-        context.moveTo(centerX, groundY - 2);
-        context.quadraticCurveTo(centerX + direction * rootLength * 0.42, groundY + scale * 0.035, centerX + direction * rootLength, groundY + scale * 0.055);
-        context.lineWidth = Math.max(0.8, scale * 0.018 * (1 - index * 0.08));
-        context.strokeStyle = `rgba(111,76,34,${alpha * 0.55})`;
-        context.stroke();
-      }
-    }
-    context.restore();
-  }
-
-  function leafPath(size) {
-    context.beginPath();
-    context.moveTo(0, -size * 0.58);
-    for (const side of [1, -1]) {
-      const points = side === 1 ? [-0.42, -0.22, 0, 0.23, 0.42] : [0.42, 0.23, 0, -0.22, -0.42];
-      points.forEach((y) => {
-        const spread = (0.16 + Math.sin((y + 0.58) / 1.16 * Math.PI) * 0.23) * size * side;
-        context.bezierCurveTo(spread * 1.1, (y - side * 0.11) * size, spread * 1.35, (y + side * 0.025) * size, spread * 0.9, (y + side * 0.055) * size);
-        context.quadraticCurveTo(spread * 0.66, (y + side * 0.075) * size, spread * 0.72, (y + side * 0.1) * size);
-      });
-      if (side === 1) context.quadraticCurveTo(size * 0.12, size * 0.5, 0, size * 0.58);
-    }
-    context.closePath();
-  }
-
-  function drawNaturalLeaf(leaf, x, y, size, rotation, turn, alpha, burn) {
-    if (alpha <= 0.005) return;
-    context.save();
-    context.translate(x, y);
-    context.rotate(rotation);
-    context.scale(0.18 + Math.abs(Math.cos(turn)) * 0.82, 1);
-    context.globalAlpha = alpha;
-    const hue = leaf.hue ?? 72;
-    const light = 29 + Math.cos(turn) * 8;
-    const surface = context.createLinearGradient(-size * 0.45, -size * 0.2, size * 0.45, size * 0.25);
-    surface.addColorStop(0, `hsl(${hue} 35% 9%)`);
-    surface.addColorStop(0.38, `hsl(${hue} 43% ${light}%)`);
-    surface.addColorStop(0.49, `hsl(${hue} 48% 48%)`);
-    surface.addColorStop(0.52, `hsl(${hue} 42% 20%)`);
-    surface.addColorStop(0.82, `hsl(${hue} 36% 31%)`);
-    surface.addColorStop(1, `hsl(${hue} 30% 12%)`);
-    leafPath(size);
-    context.shadowColor = 'rgba(0,0,0,.65)';
-    context.shadowBlur = size * 0.12;
-    context.fillStyle = surface;
-    context.fill();
-    context.shadowBlur = 0;
-    context.save();
-    context.clip();
-    const sheenX = Math.sin(turn) * size * 0.23;
-    const sheen = context.createRadialGradient(sheenX, -size * 0.15, size * 0.025, sheenX, -size * 0.15, size * 0.46);
-    sheen.addColorStop(0, 'rgba(243,247,197,.43)');
-    sheen.addColorStop(0.35, 'rgba(208,223,149,.14)');
-    sheen.addColorStop(1, 'rgba(208,223,149,0)');
-    context.fillStyle = sheen;
-    context.fillRect(-size, -size, size * 2, size * 2);
-    // Fine branching veins follow the lobes, with highlights on the folded ridge.
-    for (let i = 0; i < 9; i += 1) {
-      const yy = (-0.4 + i * 0.095) * size;
-      for (const side of [-1, 1]) {
-        context.beginPath();
-        context.moveTo(0, yy + size * 0.12);
-        context.quadraticCurveTo(side * size * 0.15, yy + size * 0.04, side * size * 0.38, yy - size * 0.06);
-        context.strokeStyle = 'rgba(213,210,131,.36)';
-        context.lineWidth = Math.max(0.35, size * 0.008);
-        context.stroke();
-      }
-    }
-    if (burn > 0) {
-      const char = context.createLinearGradient(0, -size * 0.6, 0, size * 0.6);
-      char.addColorStop(0, 'rgba(15,10,6,0)');
-      char.addColorStop(clamp(1 - burn - 0.08), 'rgba(30,12,3,.2)');
-      char.addColorStop(clamp(1 - burn), '#fff4a6');
-      char.addColorStop(clamp(1 - burn + 0.06), '#ff620c');
-      char.addColorStop(clamp(1 - burn + 0.15), '#100b09');
-      char.addColorStop(1, '#070606');
-      context.fillStyle = char;
-      context.fillRect(-size, -size, size * 2, size * 2);
-    }
-    context.restore();
-    context.beginPath();
-    context.moveTo(0, size * 0.73);
-    context.quadraticCurveTo(size * 0.035, 0, 0, -size * 0.55);
-    context.lineWidth = Math.max(0.6, size * 0.018);
-    context.strokeStyle = burn > 0.1 ? '#ed8a32' : '#aca66c';
-    context.stroke();
-    context.restore();
-  }
-  function drawEmbers(x, y, size, alpha, time, phase) {
-    if (alpha <= 0.005) return;
-    context.save();
-    context.globalCompositeOperation = 'lighter';
-    // Small incandescent fragments and soft halos, with no flame silhouettes.
-    for (let ember = 0; ember < 16; ember += 1) {
-      const life = (time * 0.00028 + ember / 16 + phase / TAU) % 1;
-      const angle = phase + ember * 2.399;
-      const ex = x + Math.cos(angle) * size * (0.15 + life * 1.15);
-      const ey = y - life * size * 2.4 + Math.sin(angle) * size * 0.3;
-      const radius = (1.3 + (ember % 4) * 0.65) * (1 - life * 0.55);
-      const opacity = alpha * Math.sin(life * Math.PI);
-      const glow = context.createRadialGradient(ex, ey, 0, ex, ey, radius * 5);
-      glow.addColorStop(0, `rgba(255,202,102,${opacity})`);
-      glow.addColorStop(0.2, `rgba(255,101,24,${opacity * 0.85})`);
-      glow.addColorStop(1, 'rgba(220,40,0,0)');
-      context.fillStyle = glow;
-      context.beginPath();
-      context.arc(ex, ey, radius * 5, 0, TAU);
-      context.fill();
-      context.fillStyle = `rgba(255,222,155,${opacity})`;
-      context.beginPath();
-      context.ellipse(ex, ey, radius * 0.5, radius, angle, 0, TAU);
-      context.fill();
-    }
-    context.restore();
-  }
-
-  function drawLeaves(centerX, groundY, treeScale, time) {
-    const count = width < 680 ? 24 : leaves.length;
-    leaves.slice(0, count).sort((a, b) => a.z - b.z).forEach((leaf) => {
-      const fall = smoothstep(leaf.fallStart, leaf.fallStart + 0.31, progress);
-      const burn = smoothstep(leaf.burnStart, leaf.burnStart + 0.2, progress);
-      const baseX = centerX + leaf.x * treeScale;
-      const baseY = groundY + leaf.y * treeScale;
-      const sway = Math.sin(time * 0.0012 + leaf.phase + fall * 8) * (6 + fall * 34);
-      const x = baseX + sway + leaf.drift * width * easeIn(fall) + pointer.x * 14 * (1 + leaf.z);
-      const y = mix(baseY, groundY - height * (0.22 + leaf.z * 0.06), fall) + Math.sin(fall * Math.PI * 4 + leaf.phase) * 11;
-      const depthScale = 0.78 + (leaf.z + 0.7) * 0.22;
-      const size = clamp(treeScale * 0.16 * leaf.size * depthScale, 28, width < 680 ? 52 : 68);
-      const rotation = leaf.rotation + fall * leaf.direction * 5.8 + Math.sin(time * 0.001 + leaf.phase) * 0.09;
-      const turn = time * 0.0011 * leaf.direction + leaf.phase + fall * 7;
-      const leafAlpha = (1 - smoothstep(0.72, 0.99, burn)) * smoothstep(0.02, 0.1, 1 - progress);
-      drawNaturalLeaf(leaf, x, y, size, rotation, turn, leafAlpha, burn);
-
-      const emberAmount = smoothstep(0.05, 0.34, burn) * (1 - smoothstep(0.8, 1, burn));
-      drawEmbers(x, y + size * 0.12, size * 0.85, emberAmount, time, leaf.phase);
-
-      const ashAmount = smoothstep(0.28, 0.82, burn);
-      if (ashAmount > 0) {
-        context.save();
-        leaf.ash.forEach((particle) => {
-          const travel = ashAmount * particle.speed;
-          const ashX = x + particle.x * size * (0.35 + travel) + Math.sin(time * 0.002 + particle.phase) * 7;
-          const ashY = y - travel * size * 2.9 + particle.y * size * 0.8;
-          context.globalAlpha = clamp((1.5 - travel) * ashAmount);
-          context.fillStyle = particle.phase > Math.PI ? '#ffbd62' : '#c6c0b6';
-          context.shadowColor = '#ff7920';
-          context.shadowBlur = particle.phase > Math.PI ? 9 : 0;
-          context.fillRect(ashX, ashY, particle.size, particle.size * 1.8);
-        });
-        context.restore();
-      }
-    });
-  }
-
-  function drawGroundAsh(time, groundY) {
-    const visible = smoothstep(0.5, 0.72, progress) * (1 - smoothstep(0.9, 1, progress) * 0.45);
-    if (visible <= 0.001) return;
-    context.save();
-    groundAsh.forEach((particle) => {
-      const radius = Math.sqrt(particle.radius) * width * 0.28;
-      const x = width * 0.5 + Math.cos(particle.angle) * radius;
-      const rise = smoothstep(0.6, 0.82, progress) * particle.lift * height * 0.16;
-      const y = groundY + Math.sin(particle.angle) * radius * 0.13 - rise + Math.sin(time * 0.0015 + particle.phase) * 4;
-      context.globalAlpha = visible * (0.45 + particle.lift * 0.5);
-      context.fillStyle = particle.index % 4 === 0 ? '#ffb657' : '#b4afa6';
-      context.fillRect(x, y, particle.size * 2, particle.size * 2.7);
-    });
-    context.restore();
-  }
-
-  function drawYoungLeaves(centerX, groundY, treeScale, growth, time) {
-    if (growth < 0.48) return;
-    const alpha = smoothstep(0.48, 0.82, growth);
-    const count = width < 680 ? 18 : 28;
-    context.save();
-    youngTree.tips.slice(0, count).forEach((tip, index) => {
-      const reveal = smoothstep(0.46 + (index % 7) * 0.035, 0.72 + (index % 7) * 0.035, growth);
-      if (reveal <= 0) return;
-      const x = centerX + tip.x * treeScale + Math.sin(time * 0.001 + tip.phase) * 2.5;
-      const y = groundY + tip.y * treeScale;
-      const size = treeScale * 0.055 * tip.size * reveal;
-      context.save();
-      context.translate(x, y);
-      context.rotate(Math.sin(tip.phase) * 0.7);
-      context.scale(0.62, 1);
-      leafPath(size);
-      const leafGlow = context.createLinearGradient(0, -size, 0, size);
-      leafGlow.addColorStop(0, '#f2d891');
-      leafGlow.addColorStop(0.55, '#bb8e3e');
-      leafGlow.addColorStop(1, '#5f4927');
-      context.globalAlpha = alpha * reveal;
-      context.shadowColor = 'rgba(212,174,88,.5)';
-      context.shadowBlur = size * 0.8;
-      context.fillStyle = leafGlow;
-      context.fill();
-      context.restore();
-    });
-    context.restore();
-  }
-
-  function draw(time) {
-    if (!width || !height) return;
-    pointer.x += (pointer.targetX - pointer.x) * 0.045;
-    pointer.y += (pointer.targetY - pointer.y) * 0.045;
-    context.setTransform(deviceScale, 0, 0, deviceScale, 0, 0);
-    context.clearRect(0, 0, width, height);
-    drawBackground(time);
-
-    const mobile = width < 680;
-    const groundY = height * (mobile ? 0.9 : 0.91);
-    const oldCenterX = width * (mobile ? 0.53 : 0.72) + pointer.x * 13;
-    const oldScale = Math.min(width * (mobile ? 0.17 : 0.19), height * 0.225) * (1 + smoothstep(0, 0.34, progress) * 0.055);
-    const oldTreeAlpha = 1 - smoothstep(0.5, 0.72, progress);
-    drawTree(oldTree, oldCenterX, groundY, oldScale, oldTreeAlpha, 1, false);
-    drawLeaves(oldCenterX, groundY, oldScale, time);
-    drawGroundAsh(time, groundY);
-
-    const youngGrowth = smoothstep(0.625, 0.91, progress);
-    if (youngGrowth > 0) {
-      const youngCenterX = width * 0.5 + pointer.x * 6;
-      const youngScale = Math.min(width * (mobile ? 0.16 : 0.145), height * 0.205);
-      const seedGlow = context.createRadialGradient(youngCenterX, groundY, 0, youngCenterX, groundY, youngScale * 0.72);
-      seedGlow.addColorStop(0, `rgba(241,212,140,${0.18 * (1 - youngGrowth) + 0.08})`);
-      seedGlow.addColorStop(1, 'rgba(212,174,88,0)');
-      context.fillStyle = seedGlow;
-      context.fillRect(youngCenterX - youngScale, groundY - youngScale, youngScale * 2, youngScale * 2);
-      drawTree(youngTree, youngCenterX, groundY, youngScale, smoothstep(0.02, 0.18, youngGrowth), youngGrowth, true);
-      drawYoungLeaves(youngCenterX, groundY, youngScale, youngGrowth, time);
+      pos.needsUpdate = true;
     }
 
-    const foreground = context.createLinearGradient(0, height * 0.76, 0, height);
-    foreground.addColorStop(0, 'rgba(3,4,4,0)');
-    foreground.addColorStop(1, 'rgba(1,2,2,.82)');
-    context.fillStyle = foreground;
-    context.fillRect(0, height * 0.72, width, height * 0.28);
+    this.oak.group.rotation.y = Math.sin(time*0.08)*0.12;
+    this.renderer.render(this.scene, this.camera);
   }
 
-  function animate(time) {
-    frameId = window.requestAnimationFrame(animate);
-    if (!introVisible || document.hidden || reducedMotion.matches || time - lastFrame < 16) return;
-    lastFrame = time;
-    draw(time);
+  onResize(){
+    this.camera.aspect = window.innerWidth/window.innerHeight;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
+}
 
-  function enterOfficialSite() {
-    const top = officialSite.getBoundingClientRect().top + window.scrollY;
-    window.scrollTo({ top, behavior: reducedMotion.matches ? 'auto' : 'smooth' });
-  }
-
-  skipButton?.addEventListener('click', enterOfficialSite);
-  stage.addEventListener('pointermove', (event) => {
-    if (coarsePointer.matches || reducedMotion.matches) return;
-    const rect = stage.getBoundingClientRect();
-    pointer.targetX = (event.clientX - rect.left) / rect.width - 0.5;
-    pointer.targetY = (event.clientY - rect.top) / rect.height - 0.5;
-  }, { passive: true });
-  stage.addEventListener('pointerleave', () => {
-    pointer.targetX = 0;
-    pointer.targetY = 0;
+// Auto-init if #oak-canvas exists
+if(typeof window !== 'undefined'){
+  document.addEventListener('DOMContentLoaded', () => {
+    if(document.querySelector('#oak-canvas')) new CinematicIntro();
   });
-
-  const visibilityObserver = new IntersectionObserver(([entry]) => {
-    introVisible = entry.isIntersecting;
-  }, { threshold: 0 });
-  visibilityObserver.observe(intro);
-
-  window.addEventListener('scroll', updateProgress, { passive: true });
-  window.addEventListener('resize', () => {
-    resize();
-    updateProgress();
-  }, { passive: true });
-  reducedMotion.addEventListener?.('change', () => {
-    intro.classList.toggle('is-reduced-motion', reducedMotion.matches);
-    if (skipButton) skipButton.firstChild.textContent = reducedMotion.matches ? 'Enter site ' : 'Skip intro ';
-    updateProgress();
-    draw(performance.now());
-  });
-
-  intro.classList.toggle('is-reduced-motion', reducedMotion.matches);
-  if (skipButton && reducedMotion.matches) skipButton.firstChild.textContent = 'Enter site ';
-  updateProgress();
-  resize();
-  if (!reducedMotion.matches) frameId = window.requestAnimationFrame(animate);
-  window.addEventListener('pagehide', () => window.cancelAnimationFrame(frameId), { once: true });
-})();
+}
