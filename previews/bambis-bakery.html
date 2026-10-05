@@ -1,7 +1,32 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bambi's Bakery — Black Oak Concept</title></head>
-<body style="margin:0;background:#f6e7d4;color:#63352e;font-family:Arial,sans-serif">
-<main style="min-height:100vh;display:grid;place-items:center;padding:40px;text-align:center">
-<section><p style="letter-spacing:.2em;text-transform:uppercase">Black Oak concept</p><h1 style="font-family:Georgia,serif;font-size:clamp(60px,12vw,130px);margin:20px 0">Bambi's Bakery</h1><p style="max-width:620px;line-height:1.7">A premium bakery storefront concept for celebration cakes, signature bakes and online enquiries.</p></section>
-</main></body></html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f7e8d4">
+  <title>Bambi's Bakery — Black Oak Concept</title>
+  <link rel="stylesheet" href="bambis-bakery.css?v=1">
+  <script src="bambis-bakery.js?v=1" defer></script>
+</head>
+<body>
+  <main>
+    <section class="b-hero">
+      <div class="b-copy">
+        <small>Freshly made · beautifully presented</small>
+        <h1>Bambi's<br>Bakery</h1>
+        <p>A premium bakery storefront built around celebration cakes, warm storytelling, product discovery and online enquiries.</p>
+        <a class="b-scroll" href="#menu">Explore the concept ↓</a>
+      </div>
+      <div class="b-cake" aria-label="Stylised Bambi's Bakery cake"></div>
+    </section>
+    <section class="b-menu" id="menu">
+      <h2>Made for the moment.</h2>
+      <div class="b-grid">
+        <article class="b-card"><strong>Celebration cakes</strong><span>Custom centrepieces for birthdays, events and milestones.</span></article>
+        <article class="b-card"><strong>Signature bakes</strong><span>Small-batch favourites presented with premium visual detail.</span></article>
+        <article class="b-card"><strong>Order online</strong><span>A clear path from inspiration to enquiry or checkout.</span></article>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
