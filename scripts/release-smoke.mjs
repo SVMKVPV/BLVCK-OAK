@@ -87,6 +87,12 @@ try {
   for(const path of ['/community.html','/nearby.html','/login.html','/coming-soon.html']) await check(base,path,[200],/Coming soon/);
   await check(base,'/partners.html',[200],/data-lead-search[^>]+hidden/);
   await check(base,'/portfolio.html',[200],/Cinematic Wedding Invitation/);
+  await check(base,'/previews/wedding-invitation.html',[200],/wedding-invitation\.css/);
+  await check(base,'/previews/wedding-invitation.css',[200],/w-frame/);
+  await check(base,'/previews/wedding-invitation.js',[200],/DOMContentLoaded/);
+  await check(base,'/previews/bambis-bakery.html',[200],/bambis-bakery\.css/);
+  await check(base,'/previews/bambis-bakery.css',[200],/b-cake/);
+  await check(base,'/previews/bambis-bakery.js',[200],/DOMContentLoaded/);
   await check(base,'/marketplace.js',[200],/bo-market-cart/);
   await check(base,'/previews/ecommerce.html',[200],/Coming soon/);
   await check(base,'/release.css',[200],/coming-soon-chip/);

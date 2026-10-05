@@ -1,0 +1,1 @@
+addEventListener('DOMContentLoaded',()=>{document.body.classList.add('ready');const cake=document.querySelector('.b-cake');if(!cake)return;addEventListener('scroll',()=>{cake.style.transform='rotate('+(scrollY*.035)+'deg)'},{passive:true})});
