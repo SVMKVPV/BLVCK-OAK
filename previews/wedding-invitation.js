@@ -1,0 +1,1 @@
+document.documentElement.classList.add('js');addEventListener('DOMContentLoaded',()=>{document.body.classList.add('ready');const orbit=document.querySelector('.w-orbit');if(!orbit)return;addEventListener('scroll',()=>{orbit.style.transform='rotate('+(scrollY*.12)+'deg)'},{passive:true})});
