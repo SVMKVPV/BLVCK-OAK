@@ -5,6 +5,9 @@
 [build.environment]
   NODE_VERSION = "22"
 
+[context.production]
+  command = "pnpm run check && pnpm run preflight:live && pnpm run build"
+
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"

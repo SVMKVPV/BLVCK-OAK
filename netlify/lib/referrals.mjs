@@ -62,12 +62,22 @@ export function scopedStoreName(base) {
   return `${base.slice(0, 50)}-${suffix}`;
 }
 
+export function isLiveStripeKey(value) {
+  return /^(?:sk|rk)_live_[A-Za-z0-9]+$/.test(String(value || '').trim());
+}
+
 export function getStripe() {
-  const secretKey = runtimeEnv('STRIPE_SECRET_KEY');
+  const secretKey = String(runtimeEnv('STRIPE_SECRET_KEY') || '').trim();
   if (!secretKey) {
     const error = new Error('Stripe is not configured for this function deployment.');
     error.name = 'StripeConfigurationError';
     error.code = 'stripe_not_configured';
+    throw error;
+  }
+  if (deployContext() === 'production' && !isLiveStripeKey(secretKey)) {
+    const error = new Error('Live Stripe credentials are required in production.');
+    error.name = 'StripeConfigurationError';
+    error.code = 'stripe_test_key_in_production';
     throw error;
   }
   return new Stripe(secretKey);

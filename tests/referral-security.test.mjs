@@ -10,11 +10,42 @@ import {
   generateEmailToken,
   generateReferralCode,
   getPackage,
+  getStripe,
   isReferralAccountEligible,
   isValidCode,
   normaliseCode,
   sameEmail,
 } from '../netlify/lib/referrals.mjs';
+
+test('production refuses Stripe sandbox keys while previews remain testable', () => {
+  const originalContext = process.env.CONTEXT;
+  const originalKey = process.env.STRIPE_SECRET_KEY;
+  try {
+    process.env.CONTEXT = 'production';
+    process.env.STRIPE_SECRET_KEY = 'sk_test_placeholder';
+    assert.throws(
+      () => getStripe(),
+      (error) => error.name === 'StripeConfigurationError' && error.code === 'stripe_test_key_in_production',
+    );
+
+    process.env.CONTEXT = 'deploy-preview';
+    assert.doesNotThrow(() => getStripe());
+
+    process.env.CONTEXT = 'production';
+    process.env.STRIPE_SECRET_KEY = 'rk_live_placeholder';
+    assert.doesNotThrow(() => getStripe());
+  } finally {
+    if (originalContext === undefined) delete process.env.CONTEXT;
+    else process.env.CONTEXT = originalContext;
+    if (originalKey === undefined) delete process.env.STRIPE_SECRET_KEY;
+    else process.env.STRIPE_SECRET_KEY = originalKey;
+  }
+});
+
+test('Netlify production deploys run the live environment preflight', async () => {
+  const config = await readFile(new URL('../netlify.toml', import.meta.url), 'utf8');
+  assert.match(config, /\[context\.production\][\s\S]*?command\s*=\s*"[^"]*preflight:live[^"]*"/);
+});
 
 test('generated referral codes always match the one strict public format', () => {
   const codes = new Set(Array.from({ length: 250 }, () => generateReferralCode()));
