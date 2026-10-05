@@ -2,7 +2,7 @@ export const quoteCatalog = Object.freeze({
   website: Object.freeze({
     essential: { label: 'New website — Essential foundation', min: 500, max: 500 },
     professional: { label: 'New website — Professional foundation', min: 1500, max: 1500 },
-    enterprise: { label: 'New website — Enterprise / custom build', min: 2900, max: 4500 },
+    enterprise: { label: 'New website — Enterprise / custom build', min: 2900, max: 2900 },
     upgrade: { label: 'Existing website upgrade', min: 300, max: 1500 },
   }),
   features: Object.freeze({
@@ -36,6 +36,21 @@ export const quoteCatalog = Object.freeze({
   }),
 });
 
+export const packageInclusions = Object.freeze({
+  essential: Object.freeze({
+    features: Object.freeze(['booking', 'copywriting']),
+    services: Object.freeze(['seo']),
+  }),
+  professional: Object.freeze({
+    features: Object.freeze(['booking', 'copywriting', 'payments', 'analytics', 'members', 'extra-pages', 'ecommerce']),
+    services: Object.freeze(['seo']),
+  }),
+  enterprise: Object.freeze({
+    features: Object.freeze(['booking', 'copywriting', 'payments', 'analytics', 'members', 'extra-pages', 'ecommerce', 'motion']),
+    services: Object.freeze(['seo', 'automation']),
+  }),
+});
+
 const timelineLabels = Object.freeze({ flexible: 'Flexible timing', 'one-month': 'Within one month', urgent: 'Urgent — as soon as possible', planning: 'Still planning' });
 const paymentLabels = Object.freeze({ discuss: 'Discuss the best option', standard: 'Standard deposit and balance', staged: 'Staged project payments', 'pay-as-you-sell': 'Ask about Pay as You Sell' });
 
@@ -61,11 +76,21 @@ export function calculateEstimate(selection) {
     oneOffItems.push(quoteCatalog.website[level]);
   }
   if (websiteBuild === 'upgrade') oneOffItems.push(quoteCatalog.website.upgrade);
-  const features = websiteBuild === 'none' ? [] : chosenItems(selection.features, quoteCatalog.features, 'website feature');
-  const services = chosenItems(selection.services, quoteCatalog.services, 'specialist service');
+  const selectedLevel = websiteBuild === 'new' ? String(selection.websiteLevel || '') : '';
+  const included = packageInclusions[selectedLevel] || { features: [], services: [] };
+  const featureIds = websiteBuild === 'none' ? [] : [...new Set(Array.isArray(selection.features) ? selection.features : [])];
+  const serviceIds = [...new Set(Array.isArray(selection.services) ? selection.services : [])];
+  const features = chosenItems(featureIds.filter((id) => !included.features.includes(id)), quoteCatalog.features, 'website feature');
+  const services = chosenItems(serviceIds.filter((id) => !included.services.includes(id)), quoteCatalog.services, 'specialist service');
+  const includedItems = websiteBuild === 'new'
+    ? [
+        ...chosenItems(included.features, quoteCatalog.features, 'website feature'),
+        ...chosenItems(included.services, quoteCatalog.services, 'specialist service'),
+      ].map((item) => ({ ...item, min: 0, max: 0, label: `${item.label} — included` }))
+    : [];
   const marketingSetup = chosenItems(selection.marketingSetup, quoteCatalog.marketingSetup, 'marketing setup');
   const monthlyItems = chosenItems(selection.monthly, quoteCatalog.monthly, 'monthly service');
-  oneOffItems.push(...features, ...services, ...marketingSetup);
+  oneOffItems.push(...includedItems, ...features, ...services, ...marketingSetup);
   if (!oneOffItems.length && !monthlyItems.length) throw new Error('Choose at least one service or marketing option to generate an estimate.');
   if (!Object.hasOwn(timelineLabels, selection.timeline)) throw new Error('Choose a valid project timing.');
   if (!Object.hasOwn(paymentLabels, selection.payment)) throw new Error('Choose a valid payment preference.');
@@ -151,7 +176,33 @@ function initialiseBuilder() {
     featureNote.hidden = !features.disabled;
     if (features.disabled) features.querySelectorAll('input').forEach((input) => { input.checked = false; });
   }
-  form.addEventListener('change', (event) => { if (event.target.name === 'websiteBuild') updateWebsiteFields(); });
+  function applyPackageInclusions() {
+    const level = String(form.elements.websiteLevel?.value || '');
+    const included = packageInclusions[level] || { features: [], services: [] };
+    const build = form.elements.websiteBuild.value;
+    form.querySelectorAll('input[name="features"], input[name="services"]').forEach((input) => {
+      const isIncluded = build === 'new'
+        && (input.name === 'features' ? included.features : included.services).includes(input.value);
+      if (input.dataset.packageIncluded === 'true' && !isIncluded) {
+        input.checked = false;
+        delete input.dataset.packageIncluded;
+        input.closest('.quote-check')?.removeAttribute('data-included');
+      }
+      if (isIncluded) {
+        input.checked = true;
+        input.dataset.packageIncluded = 'true';
+        input.closest('.quote-check')?.setAttribute('data-included', 'true');
+      }
+    });
+  }
+
+  form.addEventListener('change', (event) => {
+    if (event.target.name === 'websiteBuild') {
+      updateWebsiteFields();
+      applyPackageInclusions();
+    }
+    if (event.target.name === 'websiteLevel') applyPackageInclusions();
+  });
 
   form.addEventListener('submit', (event) => {
     event.preventDefault();
@@ -186,6 +237,7 @@ function initialiseBuilder() {
   document.querySelector('[data-print-estimate]').addEventListener('click', () => window.print());
   document.querySelector('[data-edit-estimate]').addEventListener('click', () => form.scrollIntoView({ behavior: 'smooth', block: 'start' }));
   updateWebsiteFields();
+  applyPackageInclusions();
 }
 
 if (typeof document !== 'undefined') initialiseBuilder();
