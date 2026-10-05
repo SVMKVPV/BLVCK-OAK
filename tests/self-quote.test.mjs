@@ -18,12 +18,13 @@ const selection = {
 
 test('self-quote adds one-off work and keeps monthly marketing separate', () => {
   const estimate = calculateEstimate(selection);
-  assert.deepEqual(estimate.oneOff, { min: 2650, max: 4800 });
+  assert.deepEqual(estimate.oneOff, { min: 1950, max: 2700 });
   assert.deepEqual(estimate.monthly, { min: 500, max: 1200 });
-  assert.equal(estimate.oneOffItems.length, 4);
+  assert.ok(estimate.oneOffItems.some((item) => item.label === 'Online booking — included'));
+  assert.ok(estimate.oneOffItems.some((item) => item.label === 'SEO & search strategy — included'));
   assert.equal(estimate.monthlyItems.length, 1);
-  assert.match(formatRange(estimate.oneOff), /2,650/);
-  assert.match(formatRange(estimate.oneOff), /4,800/);
+  assert.match(formatRange(estimate.oneOff), /1,950/);
+  assert.match(formatRange(estimate.oneOff), /2,700/);
 });
 
 test('monthly-only work is allowed while empty or forged selections are rejected', () => {
@@ -53,4 +54,15 @@ test('the public builder includes all stages, marketing choices and the estimate
   assert.match(page, /Ask about Pay as You Sell/);
   assert.match(page, /not a binding offer/);
   assert.match(page, /data-send-estimate/);
+});
+
+
+test('advertised package inclusions do not increase package base prices', () => {
+  const common = { websiteBuild: 'new', marketingSetup: [], monthly: [], timeline: 'flexible', payment: 'standard', industry: '', notes: '' };
+  const essential = calculateEstimate({ ...common, websiteLevel: 'essential', features: ['booking', 'copywriting'], services: ['seo'] });
+  const professional = calculateEstimate({ ...common, websiteLevel: 'professional', features: ['booking', 'copywriting', 'payments', 'analytics', 'members', 'extra-pages', 'ecommerce'], services: ['seo'] });
+  const enterprise = calculateEstimate({ ...common, websiteLevel: 'enterprise', features: ['booking', 'copywriting', 'payments', 'analytics', 'members', 'extra-pages', 'ecommerce', 'motion'], services: ['seo', 'automation'] });
+  assert.deepEqual(essential.oneOff, { min: 500, max: 500 });
+  assert.deepEqual(professional.oneOff, { min: 1500, max: 1500 });
+  assert.deepEqual(enterprise.oneOff, { min: 2900, max: 2900 });
 });
