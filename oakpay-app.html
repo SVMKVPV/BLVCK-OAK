@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080909">
+  <meta name="robots" content="noindex,nofollow">
+  <title>BLVCK OAK PAY — Workspace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/oakpay.css?v=1">
+  <script src="/oakpay-app.js?v=1" defer></script>
+</head>
+<body class="oakpay-app-body">
+  <div class="op-app-shell">
+    <aside class="op-sidebar">
+      <a class="op-brand" href="/oakpay.html"><span>BLVCK OAK</span><b>/ PAY</b></a>
+      <nav aria-label="Workspace">
+        <button type="button" class="is-active" data-view-target="overview" data-short="Home"><span>Overview</span></button>
+        <button type="button" data-view-target="bills" data-short="Bills"><span>Bills</span></button>
+        <button type="button" data-view-target="payments" data-short="Pay"><span>Payments</span></button>
+        <button type="button" data-view-target="suppliers" data-short="Payees"><span>Suppliers</span></button>
+        <button type="button" data-view-target="get-paid" data-short="Get"><span>Get paid</span></button>
+        <button type="button" data-view-target="settings" data-short="More"><span>Team & integrations</span></button>
+      </nav>
+      <div class="op-sidebar-foot">
+        <small>BLVCK OAK PAY founding build. Live money movement is disabled until a regulated payment provider and compliance layer are connected.</small>
+        <a href="/oakpay.html">Product site ↗</a>
+        <a href="/partners.html">Account ↗</a>
+      </div>
+    </aside>
+
+    <main class="op-app-main">
+      <header class="op-app-topbar">
+        <div><h1 data-business-title>BLVCK OAK PAY</h1><p data-business-subtitle>Loading your finance workspace…</p></div>
+        <span class="op-mode-pill">Provider activation mode</span>
+      </header>
+
+      <div class="op-app-content">
+        <div class="op-alert" data-alert role="status"></div>
+        <section class="op-provider-lock">
+          <div><strong>Payment rails are intentionally locked.</strong><p>You can build suppliers, bills, batches, customer requests, rewards estimates and account controls now. A real transaction will never be marked paid or sent until live KYC/AML and settlement providers are connected.</p></div>
+          <span>Safe build mode</span>
+        </section>
+
+        <section class="op-panel-view is-active" data-view="overview">
+          <div class="op-overview-head">
+            <div><p class="op-kicker">CONTROL CENTRE</p><h2>Money movement,<br>without the mess.</h2></div>
+            <p>Your account view combines bills, supplier instructions, incoming requests and an Oak Points preview. Use the tabs to build the workflow exactly as a finance operator would.</p>
+          </div>
+          <div class="op-metrics">
+            <article class="op-metric"><small>Outstanding bills</small><strong data-metric-bills>$0</strong><span data-metric-bills-count>0 open bills</span></article>
+            <article class="op-metric"><small>Payment instructions</small><strong data-metric-payments>$0</strong><span>Awaiting provider settlement</span></article>
+            <article class="op-metric"><small>Oak Points preview</small><strong data-metric-points>0</strong><span>Illustrative rewards only</span></article>
+            <article class="op-metric"><small>Customer requests</small><strong data-metric-requests>$0</strong><span data-metric-requests-count>0 drafts</span></article>
+          </div>
+          <div class="op-grid-2">
+            <article class="op-card">
+              <div class="op-card-head"><div><h3>Recent payment instructions</h3><p>Nothing leaves this system until a settlement provider is enabled.</p></div><button type="button" data-go="payments">New payment</button></div>
+              <div class="op-table-wrap">
+                <table class="op-table"><thead><tr><th>Recipient</th><th>Amount</th><th>Funding</th><th>Status</th></tr></thead><tbody data-payment-rows></tbody></table>
+                <p class="op-empty" data-payment-empty>No payment instructions yet.</p>
+              </div>
+            </article>
+            <article class="op-card">
+              <div class="op-card-head"><div><h3>Activity</h3><p>Latest account actions.</p></div></div>
+              <div class="op-activity-list" data-activity-list></div>
+              <p class="op-empty" data-activity-empty>No activity yet. Add a supplier or bill to begin.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="op-panel-view" data-view="bills">
+          <div class="op-view-head"><div><p class="op-kicker">BILLS / PAYABLES</p><h2>Capture what needs paying.</h2></div><p>Add bills individually or import a CSV. Each bill stays in your workspace until you turn it into a payment instruction.</p></div>
+          <div class="op-grid-2">
+            <article class="op-card">
+              <div class="op-card-head"><div><h3>Add bill</h3><p>Amounts are stored in AUD cents on the server.</p></div></div>
+              <form class="op-form" data-bill-form>
+                <label>Supplier<select name="supplierId"><option value="">Choose supplier or enter name below</option></select></label>
+                <label>Supplier name<input name="supplierName" maxlength="100" placeholder="e.g. Northline Equipment"></label>
+                <label>Amount (AUD)<input name="amount" inputmode="decimal" required placeholder="1250.00"></label>
+                <label>Due date<input name="dueDate" type="date" required></label>
+                <label>Category<select name="category"><option>Supplier</option><option>Tax</option><option>Rent</option><option>Payroll</option><option>Super</option><option>Contractor</option><option>Equipment</option><option>Other</option></select></label>
+                <label>Reference<input name="reference" maxlength="80" placeholder="Invoice 1042"></label>
+                <div class="op-form-actions"><button class="op-btn op-btn-primary" type="submit">Add bill</button></div>
+              </form>
+            </article>
+            <article class="op-card">
+              <div class="op-card-head"><div><h3>Bulk import</h3><p>CSV columns: supplier, amount, dueDate, reference, category.</p></div></div>
+              <div class="op-import-zone"><input type="file" accept=".csv,text/csv" data-bill-csv><p>Your CSV is parsed in the browser, then validated and saved to your authenticated account. Maximum 50 rows per import.</p></div>
+              <p class="op-inline-note"><strong>Tip:</strong> use ISO dates such as 2026-10-31. Supplier names can be new; you do not need to create the supplier record first.</p>
+            </article>
+          </div>
+          <article class="op-card" style="margin-top:14px">
+            <div class="op-card-head"><div><h3>Bill queue</h3><p>Open and instruction-ready bills.</p></div></div>
+            <div class="op-table-wrap"><table class="op-table"><thead><tr><th>Supplier</th><th>Reference</th><th>Due</th><th>Category</th><th>Amount</th><th>Status</th></tr></thead><tbody data-bill-rows></tbody></table><p class="op-empty" data-bill-empty>No bills yet.</p></div>
+          </article>
+        </section>
+
+        <section class="op-panel-view" data-view="payments">
+          <div class="op-view-head"><div><p class="op-kicker">PAYMENTS / OUTBOUND</p><h2>Build the instruction.</h2></div><p>Choose who you are paying, the source of funds and the date. The instruction is stored safely but cannot settle until a payment provider is connected.</p></div>
+          <div class="op-grid-2">
+            <article class="op-card">
+              <div class="op-card-head"><div><h3>New payment instruction</h3><p>Use a saved supplier and optionally connect the instruction to a bill.</p></div></div>
+              <form class="op-form" data-payment-form>
+                <label>Supplier<select name="supplierId" required><option value="">Choose supplier</option></select></label>
+                <label>Bill<select name="billId"><option value="">No linked bill</option></select></label>
+                <label>Amount (AUD)<input name="amount" inputmode="decimal" required placeholder="2500.00"></label>
+                <label>Funding method<select name="fundingMethod"><option value="card">Card funding</option><option value="bank">Bank transfer</option><option value="bpay">BPAY source</option></select></label>
+                <label>Schedule date<input name="scheduledDate" type="date" required></label>
+                <label>Reference<input name="reference" maxlength="80" placeholder="Payment reference"></label>
+                <div class="op-form-actions"><button class="op-btn op-btn-primary" type="submit">Queue instruction</button></div>
+              </form>
+              <p class="op-inline-note"><strong>No funds move here.</strong> This creates an auditable instruction with a provider-required status. Once live rails exist, this server action becomes the handoff point to the regulated provider.</p>
+            </article>
+            <article class="op-card">
+              <div class="op-card-head"><div><h3>Rewards preview</h3><p>Estimate only — not issued points.</p></div></div>
+              <div class="op-metric"><small>Your earning model</small><strong data-reward-rate>1 pt / $1</strong><span data-reward-tier>Core preview</span></div>
+              <p class="op-inline-note"><strong>Oak Points preview:</strong> every queued instruction calculates a transparent illustrative points amount. It remains a product concept until reward terms, funding and redemption partners are established.</p>
+            </article>
+          </div>
+          <article class="op-card" style="margin-top:14px">
+            <div class="op-card-head"><div><h3>Payment instruction ledger</h3><p>Provider-required records cannot be confused with completed settlements.</p></div></div>
+            <div class="op-table-wrap"><table class="op-table"><thead><tr><th>Created</th><th>Supplier</th><th>Reference</th><th>Funding</th><th>Amount</th><th>Points</th><th>Status</th></tr></thead><tbody data-payment-ledger></tbody></table><p class="op-empty" data-payment-ledger-empty>No instructions yet.</p></div>
+          </article>
+        </section>
+
+        <section class="op-panel-view" data-view="suppliers">
+          <div class="op-view-head"><div><p class="op-kicker">SUPPLIERS / RECIPIENTS</p><h2>Know who gets paid.</h2></div><p>The MVP stores business labels and masked destination references only. Full account credentials should live with the future payment provider, not in this general application database.</p></div>
+          <div class="op-grid-2">
+            <article class="op-card">
+              <div class="op-card-head"><div><h3>Add supplier</h3><p>Create a reusable recipient profile.</p></div></div>
+              <form class="op-form" data-supplier-form>
+                <label>Supplier name<input name="name" required maxlength="100" placeholder="Business or recipient"></label>
+                <label>Recipient type<select name="type"><option value="supplier">Supplier</option><option value="tax">ATO / tax</option><option value="payroll">Payroll</option><option value="rent">Rent</option><option value="super">Super</option><option value="contractor">Contractor</option><option value="international">International</option></select></label>
+                <label>Destination label<input name="destinationLabel" maxlength="100" placeholder="Bank account / BPAY / payroll file"></label>
+                <label>Destination last 4<input name="destinationLast4" inputmode="numeric" maxlength="4" pattern="[0-9]{0,4}" placeholder="1234"></label>
+                <div class="op-form-actions"><button class="op-btn op-btn-primary" type="submit">Add supplier</button></div>
+              </form>
+            </article>
+            <article class="op-card">
+              <div class="op-card-head"><div><h3>Destination security</h3><p>Purposefully minimal by design.</p></div></div>
+              <p class="op-inline-note"><strong>Why only the last four digits?</strong> A real payment provider should vault bank/card destination credentials. This app stores only what your team needs to recognise the destination before approval.</p>
+            </article>
+          </div>
+          <article class="op-card" style="margin-top:14px">
+            <div class="op-card-head"><div><h3>Supplier registry</h3><p>Reusable across bills and payments.</p></div></div>
+            <div class="op-table-wrap"><table class="op-table"><thead><tr><th>Name</th><th>Type</th><th>Destination</th><th>Added</th></tr></thead><tbody data-supplier-rows></tbody></table><p class="op-empty" data-supplier-empty>No suppliers yet.</p></div>
+          </article>
+        </section>
+
+        <section class="op-panel-view" data-view="get-paid">
+          <div class="op-view-head"><div><p class="op-kicker">GET PAID / RECEIVABLES</p><h2>Create the request first.</h2></div><p>Prepare inbound payment requests now. PayID, virtual account and settlement details remain disabled until a banking partner issues real account rails for each verified business.</p></div>
+          <div class="op-grid-2">
+            <article class="op-card">
+              <div class="op-card-head"><div><h3>New customer request</h3><p>Draft an amount, customer and purpose.</p></div></div>
+              <form class="op-form" data-request-form>
+                <label>Customer name<input name="customerName" required maxlength="100"></label>
+                <label>Customer email<input name="customerEmail" type="email" required maxlength="160"></label>
+                <label>Amount (AUD)<input name="amount" inputmode="decimal" required placeholder="4600.00"></label>
+                <label>Reference<input name="reference" maxlength="80" placeholder="Project / invoice"></label>
+                <label class="wide">Description<textarea name="description" maxlength="500" placeholder="What is the customer paying for?"></textarea></label>
+                <div class="op-form-actions"><button class="op-btn op-btn-primary" type="submit">Create draft request</button></div>
+              </form>
+            </article>
+            <article class="op-card">
+              <div class="op-card-head"><div><h3>Future settlement rails</h3><p>Designed, not falsely activated.</p></div></div>
+              <div class="op-integration-grid" style="grid-template-columns:1fr">
+                <div class="op-integration"><h3>PayID</h3><span class="op-status locked">Banking partner required</span><p>Issue a unique identifier for each verified business and reconcile inbound transfers automatically.</p></div>
+                <div class="op-integration"><h3>Virtual account</h3><span class="op-status locked">Banking partner required</span><p>BSB/account or equivalent virtual-account rails can attach to this request ledger when a provider is chosen.</p></div>
+              </div>
+            </article>
+          </div>
+          <article class="op-card" style="margin-top:14px">
+            <div class="op-card-head"><div><h3>Customer requests</h3><p>Draft receivables ready for future payment rails.</p></div></div>
+            <div class="op-table-wrap"><table class="op-table"><thead><tr><th>Customer</th><th>Reference</th><th>Amount</th><th>Created</th><th>Status</th></tr></thead><tbody data-request-rows></tbody></table><p class="op-empty" data-request-empty>No customer requests yet.</p></div>
+          </article>
+        </section>
+
+        <section class="op-panel-view" data-view="settings">
+          <div class="op-view-head"><div><p class="op-kicker">ACCOUNT / CONTROLS</p><h2>Configure the finance layer.</h2></div><p>Save your business profile, choose the rewards preview model and map the accounting and payment integrations that will be activated later.</p></div>
+          <div class="op-grid-2">
+            <article class="op-card">
+              <div class="op-card-head"><div><h3>Business profile</h3><p>Used throughout this workspace.</p></div></div>
+              <form class="op-form" data-profile-form>
+                <label>Business name<input name="businessName" maxlength="120" required></label>
+                <label>ABN<input name="abn" maxlength="20" placeholder="11 digit ABN"></label>
+                <label>Industry<input name="industry" maxlength="80" placeholder="Construction, retail, services…"></label>
+                <label>Rewards preview<select name="rewardsTier"><option value="core">Core — 1 point / $1</option><option value="plus">Plus — 2 points / $1</option></select></label>
+                <div class="op-form-actions"><button class="op-btn op-btn-primary" type="submit">Save profile</button></div>
+              </form>
+            </article>
+            <article class="op-card">
+              <div class="op-card-head"><div><h3>Team role model</h3><p>Stored for the future permission layer.</p></div></div>
+              <form class="op-form" data-team-form>
+                <label>Team email<input name="email" type="email" required maxlength="160"></label>
+                <label>Role<select name="role"><option value="admin">Admin</option><option value="approver">Approver</option><option value="viewer">Viewer</option></select></label>
+                <div class="op-form-actions"><button class="op-btn op-btn-primary" type="submit">Add team member</button></div>
+              </form>
+              <div class="op-activity-list" data-team-list style="margin-top:18px"></div>
+              <p class="op-empty" data-team-empty>No additional team roles yet.</p>
+            </article>
+          </div>
+          <article class="op-card" style="margin-top:14px">
+            <div class="op-card-head"><div><h3>Integration map</h3><p>The app is ready for the OAuth/provider implementation, but does not claim a live connection that has not been authorised.</p></div></div>
+            <div class="op-integration-grid">
+              <div class="op-integration"><h3>Xero</h3><span class="op-status locked">OAuth required</span><p>Import open bills, sync payment records and reconcile after settlement.</p><small>Connection route not activated</small></div>
+              <div class="op-integration"><h3>MYOB</h3><span class="op-status locked">OAuth required</span><p>Import bills and map provider-confirmed payments back to the ledger.</p><small>Connection route not activated</small></div>
+              <div class="op-integration"><h3>Payment provider</h3><span class="op-status locked">KYC + contract required</span><p>Card funding, bank transfer, BPAY, PayID, settlement, tokenised destinations and payout status.</p><small>Live rails disabled by server design</small></div>
+            </div>
+          </article>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
