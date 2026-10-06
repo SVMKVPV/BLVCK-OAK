@@ -19,6 +19,11 @@ const requiredFiles = [
   'marketplace.js',
   'quote.html',
   'quote-builder.js',
+  'oakpay.html',
+  'oakpay-app.html',
+  'oakpay.css',
+  'oakpay-app.js',
+  'netlify/functions/oakpay-api.mjs',
   'netlify/functions/identity-validate.mjs',
   'netlify/functions/identity-signup.mjs',
   'netlify/functions/identity-login.mjs',
@@ -86,7 +91,7 @@ if (/buy\.stripe\.com\/test_/i.test(index) || /buy\.stripe\.com\/test_/i.test(cl
 if (!/data-package="link-in-bio"/.test(index)) failures.push('Link in Bio is not routed through server checkout.');
 if (!/billing:\s*'monthly'/.test(client)) failures.push('Link in Bio is not marked as a monthly client plan.');
 if (!/data-package="enterprise"/.test(index)) failures.push('Enterprise is not routed through server checkout.');
-for (const route of ['/api/partners/auth', '/api/partners', '/api/businesses/nearby', '/api/quote-payment', '/api/project-progress', '/api/portfolio', '/api/stripe/connect/callback', '/api/contact', '/api/stripe/webhook']) {
+for (const route of ['/api/partners/auth', '/api/partners', '/api/businesses/nearby', '/api/quote-payment', '/api/project-progress', '/api/portfolio', '/api/stripe/connect/callback', '/api/contact', '/api/stripe/webhook', '/api/oakpay']) {
   if (!redirects.includes(route)) failures.push(`Missing Netlify route: ${route}`);
 }
 

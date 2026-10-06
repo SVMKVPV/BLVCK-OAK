@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const publicPaths = new Set(['/', '/index.html', '/partners', '/partners.html', '/privacy', '/privacy.html', '/terms', '/terms.html', '/refunds', '/refunds.html', '/referrals', '/referrals.html']);
+  const publicPaths = new Set(['/', '/index.html', '/partners', '/partners.html', '/privacy', '/privacy.html', '/terms', '/terms.html', '/refunds', '/refunds.html', '/referrals', '/referrals.html', '/oakpay', '/oakpay.html']);
   const isLogin = /^\/partners(?:\.html)?\/?$/.test(location.pathname);
   const isPublic = publicPaths.has(location.pathname.replace(/\/$/, '') || '/');
   let authenticated = false;

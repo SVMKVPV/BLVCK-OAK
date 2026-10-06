@@ -109,6 +109,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/oakpay"
+  to = "/.netlify/functions/oakpay-api"
+  status = 200
+
+[[redirects]]
   from = "/shops"
   to = "/marketplace.html"
   status = 301
