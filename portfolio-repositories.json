@@ -1,0 +1,187 @@
+{
+  "version": 1,
+  "owner": "SVMKVPV",
+  "policy": {
+    "futureEdits": "Edit each portfolio website in its dedicated repository. BLVCK-OAK should only contain marketplace/portfolio catalogue metadata and links once migration is complete.",
+    "deployment": "Each dedicated repository should own its own Netlify site or deployment configuration.",
+    "sharedException": "None. Shared BLVCK OAK assets must be copied into the dedicated repository or referenced as public external assets so each website can build independently."
+  },
+  "sites": [
+    {
+      "id": "wedding-invitation",
+      "name": "Cinematic Wedding Invitation",
+      "currentPreview": "https://blvckoak.com.au/previews/wedding-invitation.html",
+      "currentSource": "SVMKVPV/BLVCK-OAK:previews/wedding-invitation.html + previews/wedding-invitation.css + previews/wedding-invitation.js",
+      "targetRepo": "SVMKVPV/blvckoak-portfolio-wedding-invitation",
+      "repoStatus": "needs_creation"
+    },
+    {
+      "id": "bambis-bakery",
+      "name": "Bambi's Bakery",
+      "currentPreview": "https://blvckoak.com.au/previews/bambis-bakery.html",
+      "currentSource": "SVMKVPV/BLVCK-OAK:previews/bambis-bakery.html + previews/bambis-bakery.css + previews/bambis-bakery.js",
+      "targetRepo": "SVMKVPV/blvckoak-portfolio-bambis-bakery",
+      "repoStatus": "needs_creation"
+    },
+    {
+      "id": "velora-beauty",
+      "name": "Velora Beauty Link-in-Bio",
+      "currentPreview": "https://velora-beauty-uiu2.netlify.app",
+      "currentSource": "Netlify deployment; no dedicated GitHub repository found",
+      "targetRepo": "SVMKVPV/blvckoak-portfolio-velora-beauty",
+      "repoStatus": "needs_creation"
+    },
+    {
+      "id": "limestone-cafe",
+      "name": "Limestone Café",
+      "currentPreview": "https://jovial-empanada-edf643.netlify.app",
+      "currentSource": "Netlify deployment; no dedicated GitHub repository found",
+      "targetRepo": "SVMKVPV/blvckoak-portfolio-limestone-cafe",
+      "repoStatus": "needs_creation"
+    },
+    {
+      "id": "brightforge-electrical",
+      "name": "Brightforge Electrical",
+      "currentPreview": "https://bright-forge.netlify.app",
+      "currentSource": "Netlify deployment; no dedicated GitHub repository found",
+      "targetRepo": "SVMKVPV/blvckoak-portfolio-brightforge-electrical",
+      "repoStatus": "needs_creation"
+    },
+    {
+      "id": "vanguard-relocations",
+      "name": "Vanguard Relocations",
+      "currentPreview": "https://vanguardrelocations.netlify.app",
+      "currentSource": "Netlify deployment; no dedicated GitHub repository found",
+      "targetRepo": "SVMKVPV/blvckoak-portfolio-vanguard-relocations",
+      "repoStatus": "needs_creation"
+    },
+    {
+      "id": "vanguard-link-in-bio",
+      "name": "Vanguard Relocations Link-in-Bio",
+      "currentPreview": "https://vanguardrelocations.netlify.app/links",
+      "currentSource": "Part of the Vanguard Relocations Netlify deployment",
+      "targetRepo": "SVMKVPV/blvckoak-portfolio-vanguard-link-in-bio",
+      "repoStatus": "needs_creation"
+    },
+    {
+      "id": "anand-motors",
+      "name": "Anand Motors",
+      "currentPreview": "https://curious-medovik-eba893.netlify.app",
+      "currentSource": "SVMKVPV/motors",
+      "targetRepo": "SVMKVPV/motors",
+      "repoStatus": "active"
+    },
+    {
+      "id": "cafe-cicheti",
+      "name": "Cafe Cicheti & Co",
+      "currentPreview": "https://celebrated-begonia-5b191b.netlify.app",
+      "currentSource": "SVMKVPV/cafe",
+      "targetRepo": "SVMKVPV/cafe",
+      "repoStatus": "active"
+    },
+    {
+      "id": "shineworks-detailing",
+      "name": "ShineWorks Detailing",
+      "currentPreview": "https://willowy-starship-fa0ae6.netlify.app",
+      "currentSource": "Netlify deployment; no dedicated GitHub repository found",
+      "targetRepo": "SVMKVPV/blvckoak-portfolio-shineworks-detailing",
+      "repoStatus": "needs_creation"
+    },
+    {
+      "id": "shv-clean-service",
+      "name": "SHV Clean Service",
+      "currentPreview": "https://marvelous-buttercream-cdcfb7.netlify.app",
+      "currentSource": "Netlify deployment; no dedicated GitHub repository found",
+      "targetRepo": "SVMKVPV/blvckoak-portfolio-shv-clean-service",
+      "repoStatus": "needs_creation"
+    },
+    {
+      "id": "link-hub",
+      "name": "BLVCK OAK Link Hub",
+      "currentPreview": "https://blvck-oak-links.samkapa3.chatgpt.site",
+      "currentSource": "External published site; no dedicated GitHub repository found",
+      "targetRepo": "SVMKVPV/blvckoak-portfolio-link-hub",
+      "repoStatus": "needs_creation"
+    },
+    {
+      "id": "lumera",
+      "name": "LUMÉRA Beauty",
+      "currentPreview": "previews/ecommerce.html",
+      "currentSource": "SVMKVPV/BLVCK-OAK:previews/ecommerce.html + shared previews/preview.css + previews/preview.js",
+      "targetRepo": "SVMKVPV/blvckoak-portfolio-lumera-beauty",
+      "repoStatus": "needs_creation"
+    },
+    {
+      "id": "voltforge",
+      "name": "VoltForge Electrical",
+      "currentPreview": "previews/electrician.html",
+      "currentSource": "SVMKVPV/BLVCK-OAK:previews/electrician.html + shared previews/preview.css + previews/preview.js",
+      "targetRepo": "SVMKVPV/blvckoak-portfolio-voltforge-electrical",
+      "repoStatus": "needs_creation"
+    },
+    {
+      "id": "lumina",
+      "name": "Lumina Health",
+      "currentPreview": "previews/medical-booking.html",
+      "currentSource": "SVMKVPV/BLVCK-OAK:previews/medical-booking.html + shared previews/preview.css + previews/preview.js",
+      "targetRepo": "SVMKVPV/blvckoak-portfolio-lumina-health",
+      "repoStatus": "needs_creation"
+    },
+    {
+      "id": "prismwash",
+      "name": "PrismWash Auto Spa",
+      "currentPreview": "previews/car-wash.html",
+      "currentSource": "SVMKVPV/BLVCK-OAK:previews/car-wash.html + shared previews/preview.css + previews/preview.js",
+      "targetRepo": "SVMKVPV/blvckoak-portfolio-prismwash-auto-spa",
+      "repoStatus": "needs_creation"
+    },
+    {
+      "id": "embergrain",
+      "name": "Ember & Grain",
+      "currentPreview": "previews/cafe.html",
+      "currentSource": "SVMKVPV/BLVCK-OAK:previews/cafe.html + shared previews/preview.css + previews/preview.js",
+      "targetRepo": "SVMKVPV/blvckoak-portfolio-ember-and-grain",
+      "repoStatus": "needs_creation"
+    },
+    {
+      "id": "aurelia",
+      "name": "Aurelia Dining Room",
+      "currentPreview": "previews/restaurant.html",
+      "currentSource": "SVMKVPV/BLVCK-OAK:previews/restaurant.html + shared previews/preview.css + previews/preview.js",
+      "targetRepo": "SVMKVPV/blvckoak-portfolio-aurelia-dining-room",
+      "repoStatus": "needs_creation"
+    },
+    {
+      "id": "apex",
+      "name": "Apex Motorworks",
+      "currentPreview": "previews/car-service.html",
+      "currentSource": "SVMKVPV/BLVCK-OAK:previews/car-service.html + shared previews/preview.css + previews/preview.js",
+      "targetRepo": "SVMKVPV/blvckoak-portfolio-apex-motorworks",
+      "repoStatus": "needs_creation"
+    },
+    {
+      "id": "purehaus",
+      "name": "PureHaus Cleaning",
+      "currentPreview": "previews/cleaning-service.html",
+      "currentSource": "SVMKVPV/BLVCK-OAK:previews/cleaning-service.html + shared previews/preview.css + previews/preview.js",
+      "targetRepo": "SVMKVPV/blvckoak-portfolio-purehaus-cleaning",
+      "repoStatus": "needs_creation"
+    },
+    {
+      "id": "verdant",
+      "name": "Verdant Form",
+      "currentPreview": "previews/landscaping.html",
+      "currentSource": "SVMKVPV/BLVCK-OAK:previews/landscaping.html + shared previews/preview.css + previews/preview.js",
+      "targetRepo": "SVMKVPV/blvckoak-portfolio-verdant-form",
+      "repoStatus": "needs_creation"
+    },
+    {
+      "id": "tablepulse",
+      "name": "TablePulse",
+      "currentPreview": "previews/qr-menu-ordering.html",
+      "currentSource": "SVMKVPV/BLVCK-OAK:previews/qr-menu-ordering.html + shared previews/preview.css + previews/preview.js",
+      "targetRepo": "SVMKVPV/blvckoak-portfolio-tablepulse",
+      "repoStatus": "needs_creation"
+    }
+  ]
+}
