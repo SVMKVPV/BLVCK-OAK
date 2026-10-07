@@ -16,8 +16,12 @@ Once a site has `repoStatus: "active"` in `portfolio-repositories.json`:
 
 - Cafe Cicheti & Co → `SVMKVPV/cafe`
 - Anand Motors → `SVMKVPV/motors`
+- TablePulse → `SVMKVPV/blvckoak-portfolio-tablepulse` (private source, public deployment)
+- Aurora Cafe → `SVMKVPV/blvckoak-portfolio-aurora-cafe` (private source, public deployment)
 
 These should be treated as the authoritative source for future changes to those websites.
+
+TablePulse and Aurora Cafe keep lightweight preview wrappers in `BLVCK-OAK/previews` so existing catalogue routes and access controls continue to work. Their complete website code and assets live only in the independent repositories. The registry records both the catalogue `currentPreview` route and the independent `deploymentUrl`.
 
 ## Repositories still to create
 

@@ -1,0 +1,3 @@
+html, body { margin: 0; width: 100%; height: 100%; background: #fff; }
+iframe { display: block; border: 0; width: 100%; height: 100vh; height: 100dvh; }
+noscript p { padding: 1rem; font-family: sans-serif; }

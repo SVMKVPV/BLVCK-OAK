@@ -179,9 +179,21 @@
       "id": "tablepulse",
       "name": "TablePulse",
       "currentPreview": "previews/qr-menu-ordering.html",
-      "currentSource": "SVMKVPV/BLVCK-OAK:previews/qr-menu-ordering.html + shared previews/preview.css + previews/preview.js",
+      "deploymentUrl": "https://tablepulse-blackoak.netlify.app",
+      "currentSource": "SVMKVPV/blvckoak-portfolio-tablepulse",
       "targetRepo": "SVMKVPV/blvckoak-portfolio-tablepulse",
-      "repoStatus": "needs_creation"
+      "repoVisibility": "private",
+      "repoStatus": "active"
+    },
+    {
+      "id": "aurora-cafe",
+      "name": "Aurora Cafe",
+      "currentPreview": "previews/aurora-cafe.html",
+      "deploymentUrl": "https://aurora-cafe-blackoak.netlify.app",
+      "currentSource": "SVMKVPV/blvckoak-portfolio-aurora-cafe",
+      "targetRepo": "SVMKVPV/blvckoak-portfolio-aurora-cafe",
+      "repoVisibility": "private",
+      "repoStatus": "active"
     }
   ]
 }
