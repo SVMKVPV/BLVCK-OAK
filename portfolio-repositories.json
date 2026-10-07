@@ -10,7 +10,7 @@
     {
       "id": "wedding-invitation",
       "name": "Cinematic Wedding Invitation",
-      "currentPreview": "https://blvckoak.com.au/previews/wedding-invitation.html",
+      "currentPreview": "previews/wedding-invitation.html",
       "currentSource": "SVMKVPV/BLVCK-OAK:previews/wedding-invitation.html + previews/wedding-invitation.css + previews/wedding-invitation.js",
       "targetRepo": "SVMKVPV/blvckoak-portfolio-wedding-invitation",
       "repoStatus": "needs_creation"
@@ -18,7 +18,7 @@
     {
       "id": "bambis-bakery",
       "name": "Bambi's Bakery",
-      "currentPreview": "https://blvckoak.com.au/previews/bambis-bakery.html",
+      "currentPreview": "previews/bambis-bakery.html",
       "currentSource": "SVMKVPV/BLVCK-OAK:previews/bambis-bakery.html + previews/bambis-bakery.css + previews/bambis-bakery.js",
       "targetRepo": "SVMKVPV/blvckoak-portfolio-bambis-bakery",
       "repoStatus": "needs_creation"
@@ -26,8 +26,9 @@
     {
       "id": "velora-beauty",
       "name": "Velora Beauty Link-in-Bio",
-      "currentPreview": "https://velora-beauty-uiu2.netlify.app",
-      "currentSource": "Netlify deployment; no dedicated GitHub repository found",
+      "currentPreview": "marketplace.html?search=Velora%20Beauty#shop",
+      "previewStatus": "request_only",
+      "currentSource": "Unpublished Netlify project; no source repository or published build found",
       "targetRepo": "SVMKVPV/blvckoak-portfolio-velora-beauty",
       "repoStatus": "needs_creation"
     },
