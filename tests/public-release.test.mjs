@@ -10,7 +10,7 @@ import { NEARBY_BUSINESSES_ENABLED, SHOPS_ENABLED, COMMUNITY_ENABLED } from '../
 test('release gates expose the marketplace while unfinished features remain disabled', () => {
   assert.equal(NEARBY_BUSINESSES_ENABLED,false);
   assert.equal(SHOPS_ENABLED,true);
-  assert.equal(COMMUNITY_ENABLED,false);
+  assert.equal(COMMUNITY_ENABLED,true);
 });
 test('retired startup bootstrap is absent; explicit non-autoplay videos remain', () => {
   const result = removeStartupVideo('<script src="intro-video.js" defer></script><video data-intro autoplay src="startup.mp4"></video><video controls src="assets/black-oak-brand-film.mp4"></video><video controls src="demo.mp4"></video>');
@@ -47,7 +47,7 @@ test('remaining gated pages contain no fake listings or posting UI', () => {
     assert.doesNotMatch(page,/<form\b|contenteditable|type="file"|localStorage|fetch\(/i);
     assert.doesNotMatch(page,/marketplace\.js/);
   }
-  assert.match(landingPage('community.html'), /developed privately/);
+  assert.equal(Object.hasOwn(upcoming,'community.html'),false);
 });
 test('release builds keep the marketplace live, mark unavailable links and exclude startup assets', async () => {
   const dir = await mkdtemp(join(tmpdir(),'blvck-oak-release-'));
@@ -57,7 +57,7 @@ test('release builds keep the marketplace live, mark unavailable links and exclu
     await writeFile(join(dir,'marketplace.js'),'const MARKETPLACE_LIVE = true;');
     await writeFile(join(dir,'marketplace.html'),'<html><head><script src="marketplace.js" defer></script></head><body><main id="shop"><div data-product-grid></div></main></body></html>');
     await writeFile(join(dir,'index.html'),'<html><head></head><body><nav><a href="portfolio.html">Portfolio</a><a href="gone.html">Unavailable</a></nav><main><section id="approach">Hello</section></main></body></html>');
-    for (const name of ['portfolio.html','partners.html','contact.html']) await writeFile(join(dir,name),'<html><head></head><body><main>Existing page</main></body></html>');
+    for (const name of ['portfolio.html','partners.html','contact.html','community.html']) await writeFile(join(dir,name),'<html><head></head><body><main>Existing page</main></body></html>');
     await prepareRelease(dir);
     const home = await readFile(join(dir,'index.html'),'utf8');
     assert.match(home,/discover-next/);
@@ -67,7 +67,7 @@ test('release builds keep the marketplace live, mark unavailable links and exclu
     assert.equal(report.startupVideo,false);
     assert.equal(report.shops,'live');
     assert.equal(report.marketplace,'live');
-    assert.equal(report.community,'coming_soon');
+    assert.equal(report.community,'live');
     assert.equal(report.nearby,'coming_soon');
     assert.equal(report.localLinksMarked.length,1);
     assert.equal(await readFile(join(dir,'assets/black-oak-brand-film.mp4'),'utf8'),'fixture');

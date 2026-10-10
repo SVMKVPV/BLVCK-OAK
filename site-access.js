@@ -1,8 +1,9 @@
 (() => {
   'use strict';
   const publicPaths = new Set(['/', '/index.html', '/partners', '/partners.html', '/privacy', '/privacy.html', '/terms', '/terms.html', '/refunds', '/refunds.html', '/referrals', '/referrals.html', '/oakpay', '/oakpay.html']);
+  const isCommunity = /^\/community(?:\.html)?\/?$/.test(location.pathname) || /^\/community\/[a-z0-9-]+\/(?:index\.html)?$/.test(location.pathname);
   const isLogin = /^\/partners(?:\.html)?\/?$/.test(location.pathname);
-  const isPublic = publicPaths.has(location.pathname.replace(/\/$/, '') || '/');
+  const isPublic = isCommunity || publicPaths.has(location.pathname.replace(/\/$/, '') || '/');
   let authenticated = false;
   let checked = false;
   let replaying = false;
@@ -42,11 +43,12 @@
   }
   function needsLogin(control) {
     if (!control) return false;
+    if (isCommunity && control.closest('[data-public-community]')) return false;
     if (control.closest('[data-auth-panel],[data-dashboard]') || control.matches('[data-signout]')) return false;
     if (control.matches('[data-menu-toggle],[data-menu-close],[data-dismiss-notice],[data-oak-skip],[data-close-modal]')) return false;
     if (control.tagName === 'A') {
       const url = new URL(control.href, location.href);
-      if (url.origin === location.origin && publicPaths.has(url.pathname.replace(/\/$/, '') || '/')) return false;
+      if (url.origin === location.origin && (publicPaths.has(url.pathname.replace(/\/$/, '') || '/') || /^\/community(?:\.html)?\/?$/.test(url.pathname) || /^\/community\/[a-z0-9-]+\/(?:index\.html)?$/.test(url.pathname))) return false;
       return true;
     }
     return !isLogin;

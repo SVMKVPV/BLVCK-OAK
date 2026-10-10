@@ -32,8 +32,8 @@ async function deployment() {
         const response = await request(candidate + '/release-status.json');
         if (!response.ok) continue;
         const metadata = await response.json();
-        if (metadata.commit === expected && metadata.version === 'marketplace-live-2026-10-01') {
-          if (metadata.shops !== 'live' || metadata.marketplace !== 'live' || metadata.community !== 'coming_soon' || metadata.nearby !== 'coming_soon') continue;
+        if (metadata.commit === expected && metadata.version === 'community-live-2026-10-10') {
+          if (metadata.shops !== 'live' || metadata.marketplace !== 'live' || metadata.community !== 'live' || metadata.nearby !== 'coming_soon') continue;
           result.metadata = metadata;
           return candidate;
         }
@@ -84,7 +84,10 @@ try {
   const home = await check(base,'/',[200],/discover-next/);
   if (/intro-video\.js|<video\b[^>]*autoplay|<video\b[^>]*(?:data-intro|startup)/i.test(home)) throw new Error('The deployed homepage still references an autoplay startup video.');
   for(const path of ['/marketplace','/marketplace.html','/shops','/shops.html']) await check(base,path,[200],/data-product-grid/);
-  for(const path of ['/community.html','/nearby.html','/login.html','/coming-soon.html']) await check(base,path,[200],/Coming soon/);
+  for(const path of ['/nearby.html','/login.html','/coming-soon.html']) await check(base,path,[200],/Coming soon/);
+  await check(base,'/community.html',[200],/data-profile=/);
+  await check(base,'/community/forma-habitat/',[200],/AI concept/);
+  await check(base,'/community/profiles.json',[200],/ai-100/);
   await check(base,'/partners.html',[200],/data-lead-search[^>]+hidden/);
   await check(base,'/portfolio.html',[200],/Cinematic Wedding Invitation/);
   await check(base,'/previews/wedding-invitation.html',[200],/wedding-invitation\.css/);

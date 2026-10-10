@@ -90,3 +90,10 @@ test('release verification accepts authentication denial from the protected cont
   assert.match(smoke,/check\(base,'\/api\/contact',\[401,403\]\)/);
   assert.doesNotMatch(smoke,/check\(base,'\/api\/contact',\[405\]\)/);
 });
+test('community browsing stays public while unrelated account features remain protected',async()=>{
+ for(const path of ['/community.html','/community','/community/forma-habitat/','/community/forma-habitat/index.html']) {
+  const p=await page({path});assert.deepEqual(p.redirects,[]);assert.equal(p.attributes.has('data-access-pending'),false);
+  assert.equal(p.interact({href:'https://blvckoak.com.au/community/moss-and-mortar/'}).event.prevented,undefined);
+  assert.equal(p.interact({href:'https://blvckoak.com.au/contact.html'}).event.prevented,true);
+ }
+});

@@ -1,13 +1,13 @@
 import { readdir, readFile, writeFile, rm } from 'node:fs/promises';
 import { resolve, relative, extname } from 'node:path';
-import { SHOPS_ENABLED } from '../netlify/lib/launch-flags.mjs';
+import { SHOPS_ENABLED, COMMUNITY_ENABLED } from '../netlify/lib/launch-flags.mjs';
 
 export const upcoming = Object.freeze({
   ...(!SHOPS_ENABLED ? {
     'marketplace.html': ['Website marketplace', 'Browse it. Preview it.<br>Make it yours.', 'A storefront of Black Oak website directions, currently being prepared for launch.', ['Industry concepts', 'Website previews', 'Saved favourites', 'Project shortlists']],
     'shops.html': ['Website marketplace', 'Browse it. Preview it.<br>Make it yours.', 'A storefront of Black Oak website directions, currently being prepared for launch.', ['Industry concepts', 'Website previews', 'Saved favourites', 'Project shortlists']],
   } : {}),
-  'community.html': ['Design community', 'Good work deserves<br>to be seen.', 'A future home for designers and business owners to share website designs, build a portfolio and discover each other.', ['Website showcases', 'Creator portfolios', 'Discover & save', 'Share your work']],
+  ...(!COMMUNITY_ENABLED ? { 'community.html': ['Design community', 'Good work deserves<br>to be seen.', 'A future home for designers and business owners to share website designs, build a portfolio and discover each other.', ['Website showcases', 'Creator portfolios', 'Discover & save', 'Share your work']] } : {}),
   'nearby.html': ['Nearby business finder', 'Your next introduction<br>could be nearby.', 'The Google Maps-powered business finder is not available yet. Location searches are disabled while this feature is being prepared.', ['Local discovery', 'Business categories', 'Website information', 'Partner workspace']],
   'login.html': ['Owner dashboard', 'A new workspace<br>is on its way.', 'The redesigned owner dashboard and Google sign-in are not ready yet. Existing email-code access remains available through the partner workspace.', ['Owner overview', 'Project activity', 'Private insights', 'Google sign-in']],
   'ai-generator.html': ['AI Website Generator', 'Describe it.<br>See it built.', 'Our AI Website Generator is in development. Soon you will be able to describe your business and generate a tailored website concept from BLVCK OAK.', ['Business brief', 'AI-generated website direction', 'Live design preview', 'Build handoff']],
@@ -133,6 +133,6 @@ export async function prepareRelease(output) {
   const home = await readFile(resolve(output,'index.html'),'utf8');
   if (/intro-video\.js|<video\b[^>]*autoplay|<video\b[^>]*(?:data-intro|startup)/i.test(home)) throw new Error('Autoplay startup video must not ship in the public homepage.');
   if (!home.includes('discover-next')) throw new Error('Upcoming feature entry points were not added to the homepage.');
-  await writeFile(resolve(output,'release-status.json'), JSON.stringify({ version: 'marketplace-live-2026-10-01', commit: process.env.COMMIT_REF || process.env.GITHUB_SHA || null, nearby: 'coming_soon', shops: SHOPS_ENABLED ? 'live' : 'coming_soon', marketplace: SHOPS_ENABLED ? 'live' : 'coming_soon', community: 'coming_soon', startupVideo: false, localLinksMarked: report },null,2));
+  await writeFile(resolve(output,'release-status.json'), JSON.stringify({ version: 'community-live-2026-10-10', commit: process.env.COMMIT_REF || process.env.GITHUB_SHA || null, nearby: 'coming_soon', shops: SHOPS_ENABLED ? 'live' : 'coming_soon', marketplace: SHOPS_ENABLED ? 'live' : 'coming_soon', community: COMMUNITY_ENABLED ? 'live' : 'coming_soon', startupVideo: false, localLinksMarked: report },null,2));
   console.log(`Public release prepared: marketplace live, ${documents.size} HTML pages and ${report.length} unavailable local links marked Coming soon.`);
 }
