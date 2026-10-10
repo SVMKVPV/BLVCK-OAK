@@ -15,22 +15,23 @@ const { products, card } = runInNewContext(
 );
 const origin = 'https://blvckoak.com.au/';
 const repaired = [
-  { id: 'wedding-invitation', preview: 'previews/wedding-invitation.html', thumbnail: 'assets/marketplace/wedding-preview.jpg' },
+  { id: 'wedding-invitation', preview: 'https://the-20-december-wedding.samkapa3.chatgpt.site/', thumbnail: 'assets/marketplace/wedding-preview.jpg', external: true },
   { id: 'bambis-bakery', preview: 'previews/bambis-bakery.html', thumbnail: 'assets/marketplace/bakery-preview.jpg' }
 ];
 const portfolioCards = [...portfolio.matchAll(/<a\b[^>]*class="concept-card\b[^>]*>[\s\S]*?<\/a>/g)].map(match => match[0]);
 
-test('Wedding and Bambi previews stay on the marketplace host', () => {
+test('Wedding opens its public invitation while Bambi stays on the marketplace host', () => {
   for (const repairedPreview of repaired) {
     const product = products.find(item => item.id === repairedPreview.id);
     assert.ok(product);
     assert.equal(product.preview, repairedPreview.preview);
-    assert.equal(new URL(product.preview, origin).origin, new URL(origin).origin);
+    if (repairedPreview.external) assert.notEqual(new URL(product.preview, origin).origin, new URL(origin).origin);
+    else assert.equal(new URL(product.preview, origin).origin, new URL(origin).origin);
     assert.equal(registry.sites.find(site => site.id === product.id).currentPreview, product.preview);
     const rendered = card(product);
     assert.ok(rendered.includes(`href="${product.preview}"`));
     const portfolioCard = portfolioCards.find(item => item.includes(`href="${product.preview}"`));
-    assert.ok(portfolioCard, `${product.name} retains a local portfolio preview`);
+    assert.ok(portfolioCard, `${product.name} retains its working portfolio preview`);
     assert.doesNotMatch(rendered + portfolioCard, /\b3d\b/i);
   }
 });

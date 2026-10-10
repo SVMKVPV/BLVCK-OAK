@@ -10,7 +10,7 @@
     {
       "id": "wedding-invitation",
       "name": "Cinematic Wedding Invitation",
-      "currentPreview": "previews/wedding-invitation.html",
+      "currentPreview": "https://the-20-december-wedding.samkapa3.chatgpt.site/",
       "currentSource": "SVMKVPV/BLVCK-OAK:previews/wedding-invitation.html + previews/wedding-invitation.css + previews/wedding-invitation.js",
       "targetRepo": "SVMKVPV/blvckoak-portfolio-wedding-invitation",
       "repoStatus": "needs_creation"
