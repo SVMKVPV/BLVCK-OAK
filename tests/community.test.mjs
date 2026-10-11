@@ -15,7 +15,7 @@ test('100 distinct fictional profiles have unique offerings and cannot transact'
 test('every discover card resolves to a labelled public profile and local artwork',async()=>{
  const dir=await mkdtemp(join(tmpdir(),'community-'));
  try{await buildCommunity(dir);const feed=await readFile(join(dir,'community.html'),'utf8');assert.equal((feed.match(/data-profile=/g)||[]).length,100);
- for(const p of profiles){const html=await readFile(join(dir,'community',p.slug,'index.html'),'utf8');assert.match(html,/AI concept/);assert.match(html,/No checkout or bookings/);assert.match(html,/id="collection"/);assert.doesNotMatch(html,/data-package=|api\/checkout/);assert.match(await readFile(join(dir,'community/art',p.slug+'.svg'),'utf8'),/<svg/);}
+ for(const p of profiles){const html=await readFile(join(dir,'community',p.slug,'index.html'),'utf8');assert.match(html,/AI concept/);assert.match(html,/No checkout or bookings/);assert.match(html,/id="collection"/);assert.doesNotMatch(html,/data-package=|api\/checkout/);const image=await readFile(join(dir,'community/photos',p.slug+'.webp')); assert.equal(image.toString('ascii',0,4),'RIFF'); assert.equal(image.toString('ascii',8,12),'WEBP'); assert.doesNotMatch(html,/product-art|<svg/);}
  assert.equal(JSON.parse(await readFile(join(dir,'community/profiles.json'),'utf8')).length,100);
  }finally{await rm(dir,{recursive:true,force:true});}
 });
