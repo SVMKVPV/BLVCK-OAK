@@ -52,6 +52,7 @@ const requiredFiles = [
   'terms.html',
   'refunds.html',
   'netlify.toml',
+  '_redirects',
   'netlify/functions/package-checkout.mjs',
   'netlify/functions/referral-register.mjs',
   'netlify/functions/referral-verify.mjs',
@@ -70,6 +71,7 @@ const client = await readFile(resolve(root, 'script.js'), 'utf8');
 const cinematicIntro = await readFile(resolve(root, 'cinematic-intro.js'), 'utf8');
 const stylesheet = await readFile(resolve(root, 'style.css'), 'utf8');
 const redirects = await readFile(resolve(root, 'netlify.toml'), 'utf8');
+const publishRedirects = await readFile(resolve(root, '_redirects'), 'utf8');
 const marketplace = await readFile(resolve(root, 'marketplace.html'), 'utf8');
 
 if (!stylesheet.trimStart().startsWith(':root') || stylesheet.includes('\uFFFD')) {
@@ -86,6 +88,10 @@ if (!/prefers-reduced-motion/.test(cinematicIntro) || !/data-cinematic-fallback/
 }
 if (SHOPS_ENABLED && (!/marketplace\.css/.test(marketplace) || !/marketplace\.js/.test(marketplace) || !/data-product-grid/.test(marketplace))) {
   failures.push('Live Marketplace is missing its catalogue assets or product-grid hook.');
+}
+for (const route of ['/marketplace', '/shops', '/shops.html']) {
+  const rule = new RegExp(`^${route.replace('.', '\\.') }\\s+/marketplace\\.html\\s+200!$`, 'm');
+  if (!rule.test(publishRedirects)) failures.push(`Missing published Marketplace rewrite: ${route}`);
 }
 
 if (/buy\.stripe\.com\/test_/i.test(index) || /buy\.stripe\.com\/test_/i.test(client)) {

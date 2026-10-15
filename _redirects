@@ -1,0 +1,5 @@
+# Publish real, extensionless marketplace aliases in addition to netlify.toml.
+# The forced rewrites keep these public routes working on custom Deploy Preview domains.
+/marketplace  /marketplace.html  200!
+/shops        /marketplace.html  200!
+/shops.html   /marketplace.html  200!

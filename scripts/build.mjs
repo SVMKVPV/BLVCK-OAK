@@ -17,7 +17,7 @@ for (const file of [
   'partners.html','partners.js','portal.css','pay.html','pay.js','progress.html','progress.js',
   'portfolio.js','quote-builder.js','audit.html','book.html','ai-generator.html','ai-generator.css','ai-generator.js','sales-config.js','sales.js',
   'oakpay.html','oakpay-app.html','oakpay.css','oakpay-app.js',
-  'robots.txt','sitemap.xml','favicon.ico','favicon.svg','apple-touch-icon.png','android-chrome-192x192.png','android-chrome-512x512.png','site.webmanifest'
+  'robots.txt','sitemap.xml','favicon.ico','favicon.svg','apple-touch-icon.png','android-chrome-192x192.png','android-chrome-512x512.png','site.webmanifest','_redirects'
 ]) {
   await cp(resolve(root, file), resolve(output, file));
 }
