@@ -93,6 +93,9 @@ if (!/prefers-reduced-motion/.test(cinematicIntro) || !/data-cinematic-fallback/
 if (!/prefers-reduced-motion/.test(firefall) || !/connection\?\.saveData/.test(firefall) || !/addEventListener\('scroll'/.test(firefall)) {
   failures.push('Site-wide firefall is missing scroll, reduced-motion, or data-saving controls.');
 }
+if (!/drawRoots/.test(firefall) || !/cutContentWindows/.test(firefall) || !/foreground/.test(firefall) || !/MutationObserver/.test(firefall)) {
+  failures.push('Site-wide firefall is missing root growth or layered content occlusion.');
+}
 if (SHOPS_ENABLED && (!/marketplace\.css/.test(marketplace) || !/marketplace\.js/.test(marketplace) || !/data-product-grid/.test(marketplace))) {
   failures.push('Live Marketplace is missing its catalogue assets or product-grid hook.');
 }
