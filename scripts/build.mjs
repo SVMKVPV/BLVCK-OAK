@@ -49,6 +49,6 @@ async function installAccessGate(directory) {
   }
 }
 await installAccessGate(output);
-await installFirefall(output);
+const firefallPageCount = await installFirefall(output);
 
-console.log('Black Oak public client built successfully. Marketplace is live; community is public; nearby discovery remains Coming soon.');
+console.log(`Black Oak public client built successfully with cinematic depth on ${firefallPageCount} HTML pages. Marketplace is live; community is public; nearby discovery remains Coming soon.`);

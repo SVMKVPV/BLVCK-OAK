@@ -27,18 +27,39 @@ test('scroll firefall is decorative, bounded and motion-aware', async () => {
   assert.match(client, /navigator\.connection/);
   assert.match(client, /connection\?\.saveData/);
   assert.match(client, /prefers-reduced-motion:\s*reduce/);
+  assert.match(client, /forced-colors:\s*active/);
   assert.match(client, /window\.self\s*!==\s*window\.top/);
   assert.match(client, /particleLimit\s*=\s*width\s*<\s*700\s*\?\s*12\s*:\s*24/);
-  assert.match(client, /pixelRatio\s*=\s*Math\.min\([^;]+width\s*<\s*700\s*\?\s*1\s*:\s*1\.35\)/);
+  assert.match(client, /pixelRatio\s*=\s*Math\.min\([^;]+width\s*<\s*700\s*\?\s*1\s*:\s*width\s*>\s*1900\s*\?\s*1\.1\s*:\s*1\.35\)/);
+  assert.match(client, /rootPixelRatio\s*=\s*Math\.min\([^;]+width\s*<\s*700\s*\?\s*\.75/);
   assert.match(client, /canvas\.setAttribute\('aria-hidden',\s*'true'\)/);
   assert.match(client, /canvas\.setAttribute\('role',\s*'presentation'\)/);
   assert.match(client, /x:\s*random\(/);
   assert.match(client, /vy:\s*random\(95,\s*158\)\s*\+/);
+  assert.match(client, /buildRootNetwork/);
+  assert.match(client, /drawRoots\(growth\)/);
+  assert.match(client, /rootGrowth/);
+  assert.match(client, /const rootCanvas = document\.createElement\('canvas'\)/);
+  assert.match(client, /rootCacheProgress/);
+  assert.match(client, /Math\.round\(rootGrowth\(\) \* 160\) \/ 160/);
+  assert.match(client, /1000 \/ 30\s*:\s*1000 \/ 45/);
+  assert.match(client, /foreground:\s*!subdued/);
+  assert.match(client, /perspectiveScale/);
+  assert.match(client, /context\.transform\(/);
+  assert.match(client, /globalCompositeOperation\s*=\s*'destination-out'/);
+  assert.match(client, /cutContentWindows\(\);[\s\S]*leaf\.foreground/);
+  assert.match(client, /new MutationObserver\(scheduleContentRefresh\)/);
+  assert.match(client, /attributeFilter:\s*\['class',\s*'hidden',\s*'open',\s*'aria-hidden'\]/);
+  assert.doesNotMatch(client, /contentWindows\.length\s*>=\s*84/);
   assert.match(client, /addEventListener\('scroll',\s*onScroll,\s*\{\s*passive:\s*true\s*\}\)/);
   assert.match(client, /data-cinematic-oak/);
   assert.match(client, /intersectionRatio\s*>=\s*\.55/);
   assert.match(client, /visibilitychange/);
-  assert.match(client, /addEventListener\('pagehide',\s*destroy/);
+  assert.match(client, /function onPageHide\(event\)/);
+  assert.match(client, /event\.persisted/);
+  assert.match(client, /addEventListener\('pagehide',\s*onPageHide\)/);
+  assert.match(client, /addEventListener\('pageshow',\s*onPageShow\)/);
+  assert.match(client, /connection\?\.addEventListener\?\.\('change',\s*onConnectionChange\)/);
   assert.match(client, /requestAnimationFrame/);
   assert.doesNotMatch(client, /preventDefault|scrollTo|scrollIntoView/);
 
@@ -48,6 +69,10 @@ test('scroll firefall is decorative, bounded and motion-aware', async () => {
   assert.match(releaseSmoke, /'\/firefall\.js'/);
   assert.match(releaseSmoke, /'\/firefall\.css'/);
   assert.match(releaseSmoke, /firefallConnected/);
+  assert.match(releaseSmoke, /firefallStyles\.length\s*===\s*1/);
+  assert.match(releaseSmoke, /firefallScripts\.length\s*===\s*1/);
+  assert.match(releaseSmoke, /destination-out/);
+  assert.match(releaseSmoke, /rootCanvas/);
 });
 
 test('build helper installs firefall once in every nested HTML document', async () => {
@@ -58,20 +83,19 @@ test('build helper installs firefall once in every nested HTML document', async 
     await writeFile(join(directory, 'index.html'), '<!doctype html><html><head></head><body>Home</body></html>');
     await writeFile(join(nested, 'index.html'), '<!doctype html><html><head></head><body>Profile</body></html>');
     await writeFile(join(directory, 'partial.html'), '<!doctype html><html><head><script src="/firefall.js" defer></script></head><body>Partial</body></html>');
+    await writeFile(join(directory, 'duplicate.html'), '<!doctype html><html><head><link href="/firefall.css" rel="stylesheet"><link rel="stylesheet" href="/firefall.css"><script src="/firefall.js"></script><script defer src="/firefall.js"></script></head><body>Duplicate</body></html>');
     await writeFile(join(directory, 'notes.txt'), '</head>');
 
-    await installFirefall(directory);
-    await installFirefall(directory);
+    assert.equal(await installFirefall(directory), 4);
+    assert.equal(await installFirefall(directory), 4);
 
-    for (const path of [join(directory, 'index.html'), join(nested, 'index.html')]) {
+    for (const path of [join(directory, 'index.html'), join(nested, 'index.html'), join(directory, 'partial.html'), join(directory, 'duplicate.html')]) {
       const html = await readFile(path, 'utf8');
       assert.equal((html.match(/\/firefall\.css/g) || []).length, 1);
       assert.equal((html.match(/\/firefall\.js/g) || []).length, 1);
       assert.ok(html.indexOf('/firefall.css') < html.indexOf('</head>'));
+      assert.match(html, /<script src="\/firefall\.js" defer><\/script>/);
     }
-    const partial = await readFile(join(directory, 'partial.html'), 'utf8');
-    assert.equal((partial.match(/\/firefall\.css/g) || []).length, 1);
-    assert.equal((partial.match(/\/firefall\.js/g) || []).length, 1);
     assert.equal(await readFile(join(directory, 'notes.txt'), 'utf8'), '</head>');
   } finally {
     await rm(directory, { recursive: true, force: true });
