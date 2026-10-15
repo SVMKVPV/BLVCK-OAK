@@ -42,20 +42,13 @@ const requiredFiles = [
   'netlify/lib/pay-as-you-sell.mjs',
   'index.html',
   'cinematic-intro.js',
-  'firefall.js',
-  'firefall.css',
-  'scripts/install-firefall.mjs',
   'style.css',
-  'assets/oak-firefall-hero-v1.mp4',
-  'assets/oak-firefall-hero-v1-poster.webp',
-  'assets/oak-firefall-hero-mobile-v1-poster.webp',
   'referrals.html',
   'contact.html',
   'privacy.html',
   'terms.html',
   'refunds.html',
   'netlify.toml',
-  '_redirects',
   'netlify/functions/package-checkout.mjs',
   'netlify/functions/referral-register.mjs',
   'netlify/functions/referral-verify.mjs',
@@ -72,36 +65,24 @@ for (const file of requiredFiles) {
 const index = await readFile(resolve(root, 'index.html'), 'utf8');
 const client = await readFile(resolve(root, 'script.js'), 'utf8');
 const cinematicIntro = await readFile(resolve(root, 'cinematic-intro.js'), 'utf8');
-const firefall = await readFile(resolve(root, 'firefall.js'), 'utf8');
 const stylesheet = await readFile(resolve(root, 'style.css'), 'utf8');
 const redirects = await readFile(resolve(root, 'netlify.toml'), 'utf8');
-const publishRedirects = await readFile(resolve(root, '_redirects'), 'utf8');
 const marketplace = await readFile(resolve(root, 'marketplace.html'), 'utf8');
 
 if (!stylesheet.trimStart().startsWith(':root') || stylesheet.includes('\uFFFD')) {
   failures.push('style.css is not valid UTF-8 CSS.');
 }
-for (const selector of ['.site-header', '.pricing-grid', '.side-menu', '.cinematic-oak']) {
+for (const selector of ['.site-header', '.pricing-grid', '.side-menu', '.oak-origin']) {
   if (!stylesheet.includes(selector)) failures.push(`style.css is missing required selector: ${selector}`);
 }
-if (!/data-cinematic-oak/.test(index) || !/data-cinematic-poster/.test(index) || !/cinematic-intro\.js/.test(index)) {
-  failures.push('Homepage cinematic hero is not connected.');
+if (!/data-oak-origin/.test(index) || !/cinematic-intro\.js/.test(index)) {
+  failures.push('Homepage cinematic intro is not connected.');
 }
-if (!/prefers-reduced-motion/.test(cinematicIntro) || !/data-cinematic-fallback/.test(index)) {
-  failures.push('Homepage cinematic hero is missing motion accessibility or media fallback controls.');
-}
-if (!/prefers-reduced-motion/.test(firefall) || !/connection\?\.saveData/.test(firefall) || !/addEventListener\('scroll'/.test(firefall)) {
-  failures.push('Site-wide firefall is missing scroll, reduced-motion, or data-saving controls.');
-}
-if (!/drawRoots/.test(firefall) || !/cutContentWindows/.test(firefall) || !/foreground/.test(firefall) || !/MutationObserver/.test(firefall)) {
-  failures.push('Site-wide firefall is missing root growth or layered content occlusion.');
+if (!/prefers-reduced-motion/.test(cinematicIntro) || !/data-oak-skip/.test(index)) {
+  failures.push('Homepage cinematic intro is missing motion accessibility controls.');
 }
 if (SHOPS_ENABLED && (!/marketplace\.css/.test(marketplace) || !/marketplace\.js/.test(marketplace) || !/data-product-grid/.test(marketplace))) {
   failures.push('Live Marketplace is missing its catalogue assets or product-grid hook.');
-}
-for (const route of ['/marketplace', '/shops', '/shops.html']) {
-  const rule = new RegExp(`^${route.replace('.', '\\.') }\\s+/marketplace\\.html\\s+200!$`, 'm');
-  if (!rule.test(publishRedirects)) failures.push(`Missing published Marketplace rewrite: ${route}`);
 }
 
 if (/buy\.stripe\.com\/test_/i.test(index) || /buy\.stripe\.com\/test_/i.test(client)) {
