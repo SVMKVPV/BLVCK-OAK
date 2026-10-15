@@ -47,10 +47,7 @@ async function deployment() {
 async function check(base,path,allowed,pattern,options={}) {
   const response = await request(base + path,options);
   const text = await response.text();
-  const firefallStyles = text.match(/<link\b[^>]*href=["']\/firefall\.css["'][^>]*>/gi) || [];
-  const firefallScripts = text.match(/<script\b[^>]*src=["']\/firefall\.js["'][^>]*\bdefer\b[^>]*><\/script>/gi) || [];
-  const firefallConnected = !/<html\b/i.test(text) || (firefallStyles.length === 1 && firefallScripts.length === 1);
-  const ok = allowed.includes(response.status) && (!pattern || pattern.test(text)) && firefallConnected;
+  const ok = allowed.includes(response.status) && (!pattern || pattern.test(text));
   result.checks.push({path,status:response.status,ok});
   console.log(`${ok ? 'PASS' : 'FAIL'} ${options.method || 'GET'} ${path}: ${response.status}`);
   if (!ok) throw new Error(`Unexpected deployed response for ${path}`);
@@ -86,9 +83,6 @@ try {
   const base = await deployment(); result.baseUrl=base;
   const home = await check(base,'/',[200],/discover-next/);
   if (/intro-video\.js|<video\b[^>]*autoplay|<video\b[^>]*(?:data-intro|startup)/i.test(home)) throw new Error('The deployed homepage still references an autoplay startup video.');
-  const firefall = await check(base,'/firefall.js',[200],/buildRootNetwork/);
-  if (!/destination-out/.test(firefall) || !/rootCanvas/.test(firefall)) throw new Error('The deployed firefall is missing depth occlusion or its root render cache.');
-  await check(base,'/firefall.css',[200],/\.site-firefall/);
   for(const path of ['/marketplace','/marketplace.html','/shops','/shops.html']) await check(base,path,[200],/data-product-grid/);
   for(const path of ['/nearby.html','/login.html','/coming-soon.html']) await check(base,path,[200],/Coming soon/);
   await check(base,'/community.html',[200],/data-profile=/);

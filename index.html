@@ -80,15 +80,57 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="preload" as="image" href="assets/oak-firefall-hero-v1-poster.webp" type="image/webp" media="(min-width: 621px)">
-  <link rel="preload" as="image" href="assets/oak-firefall-hero-mobile-v1-poster.webp" type="image/webp" media="(max-width: 620px)">
-  <link rel="stylesheet" href="style.css?v=17">
-  <script src="cinematic-intro.js?v=7" defer></script>
+  <link rel="stylesheet" href="style.css?v=16">
+  <script src="cinematic-intro.js?v=6" defer></script>
   <script src="script.js?v=11" defer></script>
   <script src="sales-config.js?v=1" defer></script>
   <script src="sales.js?v=1" defer></script>
 </head>
 <body>
+  <section class="oak-origin" data-oak-origin aria-labelledby="oak-origin-title">
+    <div class="oak-origin-stage" data-oak-stage>
+      <video class="oak-origin-video" data-oak-video data-orientation="portrait-ccw" muted playsinline preload="auto" disablepictureinpicture aria-hidden="true">
+        <source src="assets/obsidian-oak-scroll-ccw.mp4" type="video/mp4">
+      </video>
+      <canvas class="oak-origin-canvas" data-oak-canvas aria-hidden="true"></canvas>
+      <div class="oak-origin-grain" aria-hidden="true"></div>
+      <div class="oak-origin-brand" aria-hidden="true"><span>BLVCK</span> OAK <small>/ ORIGIN</small></div>
+
+      <div class="oak-origin-story" data-oak-story>
+        <article class="oak-origin-chapter is-active" data-oak-chapter="0">
+          <p>Chapter 01 / The source</p>
+          <h1 id="oak-origin-title">Every digital story<br><em>begins with a seed.</em></h1>
+          <span>Scroll to enter the BLVCK OAK journey.</span>
+        </article>
+        <article class="oak-origin-chapter" data-oak-chapter="1" aria-hidden="true">
+          <p>Chapter 02 / The canopy</p>
+          <h2>Every leaf holds<br><em>a world of its own.</em></h2>
+          <span>Rooted in nature. Shaped by change. Ready for what comes next.</span>
+        </article>
+        <article class="oak-origin-chapter" data-oak-chapter="2" aria-hidden="true">
+          <p>Chapter 03 / Transformation</p>
+          <h2>Nothing remarkable<br><em>stands still.</em></h2>
+          <span>Old forms become fuel. Strong ideas survive the fire.</span>
+        </article>
+        <article class="oak-origin-chapter" data-oak-chapter="3" aria-hidden="true">
+          <p>Chapter 04 / New growth</p>
+          <h2>From ash,<br><em>direction takes root.</em></h2>
+          <span>A sharper identity. A stronger system. A new beginning.</span>
+        </article>
+        <article class="oak-origin-chapter oak-origin-chapter-final" data-oak-chapter="4" aria-hidden="true">
+          <p>BLVCK OAK / Sydney, Australia</p>
+          <h2>The journey<br><em>begins here.</em></h2>
+          <span>Welcome to the official BLVCK OAK experience.</span>
+        </article>
+      </div>
+
+      <button class="oak-origin-skip" type="button" data-oak-skip>Skip intro <span aria-hidden="true">↘</span></button>
+      <div class="oak-origin-scroll" data-oak-scroll-cue aria-hidden="true"><i></i><span>Scroll to transform</span></div>
+      <div class="oak-origin-progress" aria-hidden="true"><span data-oak-progress></span></div>
+      <p class="sr-only">A scroll-controlled three-dimensional obsidian oak rotates against a mirrored wall. Molten gold veins pulse through its branches as fire becomes ash and a new oak grows before the BLVCK OAK homepage is revealed.</p>
+    </div>
+  </section>
+
   <main>
     <div class="payment-notice" data-payment-notice role="status" hidden>
       <span data-payment-icon aria-hidden="true">✓</span>
@@ -125,84 +167,41 @@
       <a class="button button-gold side-menu-cta" href="book.html">Book a call <span>↗</span></a>
     </aside>
 
-    <section class="hero" id="top" aria-labelledby="hero-title">
-      <div class="cinematic-oak" data-cinematic-oak aria-hidden="true">
-        <picture class="cinematic-oak-poster" data-cinematic-poster>
-          <source media="(max-width: 620px)" srcset="assets/oak-firefall-hero-mobile-v1-poster.webp" type="image/webp">
-          <img src="assets/oak-firefall-hero-v1-poster.webp" alt="" width="1680" height="720" decoding="async" fetchpriority="high">
-        </picture>
-        <video class="cinematic-oak-video" data-cinematic-video muted playsinline loop preload="none" disablepictureinpicture tabindex="-1" poster="assets/oak-firefall-hero-v1-poster.webp">
-          <source data-cinematic-src="assets/oak-firefall-hero-v1.mp4" type="video/mp4">
-        </video>
-        <svg class="cinematic-oak-fallback" data-cinematic-fallback viewBox="0 0 720 900" role="presentation" focusable="false">
-          <defs>
-            <linearGradient id="cinematic-trunk" x1="0" y1="1" x2=".82" y2="0">
-              <stop offset="0" stop-color="#0b0c0b"/>
-              <stop offset=".48" stop-color="#211d15"/>
-              <stop offset=".72" stop-color="#d4ae58"/>
-              <stop offset="1" stop-color="#151511"/>
-            </linearGradient>
-            <radialGradient id="cinematic-leaf">
-              <stop offset="0" stop-color="#f1d48c"/>
-              <stop offset=".32" stop-color="#8d662e"/>
-              <stop offset="1" stop-color="#0b0d0b"/>
-            </radialGradient>
-            <filter id="cinematic-glow" x="-70%" y="-70%" width="240%" height="240%">
-              <feGaussianBlur stdDeviation="6" result="blur"/>
-              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-          </defs>
-          <g class="cinematic-branches" fill="none" stroke="url(#cinematic-trunk)" stroke-linecap="round">
-            <path d="M362 890 C347 740 380 620 359 505 C340 397 284 287 192 184" stroke-width="38"/>
-            <path d="M363 651 C421 550 483 451 554 352" stroke-width="25"/>
-            <path d="M357 529 C292 451 235 397 128 350" stroke-width="23"/>
-            <path d="M354 423 C389 323 405 222 382 105" stroke-width="20"/>
-            <path d="M551 353 C602 299 622 239 626 174" stroke-width="15"/>
-            <path d="M476 455 C530 430 590 426 658 442" stroke-width="12"/>
-            <path d="M278 365 C218 301 169 253 102 229" stroke-width="13"/>
-            <path d="M211 211 C231 137 284 84 343 48" stroke-width="12"/>
-          </g>
-          <g class="cinematic-leaf-mass" fill="url(#cinematic-leaf)">
-            <ellipse cx="182" cy="174" rx="94" ry="58" transform="rotate(18 182 174)"/>
-            <ellipse cx="330" cy="99" rx="110" ry="66" transform="rotate(-9 330 99)"/>
-            <ellipse cx="477" cy="158" rx="113" ry="70" transform="rotate(13 477 158)"/>
-            <ellipse cx="606" cy="229" rx="90" ry="60" transform="rotate(26 606 229)"/>
-            <ellipse cx="113" cy="303" rx="97" ry="61" transform="rotate(-13 113 303)"/>
-            <ellipse cx="260" cy="281" rx="120" ry="73" transform="rotate(7 260 281)"/>
-            <ellipse cx="443" cy="289" rx="118" ry="71" transform="rotate(-8 443 289)"/>
-            <ellipse cx="591" cy="382" rx="113" ry="65" transform="rotate(8 591 382)"/>
-            <ellipse cx="197" cy="417" rx="101" ry="63" transform="rotate(9 197 417)"/>
-            <ellipse cx="392" cy="415" rx="118" ry="73" transform="rotate(-4 392 415)"/>
-          </g>
-          <g class="cinematic-fire-veins" fill="none" stroke="#d4ae58" stroke-linecap="round" filter="url(#cinematic-glow)">
-            <path d="M360 840 C311 771 394 727 350 659 C429 714 412 784 360 840Z" stroke-width="5"/>
-            <path d="M393 701 C374 657 424 636 405 587 C455 632 444 675 393 701Z" stroke-width="4"/>
-            <path d="M321 625 C295 581 348 551 319 508 C377 548 365 596 321 625Z" stroke-width="3"/>
-          </g>
-        </svg>
-        <canvas class="cinematic-oak-particles" data-cinematic-particles></canvas>
-        <div class="cinematic-oak-aura"></div>
-        <div class="cinematic-oak-grain"></div>
-      </div>
+    <section class="hero" id="top">
+      <canvas class="hero-canvas" data-hero-canvas aria-hidden="true"></canvas>
       <div class="ambient ambient-one"></div>
       <div class="ambient ambient-two"></div>
+      <div class="hero-artefact" data-hero-artefact aria-hidden="true">
+        <span class="artefact-orbit orbit-one"></span>
+        <span class="artefact-orbit orbit-two"></span>
+        <span class="artefact-orbit orbit-three"></span>
+        <div class="artefact-core">
+          <span class="artefact-face artefact-front">BO</span>
+          <span class="artefact-face artefact-back">BO</span>
+          <span class="artefact-face artefact-left"></span>
+          <span class="artefact-face artefact-right"></span>
+          <span class="artefact-face artefact-top"></span>
+          <span class="artefact-face artefact-bottom"></span>
+        </div>
+        <span class="artefact-shadow"></span>
+      </div>
       <div class="hero-content" data-depth-layer="0.45">
         <p class="kicker"><span></span> Independent digital architecture studio</p>
-        <h1 id="hero-title">Built to look rare.<br><em>Designed to perform.</em></h1>
+        <h1>Built to look rare.<br><em>Designed to perform.</em></h1>
         <p class="hero-copy">High-conviction websites. Sharper branding. Smarter systems. Black Oak brings design, search strategy and automation together for businesses ready for their next chapter.</p>
         <div class="hero-actions">
           <a class="button button-gold" href="quote.html">Build your estimate <span>↗</span></a>
-          <a class="button button-ghost" href="audit.html">Get a free website score <span>↗</span></a>
+          <a class="text-link" href="audit.html">Get a free website score <span>↗</span></a>
         </div>
       </div>
       <div class="hero-system-note" aria-hidden="true">
-        <span>Live system / 01</span>
-        <strong>Strategy / Motion / Conversion</strong>
+        <span>Live system</span>
+        <strong>Depth / Motion / Conversion</strong>
       </div>
       <div class="hero-proof" aria-label="Studio highlights">
-        <div><strong>100%</strong><span>Custom designed</span></div>
-        <div><strong>48h</strong><span>Response time</span></div>
-        <div><strong>01</strong><span>Strategy-first studio</span></div>
+        <div><strong>01</strong><span>Strategy first</span></div>
+        <div><strong>02</strong><span>Built for speed</span></div>
+        <div><strong>03</strong><span>Made to convert</span></div>
       </div>
     </section>
 
