@@ -42,6 +42,9 @@ const requiredFiles = [
   'netlify/lib/pay-as-you-sell.mjs',
   'index.html',
   'cinematic-intro.js',
+  'firefall.js',
+  'firefall.css',
+  'scripts/install-firefall.mjs',
   'style.css',
   'assets/oak-firefall-hero-v1.mp4',
   'assets/oak-firefall-hero-v1-poster.webp',
@@ -69,6 +72,7 @@ for (const file of requiredFiles) {
 const index = await readFile(resolve(root, 'index.html'), 'utf8');
 const client = await readFile(resolve(root, 'script.js'), 'utf8');
 const cinematicIntro = await readFile(resolve(root, 'cinematic-intro.js'), 'utf8');
+const firefall = await readFile(resolve(root, 'firefall.js'), 'utf8');
 const stylesheet = await readFile(resolve(root, 'style.css'), 'utf8');
 const redirects = await readFile(resolve(root, 'netlify.toml'), 'utf8');
 const publishRedirects = await readFile(resolve(root, '_redirects'), 'utf8');
@@ -85,6 +89,9 @@ if (!/data-cinematic-oak/.test(index) || !/data-cinematic-poster/.test(index) ||
 }
 if (!/prefers-reduced-motion/.test(cinematicIntro) || !/data-cinematic-fallback/.test(index)) {
   failures.push('Homepage cinematic hero is missing motion accessibility or media fallback controls.');
+}
+if (!/prefers-reduced-motion/.test(firefall) || !/connection\?\.saveData/.test(firefall) || !/addEventListener\('scroll'/.test(firefall)) {
+  failures.push('Site-wide firefall is missing scroll, reduced-motion, or data-saving controls.');
 }
 if (SHOPS_ENABLED && (!/marketplace\.css/.test(marketplace) || !/marketplace\.js/.test(marketplace) || !/data-product-grid/.test(marketplace))) {
   failures.push('Live Marketplace is missing its catalogue assets or product-grid hook.');

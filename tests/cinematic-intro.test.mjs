@@ -53,6 +53,8 @@ test('homepage opens on the offer with a decorative cinematic oak inside the her
   assert.match(client, /min-width: 901px/);
   assert.match(client, /video\.play\(\)/);
   assert.match(client, /video\?\.pause\(\)/);
+  assert.match(client, /if \(visible\) startAnimation\(\);\s*else stopAnimation\(\);/);
+  assert.match(client, /visibilitychange/);
   assert.doesNotMatch(client, /window\.addEventListener\(['"]scroll/);
   assert.doesNotMatch(client, /window\.scrollTo|video\.currentTime/);
 

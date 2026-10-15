@@ -181,12 +181,14 @@
   }
 
   function animate(now) {
-    frameId = window.requestAnimationFrame(animate);
+    frameId = 0;
     if (!visible || document.hidden || reducedMotion.matches || saveData) return;
     const minimumFrameTime = coarsePointer.matches ? 1000 / 30 : 1000 / 60;
-    if (now - previousFrame < minimumFrameTime) return;
-    previousFrame = now;
-    draw(now / 1000);
+    if (now - previousFrame >= minimumFrameTime) {
+      previousFrame = now;
+      draw(now / 1000);
+    }
+    frameId = window.requestAnimationFrame(animate);
   }
 
   function stopAnimation() {
@@ -195,8 +197,14 @@
   }
 
   function startAnimation() {
-    if (frameId || reducedMotion.matches || saveData) return;
+    if (frameId || !visible || document.hidden || reducedMotion.matches || saveData) return;
     frameId = window.requestAnimationFrame(animate);
+  }
+
+  function handleDocumentVisibility() {
+    if (document.hidden) stopAnimation();
+    else startAnimation();
+    setVideoPlayback();
   }
 
   function setVideoPlayback() {
@@ -246,6 +254,7 @@
     ? new IntersectionObserver(([entry]) => {
         visible = entry.isIntersecting;
         if (visible) startAnimation();
+        else stopAnimation();
         setVideoPlayback();
       }, { threshold: 0 })
     : null;
@@ -271,6 +280,7 @@
   reducedMotion.addEventListener?.('change', handleMotionPreference);
   coarsePointer.addEventListener?.('change', handleMotionPreference);
   wideViewport.addEventListener?.('change', handleMotionPreference);
+  document.addEventListener('visibilitychange', handleDocumentVisibility);
   resize();
   handleMotionPreference();
 
@@ -282,5 +292,6 @@
     reducedMotion.removeEventListener?.('change', handleMotionPreference);
     coarsePointer.removeEventListener?.('change', handleMotionPreference);
     wideViewport.removeEventListener?.('change', handleMotionPreference);
+    document.removeEventListener('visibilitychange', handleDocumentVisibility);
   }, { once: true });
 })();
