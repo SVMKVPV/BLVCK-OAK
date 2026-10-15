@@ -43,6 +43,9 @@ const requiredFiles = [
   'index.html',
   'cinematic-intro.js',
   'style.css',
+  'assets/oak-firefall-hero-v1.mp4',
+  'assets/oak-firefall-hero-v1-poster.webp',
+  'assets/oak-firefall-hero-mobile-v1-poster.webp',
   'referrals.html',
   'contact.html',
   'privacy.html',
@@ -72,14 +75,14 @@ const marketplace = await readFile(resolve(root, 'marketplace.html'), 'utf8');
 if (!stylesheet.trimStart().startsWith(':root') || stylesheet.includes('\uFFFD')) {
   failures.push('style.css is not valid UTF-8 CSS.');
 }
-for (const selector of ['.site-header', '.pricing-grid', '.side-menu', '.oak-origin']) {
+for (const selector of ['.site-header', '.pricing-grid', '.side-menu', '.cinematic-oak']) {
   if (!stylesheet.includes(selector)) failures.push(`style.css is missing required selector: ${selector}`);
 }
-if (!/data-oak-origin/.test(index) || !/cinematic-intro\.js/.test(index)) {
-  failures.push('Homepage cinematic intro is not connected.');
+if (!/data-cinematic-oak/.test(index) || !/data-cinematic-poster/.test(index) || !/cinematic-intro\.js/.test(index)) {
+  failures.push('Homepage cinematic hero is not connected.');
 }
-if (!/prefers-reduced-motion/.test(cinematicIntro) || !/data-oak-skip/.test(index)) {
-  failures.push('Homepage cinematic intro is missing motion accessibility controls.');
+if (!/prefers-reduced-motion/.test(cinematicIntro) || !/data-cinematic-fallback/.test(index)) {
+  failures.push('Homepage cinematic hero is missing motion accessibility or media fallback controls.');
 }
 if (SHOPS_ENABLED && (!/marketplace\.css/.test(marketplace) || !/marketplace\.js/.test(marketplace) || !/data-product-grid/.test(marketplace))) {
   failures.push('Live Marketplace is missing its catalogue assets or product-grid hook.');
