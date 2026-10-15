@@ -4,6 +4,7 @@ import { profiles } from '../community/profiles.mjs';
 import { buildCommunity } from './build-community.mjs';
 import { prepareRelease } from './prepare-release.mjs';
 import { markUnavailableLinks } from './unavailable-links.mjs';
+import { installFirefall } from './install-firefall.mjs';
 
 const root = resolve(import.meta.dirname, '..');
 const output = resolve(root, 'dist');
@@ -12,7 +13,7 @@ await rm(output, { recursive: true, force: true });
 await mkdir(output, { recursive: true });
 
 for (const file of [
-  'community.js','community.css','site-access.js','site-access.css','index.html','referrals.html','contact.html','privacy.html','terms.html','refunds.html',
+  'community.js','community.css','site-access.js','site-access.css','firefall.js','firefall.css','index.html','referrals.html','contact.html','privacy.html','terms.html','refunds.html',
   'portfolio.html','marketplace.html','marketplace.css','marketplace.js','quote.html','style.css','og.png','cinematic-intro.js','script.js',
   'partners.html','partners.js','portal.css','pay.html','pay.js','progress.html','progress.js',
   'portfolio.js','quote-builder.js','audit.html','book.html','ai-generator.html','ai-generator.css','ai-generator.js','sales-config.js','sales.js',
@@ -48,5 +49,6 @@ async function installAccessGate(directory) {
   }
 }
 await installAccessGate(output);
+await installFirefall(output);
 
 console.log('Black Oak public client built successfully. Marketplace is live; community is public; nearby discovery remains Coming soon.');

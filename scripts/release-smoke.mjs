@@ -47,7 +47,11 @@ async function deployment() {
 async function check(base,path,allowed,pattern,options={}) {
   const response = await request(base + path,options);
   const text = await response.text();
-  const ok = allowed.includes(response.status) && (!pattern || pattern.test(text));
+  const firefallConnected = !/<html\b/i.test(text) || (
+    /href=["']\/firefall\.css["']/i.test(text)
+    && /src=["']\/firefall\.js["'][^>]*\bdefer\b/i.test(text)
+  );
+  const ok = allowed.includes(response.status) && (!pattern || pattern.test(text)) && firefallConnected;
   result.checks.push({path,status:response.status,ok});
   console.log(`${ok ? 'PASS' : 'FAIL'} ${options.method || 'GET'} ${path}: ${response.status}`);
   if (!ok) throw new Error(`Unexpected deployed response for ${path}`);
@@ -83,6 +87,8 @@ try {
   const base = await deployment(); result.baseUrl=base;
   const home = await check(base,'/',[200],/discover-next/);
   if (/intro-video\.js|<video\b[^>]*autoplay|<video\b[^>]*(?:data-intro|startup)/i.test(home)) throw new Error('The deployed homepage still references an autoplay startup video.');
+  await check(base,'/firefall.js',[200],/window\.self\s*!==\s*window\.top/);
+  await check(base,'/firefall.css',[200],/\.site-firefall/);
   for(const path of ['/marketplace','/marketplace.html','/shops','/shops.html']) await check(base,path,[200],/data-product-grid/);
   for(const path of ['/nearby.html','/login.html','/coming-soon.html']) await check(base,path,[200],/Coming soon/);
   await check(base,'/community.html',[200],/data-profile=/);
