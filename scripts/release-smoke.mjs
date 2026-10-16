@@ -62,9 +62,18 @@ async function allHtml(directory) {
   }
   return list;
 }
+function externalLinkKey(value) {
+  const url = new URL(value);
+  const path = url.pathname.replace(/\/+$/, '') || '/';
+  return url.origin + path;
+}
 async function externalLinks() {
   const html = (await allHtml(resolve('dist'))).join('\n');
   const config = await readFile('netlify.toml','utf8');
+  const registry = JSON.parse(await readFile('portfolio-repositories.json','utf8'));
+  const protectedPreviews = new Set((registry.sites || [])
+    .filter(site => site.previewStatus === 'protected')
+    .map(site => externalLinkKey(site.currentPreview)));
   const urls = new Set([...html.matchAll(/<a\b[^>]*href=["'](https?:\/\/[^"']+)["']/g)].map(m=>m[1].replaceAll('&amp;','&')));
   for(const match of config.matchAll(/to\s*=\s*"(https:\/\/[^\"]+)"/g)) urls.add(match[1]);
   for(const value of [...urls].filter(u=>!trusted(u)).slice(0,60)) {
@@ -73,7 +82,10 @@ async function externalLinks() {
     try {
       const response = await request(value);
       await response.body?.cancel();
-      const item = {url:url.origin+url.pathname,status:response.status,confirmedBroken:[401,403,404,410].includes(response.status)};
+      const key = externalLinkKey(value);
+      const protectedPreview = protectedPreviews.has(key);
+      const confirmedBroken = [404,410].includes(response.status) || ([401,403].includes(response.status) && !protectedPreview);
+      const item = {url:key,status:response.status,confirmedBroken,protectedPreview};
       result.externalLinks.push(item);
       console.log(`External link ${item.status}: ${item.url}`);
     } catch { result.externalLinks.push({url:url.origin+url.pathname,status:null,confirmedBroken:false,unverified:true}); }
