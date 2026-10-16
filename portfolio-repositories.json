@@ -8,6 +8,15 @@
   },
   "sites": [
     {
+      "id": "aurelis-spatial-studio",
+      "name": "AURELIS — Spatial Design Studio",
+      "currentPreview": "https://aurelis-spatial-studio.samkapa3.chatgpt.site/",
+      "previewStatus": "protected",
+      "currentSource": "External published Site; source maintained in the AURELIS project checkout",
+      "targetRepo": "SVMKVPV/blvckoak-portfolio-aurelis-spatial-studio",
+      "repoStatus": "needs_creation"
+    },
+    {
       "id": "wedding-invitation",
       "name": "Cinematic Wedding Invitation",
       "currentPreview": "https://the-20-december-wedding.samkapa3.chatgpt.site/",
