@@ -1,5 +1,7 @@
-import { featureAccess } from '../lib/feature-access.mjs';
+import { publicFeatureAccess } from '../lib/feature-access.mjs';
 import { emailShell, escapeHtml, getOwnerEmail, sendEmail } from '../lib/email.mjs';
+import { PortalError, readBody } from '../lib/portal-auth.mjs';
+import { enforcePublicQuota } from '../lib/public-rate-limit.mjs';
 import { json } from '../lib/referrals.mjs';
 import { createSalesLead } from '../lib/sales-leads.mjs';
 
@@ -17,25 +19,15 @@ const serviceLabels = Object.freeze({
   general: 'Not sure yet / Multiple services',
 });
 
-export const config = {
-  rateLimit: {
-    action: 'rate_limit',
-    aggregateBy: ['domain', 'ip'],
-    windowSize: 60,
-    windowLimit: 3,
-  },
-};
-
-export default async function handler(request) {
-  const denied = await featureAccess(request);
-  if (denied) return denied;
+export default async function handler(request, context) {
   if (request.method !== 'POST') return json({ error: 'Method not allowed.' }, 405);
+  const denied = publicFeatureAccess(request);
+  if (denied) return denied;
+  const limited = await enforcePublicQuota('contact', context);
+  if (limited) return limited;
 
   try {
-    const contentLength = Number(request.headers.get('content-length') || 0);
-    if (contentLength > 8192) return json({ error: 'Message is too large.' }, 413);
-
-    const body = await request.json();
+    const body = await readBody(request, 16_384);
     const name = String(body.name || '').trim().slice(0, 100);
     const email = String(body.email || '').trim().toLowerCase().slice(0, 160);
     const company = String(body.company || '').trim().slice(0, 120);
@@ -88,6 +80,7 @@ export default async function handler(request) {
     return json({ message: 'Your enquiry has been sent. We will reply within two business days.' }, 201);
   } catch (error) {
     console.error('Contact form failed:', error.message);
+    if (error instanceof PortalError) return json({ error: error.message }, error.status);
     return json({ error: 'The secure contact form is temporarily unavailable. Please try again later.' }, 503);
   }
 }

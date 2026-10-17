@@ -7,7 +7,7 @@ const read = (file) => readFile(new URL(`../${file}`, import.meta.url), 'utf8');
 test('homepage connects the scroll-led BLVCK OAK origin sequence', async () => {
   const [html, css, client, build, packageJson, cinematicVideo] = await Promise.all([
     read('index.html'),
-    read('style.css'),
+    read('studio-intro.css'),
     read('cinematic-intro.js'),
     read('scripts/build.mjs'),
     read('package.json'),
@@ -22,7 +22,7 @@ test('homepage connects the scroll-led BLVCK OAK origin sequence', async () => {
   assert.doesNotMatch(html, /data-oak-video[^>]*autoplay/);
   assert.match(html, /data-oak-chapter="4"/);
   assert.match(html, /data-oak-skip/);
-  assert.ok(html.indexOf('data-oak-origin') < html.indexOf('<main>'));
+  assert.ok(html.indexOf('data-oak-origin') < html.indexOf('<main'));
   assert.match(css, /\.oak-origin-stage\s*\{/);
   assert.match(css, /position:\s*sticky/);
   assert.match(css, /\.oak-origin-video\s*\{[^}]*object-fit:\s*contain/);

@@ -36,7 +36,8 @@ export function ownerAuthEmail() {
 }
 
 export async function readBody(request, limit = 16000) {
-  if (!(request.headers.get('content-type') || '').includes('application/json')) throw new PortalError('Use a JSON request.', 415);
+  const mediaType = String(request.headers.get('content-type') || '').split(';', 1)[0].trim().toLowerCase();
+  if (mediaType !== 'application/json') throw new PortalError('Use a JSON request.', 415);
   const text = await request.text();
   if (Buffer.byteLength(text, 'utf8') > limit) throw new PortalError('Request is too large.', 413);
   try { return JSON.parse(text); } catch { throw new PortalError('Invalid request.'); }

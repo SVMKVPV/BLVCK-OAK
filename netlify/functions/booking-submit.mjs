@@ -1,17 +1,45 @@
-import { featureAccess } from '../lib/feature-access.mjs';
+import { publicFeatureAccess } from '../lib/feature-access.mjs';
 import { emailShell, escapeHtml, getOwnerEmail, sendEmail } from '../lib/email.mjs';
+import { PortalError, readBody } from '../lib/portal-auth.mjs';
+import { enforcePublicQuota } from '../lib/public-rate-limit.mjs';
 import { json } from '../lib/referrals.mjs';
 import { createSalesLead } from '../lib/sales-leads.mjs';
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-export const config = { rateLimit: { action: 'rate_limit', aggregateBy: ['domain', 'ip'], windowSize: 60, windowLimit: 3 } };
+const sydneyClock = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'Australia/Sydney',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  hourCycle: 'h23',
+});
 
-export default async function handler(request) {
-  const denied = await featureAccess(request);
-  if (denied) return denied;
+function sydneyStamp(epoch) {
+  const parts = Object.fromEntries(sydneyClock.formatToParts(new Date(epoch)).map(({ type, value }) => [type, value]));
+  return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}`;
+}
+
+export function validSydneyBookingTime(preferredDate, preferredTime, now = Date.now()) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(preferredDate) || !/^\d{2}:\d{2}$/.test(preferredTime)) return false;
+  const [year, month, day] = preferredDate.split('-').map(Number);
+  const [hour, minute] = preferredTime.split(':').map(Number);
+  const calendarDate = new Date(Date.UTC(year, month - 1, day));
+  if (calendarDate.getUTCFullYear() !== year || calendarDate.getUTCMonth() !== month - 1 || calendarDate.getUTCDate() !== day) return false;
+  if (hour < 8 || hour > 20 || minute < 0 || minute > 59) return false;
+  const requested = `${preferredDate}T${preferredTime}`;
+  return requested >= sydneyStamp(now) && requested <= sydneyStamp(now + 180 * 86_400_000);
+}
+
+export default async function handler(request, context) {
   if (request.method !== 'POST') return json({ error: 'Method not allowed.' }, 405);
+  const denied = publicFeatureAccess(request);
+  if (denied) return denied;
+  const limited = await enforcePublicQuota('booking', context);
+  if (limited) return limited;
   try {
-    const body = await request.json();
+    const body = await readBody(request, 8192);
     if (body.website) return json({ error: 'Booking could not be sent.' }, 400);
     const name = String(body.name || '').trim().slice(0, 100);
     const email = String(body.email || '').trim().toLowerCase().slice(0, 160);
@@ -21,9 +49,7 @@ export default async function handler(request) {
     const preferredTime = String(body.preferredTime || '');
     const message = String(body.message || '').trim().slice(0, 2000);
     if (name.length < 2 || !emailPattern.test(email)) return json({ error: 'Enter your name and a valid email address.' }, 400);
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(preferredDate) || !/^\d{2}:\d{2}$/.test(preferredTime)) return json({ error: 'Choose your preferred date and time.' }, 400);
-    const chosen = new Date(`${preferredDate}T${preferredTime}:00+10:00`);
-    if (Number.isNaN(chosen.getTime()) || chosen.getTime() < Date.now() - 3600000 || chosen.getTime() > Date.now() + 180 * 86400000) return json({ error: 'Choose a date within the next six months.' }, 400);
+    if (!validSydneyBookingTime(preferredDate, preferredTime)) return json({ error: 'Choose a Sydney time between 8:00 am and 8:00 pm within the next six months.' }, 400);
     if (body.acceptedPrivacy !== true) return json({ error: 'Accept the privacy notice to continue.' }, 400);
     const lead = await createSalesLead({ type: 'booking', requestId: body.requestId, name, email, company, phone, service: 'Free consultation', message, preferredDate, preferredTime });
     const ownerEmail = getOwnerEmail();
@@ -45,6 +71,7 @@ export default async function handler(request) {
     return json({ message: 'Your consultation request is in. Check your email for confirmation.' }, 201);
   } catch (error) {
     console.error('Booking request failed:', error.name);
+    if (error instanceof PortalError) return json({ error: error.message }, error.status);
     return json({ error: 'Booking is temporarily unavailable. Please use the contact form.' }, 503);
   }
 }

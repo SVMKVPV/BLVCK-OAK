@@ -2,13 +2,14 @@ import { featureAccess } from '../lib/feature-access.mjs';
 import { json } from '../lib/referrals.mjs';
 import { PortalError, assertSameOrigin, clientError, portalStore, quoteIdPattern, readBody, safeEqual, tokenPattern } from '../lib/portal-auth.mjs';
 import { publicProjectProgress } from '../lib/project-progress.mjs';
+import { enforcePublicQuota } from '../lib/public-rate-limit.mjs';
 
-export const config = { rateLimit: { action: 'rate_limit', aggregateBy: ['domain', 'ip'], windowSize: 60, windowLimit: 60 } };
-
-export default async function handler(request) {
+export default async function handler(request, context) {
   const denied = await featureAccess(request);
   if (denied) return denied;
   if (request.method !== 'POST') return json({ error: 'Method not allowed.' }, 405);
+  const limited = await enforcePublicQuota('project-progress', context);
+  if (limited) return limited;
   try {
     assertSameOrigin(request);
     const body = await readBody(request, 4096);

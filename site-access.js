@@ -1,9 +1,34 @@
 (() => {
   'use strict';
-  const publicPaths = new Set(['/', '/index.html', '/partners', '/partners.html', '/privacy', '/privacy.html', '/terms', '/terms.html', '/refunds', '/refunds.html', '/referrals', '/referrals.html', '/oakpay', '/oakpay.html']);
-  const isCommunity = /^\/community(?:\.html)?\/?$/.test(location.pathname) || /^\/community\/[a-z0-9-]+\/(?:index\.html)?$/.test(location.pathname);
+  const acquisitionPaths = new Set([
+    '/', '/index.html',
+    '/portfolio', '/portfolio.html',
+    '/marketplace', '/marketplace.html',
+    '/audit', '/audit.html',
+    '/quote', '/quote.html',
+    '/ai-generator', '/ai-generator.html',
+    '/contact', '/contact.html',
+    '/book', '/book.html',
+    '/nearby', '/nearby.html',
+    '/coming-soon', '/coming-soon.html',
+  ]);
+  const publicPaths = new Set([
+    ...acquisitionPaths,
+    '/partners', '/partners.html',
+    '/privacy', '/privacy.html',
+    '/terms', '/terms.html',
+    '/refunds', '/refunds.html',
+    '/referrals', '/referrals.html',
+    '/oakpay', '/oakpay.html',
+  ]);
+  const normalisePath = (path) => path.replace(/\/$/, '') || '/';
+  const isCommunityPath = (path) => /^\/community(?:\.html)?\/?$/.test(path) || /^\/community\/[a-z0-9-]+\/(?:index\.html)?$/.test(path);
+  const isPreviewPath = (path) => /^\/previews\/[a-z0-9-]+(?:\.html)?\/?$/.test(path);
+  const isPublicPath = (path) => publicPaths.has(normalisePath(path)) || isCommunityPath(path) || isPreviewPath(path);
+  const isCommunity = isCommunityPath(location.pathname);
+  const isAcquisition = acquisitionPaths.has(normalisePath(location.pathname)) || isPreviewPath(location.pathname);
   const isLogin = /^\/partners(?:\.html)?\/?$/.test(location.pathname);
-  const isPublic = isCommunity || publicPaths.has(location.pathname.replace(/\/$/, '') || '/');
+  const isPublic = isPublicPath(location.pathname);
   let authenticated = false;
   let checked = false;
   let replaying = false;
@@ -43,12 +68,15 @@
   }
   function needsLogin(control) {
     if (!control) return false;
+    // Customer acquisition pages and previews are intentionally usable without
+    // an account. Their server-side mutations enforce their own public boundary.
+    if (isAcquisition || control.closest('[data-public-action]')) return false;
     if (isCommunity && control.closest('[data-public-community]')) return false;
     if (control.closest('[data-auth-panel],[data-dashboard]') || control.matches('[data-signout]')) return false;
     if (control.matches('[data-menu-toggle],[data-menu-close],[data-dismiss-notice],[data-oak-skip],[data-close-modal]')) return false;
     if (control.tagName === 'A') {
       const url = new URL(control.href, location.href);
-      if (url.origin === location.origin && (publicPaths.has(url.pathname.replace(/\/$/, '') || '/') || /^\/community(?:\.html)?\/?$/.test(url.pathname) || /^\/community\/[a-z0-9-]+\/(?:index\.html)?$/.test(url.pathname))) return false;
+      if (url.origin === location.origin && isPublicPath(url.pathname)) return false;
       return true;
     }
     return !isLogin;

@@ -15,3 +15,16 @@ export async function featureAccess(request) {
     return json({ error: result.error }, result.status);
   }
 }
+
+// Public acquisition endpoints do not require an account, but browser writes
+// must still originate from this site. Keep this separate from featureAccess so
+// private client and partner handlers cannot become public by accident.
+export function publicFeatureAccess(request) {
+  try {
+    assertSameOrigin(request);
+    return null;
+  } catch (error) {
+    const result = clientError(error);
+    return json({ error: result.error }, result.status);
+  }
+}

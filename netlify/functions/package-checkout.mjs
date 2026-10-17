@@ -1,4 +1,4 @@
-import { featureAccess } from '../lib/feature-access.mjs';
+import { publicFeatureAccess } from '../lib/feature-access.mjs';
 import {
   CHECKOUT_VERSION,
   ENTERPRISE_REFERRAL_DISCOUNT_PERCENT,
@@ -18,11 +18,14 @@ import {
   referralsStore,
   sameEmail,
 } from '../lib/referrals.mjs';
+import { PortalError, readBody } from '../lib/portal-auth.mjs';
+import { enforcePublicQuota } from '../lib/public-rate-limit.mjs';
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const requestIdPattern = /^[A-Za-z0-9-]{16,80}$/;
 
 export const config = {
+  path: ['/api/checkout/package', '/.netlify/functions/package-checkout'],
   rateLimit: {
     action: 'rate_limit',
     aggregateBy: ['domain', 'ip'],
@@ -72,16 +75,15 @@ export function packageCheckoutParameters({
   };
 }
 
-export default async function handler(request) {
-  const denied = await featureAccess(request);
-  if (denied) return denied;
+export default async function handler(request, context) {
   if (request.method !== 'POST') return json({ error: 'Method not allowed.' }, 405);
+  const denied = publicFeatureAccess(request);
+  if (denied) return denied;
+  const limited = await enforcePublicQuota('checkout', context);
+  if (limited) return limited;
 
   try {
-    const contentLength = Number(request.headers.get('content-length') || 0);
-    if (contentLength > 4096) return json({ error: 'Checkout request is too large.' }, 413);
-
-    const body = await request.json();
+    const body = await readBody(request, 4096);
     const packageItem = getPackage(body.packageId);
     if (!packageItem) return json({ error: 'Choose a valid Black Oak package.' }, 400);
 
@@ -197,6 +199,7 @@ export default async function handler(request) {
     });
   } catch (error) {
     console.error('Package checkout failed:', error.message);
+    if (error instanceof PortalError) return json({ error: error.message }, error.status);
     return json({ error: 'Secure checkout could not be opened. Please try again.' }, 500);
   }
 }
