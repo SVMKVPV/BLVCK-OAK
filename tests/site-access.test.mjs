@@ -93,6 +93,7 @@ const publicHandlers = [
   ['booking', booking],
   ['website audit', audit],
 ];
+const previewContext = { deploy: { context: 'deploy-preview' } };
 const publicPost = (origin, body = {}) => new Request('https://blvckoak.com.au/api/feature', {
   method:'POST',
   headers:{origin,'content-type':'application/json'},
@@ -101,7 +102,7 @@ const publicPost = (origin, body = {}) => new Request('https://blvckoak.com.au/a
 
 test('public acquisition APIs accept guest requests from the same site and retain validation',async()=>{
   for (const [name, handler] of publicHandlers) {
-    const response = await handler(publicPost('https://blvckoak.com.au'));
+    const response = await handler(publicPost('https://blvckoak.com.au'), previewContext);
     assert.equal(response.status,400,name);
     assert.equal(response.headers.get('cache-control'),'no-store',name);
   }
