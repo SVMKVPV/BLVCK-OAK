@@ -5,6 +5,8 @@ import partnerAuth from '../netlify/functions/partner-auth.mjs';
 import stripeWebhook from '../netlify/functions/stripe-webhook.mjs';
 import identitySignup from '../netlify/functions/identity-signup.mjs';
 
+const previewContext = { deploy: { context: 'deploy-preview' } };
+
 async function body(response) {
   return response.json();
 }
@@ -22,14 +24,14 @@ test('partner auth enforces same-origin and JSON content type', async () => {
       method: 'POST',
       headers: { origin: 'https://attacker.example', 'content-type': 'application/json' },
       body: '{}',
-    }));
+    }), previewContext);
     assert.equal(crossOrigin.status, 403);
 
     const wrongType = await partnerAuth(new Request('https://blackoak.example/api/partners/auth', {
       method: 'POST',
       headers: { origin: 'https://blackoak.example', 'content-type': 'text/plain' },
       body: '{}',
-    }));
+    }), previewContext);
     assert.equal(wrongType.status, 415);
   } finally {
     if (oldSite === undefined) delete process.env.SITE_URL;

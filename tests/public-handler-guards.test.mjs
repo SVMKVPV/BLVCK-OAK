@@ -8,6 +8,7 @@ import packageCheckout from '../netlify/functions/package-checkout.mjs';
 import websiteAudit from '../netlify/functions/website-audit.mjs';
 
 const site = 'https://blackoak.example';
+const previewContext = { deploy: { context: 'deploy-preview' } };
 
 function post(path, body, { contentType = 'application/json', origin = site } = {}) {
   const headers = { origin };
@@ -53,14 +54,14 @@ test('public JSON handlers require application/json before doing work', async ()
   ];
 
   for (const [name, handler, path] of handlers) {
-    const response = await handler(post(path, '{}', { contentType: 'text/plain' }));
+    const response = await handler(post(path, '{}', { contentType: 'text/plain' }), previewContext);
     assert.equal(response.status, 415, `${name} should reject non-JSON input`);
 
-    const misleading = await handler(post(path, '{}', { contentType: 'text/application/json-attack' }));
+    const misleading = await handler(post(path, '{}', { contentType: 'text/application/json-attack' }), previewContext);
     assert.equal(misleading.status, 415, `${name} should require an exact JSON media type`);
 
-    const charset = await handler(post(path, '{}', { contentType: 'application/json; charset=utf-8' }));
-    assert.notEqual(charset.status, 415, `${name} should accept JSON with a charset parameter`);
+    const charset = await handler(post(path, '{', { contentType: 'application/json; charset=utf-8' }), previewContext);
+    assert.equal(charset.status, 400, `${name} should accept JSON with a charset parameter before validating the body`);
   }
 });
 
@@ -76,7 +77,7 @@ test('public JSON handlers enforce actual UTF-8 body limits without a Content-Le
   for (const [name, handler, path, limit] of handlers) {
     const request = post(path, JSON.stringify({ padding: 'é'.repeat(limit) }));
     assert.equal(request.headers.get('content-length'), null, `${name} test must not rely on Content-Length`);
-    const response = await handler(request);
+    const response = await handler(request, previewContext);
     assert.equal(response.status, 413, `${name} should reject an oversized UTF-8 body`);
   }
 });
@@ -91,7 +92,7 @@ test('public JSON handlers report invalid JSON as a client error', async () => {
   ];
 
   for (const [name, handler, path] of handlers) {
-    const response = await handler(post(path, '{'));
+    const response = await handler(post(path, '{'), previewContext);
     assert.equal(response.status, 400, `${name} should reject malformed JSON`);
   }
 });
