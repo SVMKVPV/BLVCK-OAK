@@ -131,6 +131,13 @@
   status = 301
   force = true
 
+# Keep the legacy free-preview CTA used by the public Link in Bio page useful.
+[[redirects]]
+  from = "/free-preview.html"
+  to = "/contact.html?service=website-preview"
+  status = 301
+  force = true
+
 # The previous external ecommerce preview returned HTTP 401 to public visitors.
 [[redirects]]
   from = "/previews/ecommerce.html"
