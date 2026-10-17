@@ -2,13 +2,14 @@ import { randomInt } from 'node:crypto';
 import { emailKey, json } from '../lib/referrals.mjs';
 import { emailShell, escapeHtml, sendEmail } from '../lib/email.mjs';
 import { PortalError, assertSameOrigin, clientError, consumeChallenge, createSession, ensureReferral, hash, ownerAuthEmail, portalStore, readBody, secretToken, validEmail } from '../lib/portal-auth.mjs';
+import { enforcePublicQuota } from '../lib/public-rate-limit.mjs';
 
-export const config = { rateLimit: { action: 'rate_limit', aggregateBy: ['domain', 'ip'], windowSize: 60, windowLimit: 10 } };
-
-export default async function handler(request) {
+export default async function handler(request, context) {
   if (request.method !== 'POST') return json({ error: 'Method not allowed.' }, 405);
   try {
     assertSameOrigin(request);
+    const limited = await enforcePublicQuota('partner-auth', context);
+    if (limited) return limited;
     const body = await readBody(request, 4096);
     const store = portalStore();
     if (body.action === 'start') {

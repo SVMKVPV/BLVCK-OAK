@@ -6,8 +6,7 @@ import { applyProjectProgress, projectProgressLink, readProjectProgress } from '
 import { publicPaymentArrangement } from '../lib/pay-as-you-sell.mjs';
 import { applyPortfolio, readPortfolio } from '../lib/portfolio.mjs';
 import { listSalesLeads, updateSalesLead } from '../lib/sales-leads.mjs';
-
-export const config = { rateLimit: { action: 'rate_limit', aggregateBy: ['domain', 'ip'], windowSize: 60, windowLimit: 40 } };
+import { enforcePublicQuota } from '../lib/public-rate-limit.mjs';
 
 async function notifyQuote(quote, approved = false) {
   const ownerEmail = getOwnerEmail();
@@ -45,10 +44,12 @@ async function consumeQuoteQuota(store, auth) {
   throw new PortalError('Please try again shortly.', 409);
 }
 
-export default async function handler(request) {
+export default async function handler(request, context) {
   try {
     const store = portalStore();
     const auth = await requireAccount(request, store);
+    const limited = await enforcePublicQuota('partner-api', context);
+    if (limited) return limited;
     if (request.method === 'GET') {
       const referral = await ensureReferral(auth.account);
       const prefix = auth.isOwner ? 'quote-index/' : `partner-quotes/${auth.account.id}/`;

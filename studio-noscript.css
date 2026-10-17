@@ -1,0 +1,29 @@
+.oak-origin {
+  height: auto !important;
+  min-height: 100vh;
+}
+
+.oak-origin-stage {
+  position: relative !important;
+  height: 100vh !important;
+}
+
+.oak-origin-video,
+.oak-origin-canvas,
+.oak-origin-grain,
+.oak-origin-skip,
+.oak-origin-scroll,
+.oak-origin-progress {
+  display: none !important;
+}
+
+.oak-origin-chapter {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+.oak-origin-chapter:first-child {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: none !important;
+}

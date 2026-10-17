@@ -180,6 +180,7 @@ function openCheckout(packageId) {
   updateCheckoutOfferPresentation();
   setCheckoutButtonState(false);
   modalBackdrop.hidden = false;
+  checkoutModal?.setAttribute('aria-hidden', 'false');
   document.body.classList.add('modal-open');
   closeModalButton.focus();
 }
@@ -188,6 +189,7 @@ function closeCheckout() {
   if (!modalBackdrop || modalBackdrop.hidden) return;
 
   modalBackdrop.hidden = true;
+  checkoutModal?.setAttribute('aria-hidden', 'true');
   document.body.classList.remove('modal-open');
   selectedPackage = null;
 
@@ -303,12 +305,12 @@ if (paymentNotice && (paymentStatus === 'success' || paymentStatus === 'cancelle
   paymentNotice.classList.add(paymentStatus);
   paymentNotice.querySelector('[data-payment-icon]').textContent = success ? '✓' : '↩';
   paymentNotice.querySelector('[data-payment-title]').textContent = subscriptionStarted
-    ? 'Monthly plan started.'
-    : success ? 'Payment received.' : 'Checkout cancelled.';
+    ? 'Monthly checkout complete.'
+    : success ? 'Checkout complete.' : 'Checkout closed.';
   paymentNotice.querySelector('[data-payment-message]').textContent = success
     ? subscriptionStarted
-      ? ' Your Link in Bio subscription is active—we’ll be in touch with onboarding details.'
-      : ' Your build is reserved—we’ll be in touch with next steps.'
+      ? ' Stripe is confirming your Link in Bio subscription. A receipt and onboarding details will arrive by email.'
+      : ' Stripe is confirming your payment. A receipt and project next steps will arrive by email.'
     : ' Nothing was charged. Your package is still here when you are ready.';
   paymentNotice.hidden = false;
 }
@@ -537,9 +539,7 @@ contactForm?.addEventListener('submit', async (event) => {
 
 const requestedPackage = pageParameters.get('package');
 if (requestedPackage && packageCatalog[requestedPackage]) {
-  (window.blackOakAccess?.ready || Promise.resolve(false)).then(signedIn => {
-    if (signedIn) window.setTimeout(() => openCheckout(requestedPackage), 0);
-  });
+  window.setTimeout(() => openCheckout(requestedPackage), 0);
 }
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');

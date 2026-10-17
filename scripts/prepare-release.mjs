@@ -123,8 +123,16 @@ export async function prepareRelease(output) {
     if (!html.includes('/release.css')) html = html.replace('</head>', '<link rel="stylesheet" href="/release.css">\n<script src="/release.js" defer></script>\n</head>');
     if (key === 'index.html') {
       const section = '<section class="release-discover" aria-labelledby="discover-next"><p class="section-label">The next chapter</p><h2 id="discover-next">Discover. Connect. Grow.</h2><p>Shop our website styles, explore the portfolio and see what Black Oak is building next.</p><nav aria-label="Marketplace and upcoming features"><a href="/marketplace.html">Shop website styles</a><a href="/community.html">Design community</a><a href="/nearby.html">Nearby business finder</a></nav></section>';
-      html = html.replace(/<section\b[^>]*id="approach"[^>]*>/, match => section + '\n' + match);
-      html = html.replace(/(<a\b[^>]*href="portfolio\.html"[^>]*>[\s\S]*?<\/a>)/g, '$1<a href="/marketplace.html">Marketplace</a><a href="/community.html">Community</a>');
+      if (!html.includes('id="discover-next"')) {
+        html = html.replace(/<section\b[^>]*id="approach"[^>]*>/, match => section + '\n' + match);
+      }
+      const homepageDestinations = [
+        !/href=["']\/?marketplace\.html["']/.test(html) ? '<a href="/marketplace.html">Marketplace</a>' : '',
+        !/href=["']\/?community\.html["']/.test(html) ? '<a href="/community.html">Community</a>' : '',
+      ].join('');
+      if (homepageDestinations) {
+        html = html.replace(/(<a\b[^>]*href="portfolio\.html"[^>]*>[\s\S]*?<\/a>)/, `$1${homepageDestinations}`);
+      }
     }
     documents.set(key, html);
   }

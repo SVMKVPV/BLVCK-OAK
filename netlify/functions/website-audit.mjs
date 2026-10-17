@@ -1,14 +1,19 @@
-import { featureAccess } from '../lib/feature-access.mjs';
+import { publicFeatureAccess } from '../lib/feature-access.mjs';
 import { lookup } from 'node:dns/promises';
 import http from 'node:http';
 import https from 'node:https';
 import { emailShell, escapeHtml, getOwnerEmail, sendEmail } from '../lib/email.mjs';
+import { PortalError, readBody } from '../lib/portal-auth.mjs';
+import { enforcePublicQuota } from '../lib/public-rate-limit.mjs';
 import { json } from '../lib/referrals.mjs';
 import { createSalesLead } from '../lib/sales-leads.mjs';
 import { isPrivateAddress, scoreWebsiteAudit } from '../lib/website-audit.mjs';
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-export const config = { rateLimit: { action: 'rate_limit', aggregateBy: ['domain', 'ip'], windowSize: 3600, windowLimit: 5 } };
+export const config = {
+  path: ['/api/website-audit', '/.netlify/functions/website-audit'],
+  rateLimit: { action: 'rate_limit', aggregateBy: ['domain', 'ip'], windowSize: 180, windowLimit: 5 },
+};
 
 async function safeUrl(value) {
   let url;
@@ -59,12 +64,14 @@ async function fetchPublicPage(initial) {
   throw new Error('The website redirected too many times.');
 }
 
-export default async function handler(request) {
-  const denied = await featureAccess(request);
-  if (denied) return denied;
+export default async function handler(request, context) {
   if (request.method !== 'POST') return json({ error: 'Method not allowed.' }, 405);
+  const denied = publicFeatureAccess(request);
+  if (denied) return denied;
+  const limited = await enforcePublicQuota('audit', context);
+  if (limited) return limited;
   try {
-    const body = await request.json();
+    const body = await readBody(request, 8192);
     if (body.companyWebsite) return json({ error: 'Audit could not be completed.' }, 400);
     const name = String(body.name || '').trim().slice(0, 100);
     const email = String(body.email || '').trim().toLowerCase().slice(0, 160);
@@ -84,6 +91,7 @@ export default async function handler(request) {
     return json({ score: report.score, finalUrl: page.finalUrl, checks: report.checks, fixes: report.fixes }, 201);
   } catch (error) {
     console.error('Website audit failed:', error.name);
+    if (error instanceof PortalError) return json({ error: error.message }, error.status);
     const message = /Enter|address|website|redirect/i.test(error.message) ? error.message : 'The audit could not reach that website. Check the address and try again.';
     return json({ error: message }, 400);
   }

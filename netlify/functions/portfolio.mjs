@@ -1,11 +1,12 @@
 import { json } from '../lib/referrals.mjs';
 import { portfolioIdPattern, publicPortfolioItem } from '../lib/portfolio.mjs';
 import { portalStore, quoteIdPattern } from '../lib/portal-auth.mjs';
+import { enforcePublicQuota } from '../lib/public-rate-limit.mjs';
 
-export const config = { rateLimit: { action: 'rate_limit', aggregateBy: ['domain', 'ip'], windowSize: 60, windowLimit: 60 } };
-
-export default async function handler(request) {
+export default async function handler(request, context) {
   if (request.method !== 'GET' && request.method !== 'HEAD') return json({ error: 'Method not allowed.' }, 405);
+  const limited = await enforcePublicQuota('portfolio', context);
+  if (limited) return limited;
   try {
     const store = portalStore();
     const { blobs } = await store.list({ prefix: 'portfolio-index/' });

@@ -4,8 +4,7 @@ import { PortalError, assertSameOrigin, clientError, portalStore, quoteIdPattern
 import { publicQuote } from '../lib/quotes.mjs';
 import { openQuoteCheckout, reconcileQuoteCheckout } from '../lib/quote-checkout.mjs';
 import { createSalesConnectionUrl, openMaintenanceCheckout, reconcileMaintenanceCheckout, stopCompletedSalesTracking } from '../lib/pay-as-you-sell.mjs';
-
-export const config = { rateLimit: { action: 'rate_limit', aggregateBy: ['domain', 'ip'], windowSize: 60, windowLimit: 20 } };
+import { enforcePublicQuota } from '../lib/public-rate-limit.mjs';
 
 function paymentFailure(error) {
   return {
@@ -16,10 +15,12 @@ function paymentFailure(error) {
   };
 }
 
-export default async function handler(request) {
+export default async function handler(request, context) {
   const denied = await featureAccess(request);
   if (denied) return denied;
   if (request.method !== 'POST') return json({ error: 'Method not allowed.' }, 405);
+  const limited = await enforcePublicQuota('quote-payment', context);
+  if (limited) return limited;
   try {
     assertSameOrigin(request);
     const body = await readBody(request, 4096);
