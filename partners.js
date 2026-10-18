@@ -288,6 +288,23 @@ function renderOwnerAnalytics(data) {
   $('[data-analytics-tax]').textContent=money(data.finance?.estimatedGstComponentCents);
   $('[data-analytics-accounts]').textContent=Number(data.accounts?.total||0).toLocaleString('en-AU');
   $('[data-analytics-tax-note]').textContent=(data.finance?.taxEstimateMethod||'Tax estimate only')+' — verify GST/BAS/tax payable with your records or accountant.';
+  const renderBreakdown = (selector, items, field) => {
+    const list=$(selector);
+    if (!list) return;
+    list.replaceChildren();
+    if (!items?.length) { const p=document.createElement('p'); p.textContent='No tracking data for this period.';list.append(p);return; }
+    items.forEach(item=>{
+      const p=document.createElement('p');
+      const label=document.createElement('strong'); label.textContent=item[field];
+      const count=document.createElement('span'); count.textContent=Number(item.views||0).toLocaleString('en-AU')+' views';
+      p.append(label,count); list.append(p);
+    });
+  };
+  renderBreakdown('[data-analytics-sources]',data.traffic?.sources,'source');
+  renderBreakdown('[data-analytics-countries]',data.traffic?.countries,'country');
+  renderBreakdown('[data-analytics-cities]',data.traffic?.cities,'city');
+  renderBreakdown('[data-analytics-campaigns]',data.traffic?.campaigns,'campaign');
+  renderBreakdown('[data-analytics-referrals]',data.traffic?.referralCodes,'code');
   const pages=$('[data-analytics-pages]'); pages.replaceChildren();
   (data.traffic?.topPages||[]).forEach(row=>{const p=document.createElement('p');p.innerHTML='<strong>'+escape(row.path)+'</strong><span>'+escape(row.views)+' views</span>';pages.append(p);});
   if(!pages.children.length) pages.innerHTML='<p class="muted">No tracked views in this period yet.</p>';
