@@ -46,7 +46,7 @@ test('studio homepage preserves production SEO, routes and commercial journeys',
   assert.doesNotMatch(html, /<script[^>]*src="future-scene\.js/);
   assert.doesNotMatch(html, /href="https:\/\/blvckoak\.com\.au\/(?:quote|book|portfolio)\.html"/);
 
-  for (const asset of ['studio.css', 'studio.js', 'studio-intro.css', 'cinematic-intro.js', 'future-ui.css', 'future-ui.js']) {
+  for (const asset of ['studio.css', 'studio.js', 'studio-intro.css', 'cinematic-intro.js', 'liquid-oak.js', 'future-ui.css', 'future-ui.js']) {
     assert.ok(build.includes(`'${asset}'`), `${asset} is copied into the release`);
     assert.ok(html.includes(asset), `${asset} is loaded by the homepage`);
   }

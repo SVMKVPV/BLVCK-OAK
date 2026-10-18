@@ -156,6 +156,9 @@
     intro.style.setProperty('--oak-progress', storyProgress.toFixed(4));
     intro.style.setProperty('--oak-exit', smoothstep(0.955, 1, storyProgress).toFixed(4));
     intro.classList.toggle('has-progress', storyProgress > 0.025);
+    window.dispatchEvent(new CustomEvent('blvckoak:origin-progress', {
+      detail: { progress: storyProgress, chapter },
+    }));
     queueVideoScrub(forceVideo);
   }
 

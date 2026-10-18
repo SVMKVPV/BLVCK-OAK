@@ -42,6 +42,7 @@ const requiredFiles = [
   'netlify/lib/pay-as-you-sell.mjs',
   'index.html',
   'cinematic-intro.js',
+  'liquid-oak.js',
   'future-ui.js',
   'future-ui.css',
   'future-scene.js',
@@ -69,6 +70,7 @@ for (const file of requiredFiles) {
 const index = await readFile(resolve(root, 'index.html'), 'utf8');
 const client = await readFile(resolve(root, 'script.js'), 'utf8');
 const cinematicIntro = await readFile(resolve(root, 'cinematic-intro.js'), 'utf8');
+const liquidOak = await readFile(resolve(root, 'liquid-oak.js'), 'utf8');
 const futureUi = await readFile(resolve(root, 'future-ui.js'), 'utf8');
 const stylesheet = await readFile(resolve(root, 'style.css'), 'utf8');
 const redirects = await readFile(resolve(root, 'netlify.toml'), 'utf8');
@@ -82,6 +84,12 @@ for (const selector of ['.site-header', '.pricing-grid', '.side-menu', '.oak-ori
 }
 if (!/data-oak-origin/.test(index) || !/obsidian-oak-scroll-ccw\.mp4/.test(index) || !/obsidian-oak-scroll-poster\.webp/.test(index) || !/cinematic-intro\.js/.test(index)) {
   failures.push('Homepage tree animation or its static fallback is not connected.');
+}
+if (!/data-oak-liquid/.test(index) || !/liquid-oak\.js/.test(index)) {
+  failures.push('Homepage liquid oak interaction is not connected.');
+}
+if (!/prefers-reduced-motion/.test(liquidOak) || !/blvckoak:motion-change/.test(liquidOak) || !/IntersectionObserver/.test(liquidOak) || !/visibilitychange/.test(liquidOak) || !/pagehide/.test(liquidOak)) {
+  failures.push('Homepage liquid oak interaction is missing motion or lifecycle safeguards.');
 }
 if (!/prefers-reduced-motion/.test(cinematicIntro) || !/blvckoak:motion-change/.test(cinematicIntro) || !/prefers-reduced-motion/.test(futureUi) || !/data-motion-toggle/.test(index)) {
   failures.push('Homepage is missing motion accessibility controls.');
