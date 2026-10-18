@@ -25,8 +25,25 @@ export default async function handler(request, context) {
     const raw=String(context?.ip||'').trim();
     const salt=String(process.env.ANALYTICS_SALT||process.env.SITE_URL||'black-oak');
     const visitor=raw?createHash('sha256').update(salt+':'+raw).digest('hex').slice(0,24):null;
+    const origin = new URL(request.url).origin;
+    let source = 'Direct / unknown';
+    try {
+      const ref = new URL(String(body.referrer || '').slice(0,300));
+      if (ref.protocol === 'https:' || ref.protocol === 'http:') {
+        if (ref.host !== new URL(origin).host) source = ref.hostname.slice(0,100);
+        else source = 'Internal navigation';
+      }
+    } catch {}
+    const campaign = {};
+    for (const key of ['utm_source','utm_medium','utm_campaign','ref']) {
+      const value = String(body[key] || '').trim().replace(/[^a-zA-Z0-9 _.-]/g,'').slice(0,80);
+      if (value) campaign[key] = value;
+    }
+    const geo = context?.geo || {};
+    const country = String(geo.country?.name || geo.country?.code || 'Unknown').slice(0,80);
+    const city = String(geo.city || 'Unknown').slice(0,80);
     const store=portalStore(); const at=Date.now(); const id=at+'-'+randomBytes(6).toString('hex');
-    await store.setJSON('analytics-visit/'+id,{at,path,visitor,referrer:String(body.referrer||'').slice(0,300)});
+    await store.setJSON('analytics-visit/'+id,{at,path,visitor,source,campaign,country,city});
     return json({ok:true},202);
   } catch { return json({ok:true},202); }
 }
