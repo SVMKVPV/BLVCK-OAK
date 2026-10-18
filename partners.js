@@ -11,6 +11,7 @@ let reviewQuote = null;
 let progressQuote = null;
 let portfolioQuote = null;
 let quoteRequestId = crypto.randomUUID();
+let standardDepositValue = null;
 
 function status(selector, text, error = false) {
   const target = $(selector);
@@ -99,16 +100,32 @@ function renderQuotes() {
     list.append(empty); return;
   }
   quotes.forEach((quote) => {
+    const instalments = quote.paymentPlan.type === 'instalments_15';
+    const stateLabel = instalments && quote.status === 'deposit_paid' ? 'Part paid' : labels[quote.status] || quote.status;
     const article = document.createElement('article');
     article.className = 'quote-record';
-    article.innerHTML = '<header><h3>' + escape(quote.service) + '</h3><span class="status-pill ' + escape(quote.status) + '">' + escape(labels[quote.status] || quote.status) + '</span></header>' +
+    article.innerHTML = '<header><h3>' + escape(quote.service) + '</h3><span class="status-pill ' + escape(quote.status) + '">' + escape(stateLabel) + '</span></header>' +
       '<p>' + escape(quote.customerName) + ' · ' + escape(quote.customerEmail) + (dashboard.isOwner ? '<br>Partner: ' + escape(quote.partnerName) + ' · ' + escape(quote.referralCode) : '') + '</p>' +
       '<details><summary>Service description</summary><p>' + escape(quote.description) + '</p></details>' +
       (quote.paymentPlan.type === 'pay_as_you_sell' ? '<p class="record-plan"><strong>Pay as You Sell</strong> · ' + escape(quote.paymentPlan.method.label) + '<br>' + (quote.paymentPlan.connected || quote.paymentPlan.trackingComplete ? escape(quote.paymentPlan.salesCount) + ' Stripe sales recorded · ' + money(quote.paymentPlan.contributionCents) + ' accrued' + (quote.paymentPlan.trackingComplete ? ' · tracking ended when paid' : '') : 'Waiting for the client to connect Stripe') + '</p>' : '') +
+      (instalments ? '<p class="record-plan"><strong>15-part payment plan</strong> · ' + escape(quote.paymentPlan.paidInstalments) + ' of 15 paid · ' + escape(quote.paymentPlan.remainingInstalments) + ' remaining<br>Manual payments through the private quote link, with timing agreed with the client.</p>' : '') +
       (quote.maintenance.enabled ? '<p class="record-plan"><strong>Maintenance offered</strong> · ' + money(quote.maintenance.monthlyCents) + ' per month · ' + escape(quote.maintenance.status.replaceAll('_', ' ')) + '</p>' : '') +
-      '<div class="record-numbers"><span>Total<strong>' + money(quote.totalCents) + '</strong></span><span>Deposit<strong>' + money(quote.depositCents) + '</strong></span><span>Paid<strong>' + money(quote.paidCents) + '</strong></span>' + (quote.progressLink ? '<span>Project progress<strong>' + escape(quote.progress.percentage) + '%</strong></span>' : '') + '</div>' +
+      '<div class="record-numbers"><span>Total<strong>' + money(quote.totalCents) + '</strong></span><span>' + (instalments ? 'Balance<strong>' + money(quote.paymentPlan.balanceCents) : 'Deposit<strong>' + money(quote.depositCents)) + '</strong></span><span>Paid<strong>' + money(quote.paidCents) + '</strong></span>' + (quote.progressLink ? '<span>Project progress<strong>' + escape(quote.progress.percentage) + '%</strong></span>' : '') + '</div>' +
       (dashboard.isOwner && quote.portfolio?.published ? '<p class="portfolio-published-status"><strong>Published in portfolio</strong> · ' + escape(quote.portfolio.title) + '</p>' : '') +
       (quote.reviewNote ? '<p>Owner note: ' + escape(quote.reviewNote) + '</p>' : '');
+    if (instalments) {
+      const details = document.createElement('details');
+      const summary = document.createElement('summary'); summary.textContent = 'View all 15 payments';
+      const schedule = document.createElement('ol'); schedule.className = 'instalment-schedule';
+      (quote.paymentPlan.schedule || []).forEach((part) => {
+        const item = document.createElement('li'); item.className = part.paid ? 'is-paid' : '';
+        const number = document.createElement('span'); number.textContent = `Part ${part.number}`;
+        const amount = document.createElement('strong'); amount.textContent = money(part.amountCents);
+        const state = document.createElement('small'); state.textContent = part.paid ? 'Paid' : quote.nextPayment?.instalmentNumber === part.number ? 'Next payment' : 'Remaining';
+        item.append(number, amount, state); schedule.append(item);
+      });
+      details.append(summary, schedule); article.append(details);
+    }
     const actions = document.createElement('div'); actions.className = 'record-actions';
     if (quote.paymentLink) {
       const copy = document.createElement('button'); copy.className = 'quiet-button'; copy.type = 'button'; copy.textContent = 'Copy payment link';
@@ -366,15 +383,36 @@ async function loadDashboard() {
 
 function calculatePreview() {
   const form = $('[data-quote-form]');
-  const total = Math.max(0, Number(form.elements.total.value) || 0) * 100;
-  const deposit = Math.max(0, Number(form.elements.deposit.value) || 0) * 100;
-  const firstPayment = form.elements.paymentPlan.value === 'pay_as_you_sell' ? deposit : (deposit || total);
+  const total = Math.round(Math.max(0, Number(form.elements.total.value) || 0) * 100);
+  const deposit = Math.round(Math.max(0, Number(form.elements.deposit.value) || 0) * 100);
+  const instalments = form.elements.paymentPlan.value === 'instalments_15';
+  const base = Math.floor(total / 15);
+  const largerCount = total % 15;
+  const firstPayment = instalments ? base + (largerCount ? 1 : 0) : form.elements.paymentPlan.value === 'pay_as_you_sell' ? deposit : (deposit || total);
   $('[data-due-preview]').textContent = money(firstPayment);
   $('[data-balance-preview]').textContent = money(Math.max(0, total - firstPayment));
+  $('[data-due-preview-label]').textContent = instalments ? 'Part 1 of 15' : 'Due first';
+  $('[data-balance-preview-label]').textContent = instalments ? 'Remaining 14 parts' : 'Then balance';
+  $('[data-instalment-preview]').textContent = !total ? 'Enter the project total to see the 15-part breakdown.' : largerCount
+    ? `${largerCount} ${largerCount === 1 ? 'payment' : 'payments'} of ${money(base + 1)}, then ${15 - largerCount} ${15 - largerCount === 1 ? 'payment' : 'payments'} of ${money(base)}. Total ${money(total)}.`
+    : `15 payments of ${money(base)}. Total ${money(total)}.`;
 }
 function updatePaymentFields() {
   const form = $('[data-quote-form]');
   const payAsYouSell = form.elements.paymentPlan.value === 'pay_as_you_sell';
+  const instalments = form.elements.paymentPlan.value === 'instalments_15';
+  if (instalments) {
+    if (standardDepositValue === null) standardDepositValue = form.elements.deposit.value;
+    form.elements.deposit.value = '0';
+  } else if (standardDepositValue !== null) {
+    form.elements.deposit.value = standardDepositValue;
+    standardDepositValue = null;
+  }
+  form.elements.deposit.disabled = instalments;
+  form.elements.deposit.required = !instalments;
+  $('[data-deposit-field]').hidden = instalments;
+  $('[data-instalment-plan-fields]').hidden = !instalments;
+  $('[data-standard-deposit-note]').hidden = instalments;
   const method = form.elements.payAsYouSellMethod.value;
   $('[data-pay-as-you-sell-fields]').hidden = !payAsYouSell;
   $('[data-sales-percent]').hidden = !payAsYouSell || method !== 'percentage';
@@ -382,7 +420,9 @@ function updatePaymentFields() {
   $('[data-sales-count]').hidden = !payAsYouSell || method !== 'sales_milestone';
   $('[data-maintenance-amount]').hidden = !form.elements.maintenanceEnabled.checked;
 }
-$('[data-quote-form]').addEventListener('input', () => { calculatePreview(); updatePaymentFields(); });
+function updateQuotePreview() { updatePaymentFields(); calculatePreview(); }
+$('[data-quote-form]').addEventListener('input', updateQuotePreview);
+$('[data-quote-form]').addEventListener('change', updateQuotePreview);
 $('[data-quote-filter]').addEventListener('change', renderQuotes);
 $('[data-lead-filter]')?.addEventListener('change', renderSalesPipeline);
 $('[data-refresh]').addEventListener('click', loadDashboard);
@@ -469,14 +509,16 @@ $('[data-portfolio-form]').addEventListener('submit', async (event) => {
 
 function resetEditor() {
   reviewQuote = null; quoteRequestId = crypto.randomUUID();
+  standardDepositValue = null;
   $('[data-quote-form]').reset(); $('[data-new-quote]').hidden = true; $('[data-decline]').hidden = true; $('[data-review-note]').hidden = true;
   $('[data-editor-title]').textContent = 'Create a client quote';
   $('[data-editor-note]').textContent = dashboard?.isOwner ? 'As owner, your quotes are approved immediately. Check the scope and complete price before creating a payable link.' : 'Draft the scope and pricing. Black Oak must approve it before the client can pay.';
   $('[data-save-quote]').firstChild.textContent = dashboard?.isOwner ? 'Create approved payment link ' : 'Submit for approval ';
-  calculatePreview(); updatePaymentFields();
+  updateQuotePreview();
 }
 function editQuote(quote) {
   reviewQuote = quote;
+  standardDepositValue = null;
   const form = $('[data-quote-form]');
   ['customerName', 'customerEmail', 'service', 'description'].forEach((field) => { form.elements[field].value = quote[field]; });
   form.elements.total.value = (quote.totalCents / 100).toFixed(2);
@@ -492,10 +534,10 @@ function editQuote(quote) {
   if (quote.maintenance.enabled) form.elements.maintenanceMonthly.value = (quote.maintenance.monthlyCents / 100).toFixed(2);
   form.elements.reviewNote.value = '';
   $('[data-editor-title]').textContent = 'Review partner quote';
-  $('[data-editor-note]').textContent = 'Check or adjust the scope, total and deposit. Approval makes the client payment link usable.';
+  $('[data-editor-note]').textContent = 'Check or adjust the scope, total, payment option and agreed timing. Approval makes the client payment link usable.';
   $('[data-save-quote]').firstChild.textContent = 'Approve & activate link ';
   $('[data-new-quote]').hidden = false; $('[data-decline]').hidden = false; $('[data-review-note]').hidden = false;
-  status('[data-quote-status]', ''); calculatePreview(); updatePaymentFields();
+  status('[data-quote-status]', ''); updateQuotePreview();
   form.elements.service.focus(); form.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 $('[data-new-quote]').addEventListener('click', resetEditor);
@@ -503,13 +545,13 @@ $('[data-quote-form]').addEventListener('submit', async (event) => {
   event.preventDefault();
   const button = $('[data-save-quote]'); button.disabled = true;
   const values = Object.fromEntries(new FormData(event.currentTarget));
-  const body = { ...values, action: reviewQuote ? 'approve_quote' : 'create_quote', requestId: quoteRequestId, ...(reviewQuote ? { id: reviewQuote.id, revision: reviewQuote.revision } : {}) };
+  const body = { ...values, ...(values.paymentPlan === 'instalments_15' ? { deposit: '0' } : {}), action: reviewQuote ? 'approve_quote' : 'create_quote', requestId: quoteRequestId, ...(reviewQuote ? { id: reviewQuote.id, revision: reviewQuote.revision } : {}) };
   status('[data-quote-status]', 'Saving your quote…');
   try {
     await api('/api/partners', body, dashboard.csrf);
     const approved = Boolean(reviewQuote || dashboard.isOwner);
     resetEditor(); await loadDashboard();
-    status('[data-quote-status]', approved ? 'Approved. Copy the payment link from the quote card.' : 'Submitted. Black Oak can now review the scope, price and deposit.');
+    status('[data-quote-status]', approved ? 'Approved. Copy the payment link from the quote card.' : 'Submitted. Black Oak can now review the scope, price and payment option.');
   } catch (error) { status('[data-quote-status]', error.message, true); }
   finally { button.disabled = false; }
 });

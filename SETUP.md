@@ -141,6 +141,17 @@ Read `BUSINESS-DETAILS-BEFORE-LAUNCH.md`. The included privacy, terms and refund
 At the discounted Enterprise price, the platform receives A$1,160 before Stripe fees and tax, then owes a A$390 partner reward after the hold. You remain responsible for margin, tax, fraud, chargebacks and any partner transfer that cannot be recovered.
 
 
+## Custom quotes with 15-part payments
+
+Select **15-part payment plan** in the self-quote builder, custom quote form, or owner approval form. The public self-quote remains an indicative request; the owner confirms the final scope, total and payment timing before the client uses an approved private payment link.
+
+- The fixed plan is `instalments_15`. The server divides the approved one-off total into exactly 15 instalments in integer cents, distributing any remainder over the first parts. There is no additional deposit: the first instalment is payment 1 of 15.
+- Each part is paid separately through Stripe Checkout from the same private quote link. This plan does not create automatic weekly or monthly debits. Agree the payment dates with the client in the quote description.
+- The client page and partner/owner dashboard show the schedule, completed part count and remaining balance. For A$1,500 this is 15 × A$100; for A$2,900 it is 5 × A$193.34 plus 10 × A$193.33.
+- Signed Checkout webhooks and return-page reconciliation reuse the existing payment-attempt locks and idempotency handling. Successful parts 1–14 retain the internal `deposit_paid` status (shown as part paid); part 15 marks the quote `paid` and stops further quote payments.
+- Refunds and disputes put the quote on payment review. Monthly services and any separately offered maintenance remain separate from the 15 one-off payments.
+- No new Stripe products, subscriptions, secrets or webhook event types are required. Deploy the updated Functions together with the frontend. `node --test tests/quote-instalments.test.mjs` exercises the schedule and settlement flow with simulated Stripe responses.
+
 ## Partner authentication and private links
 
 Partners and the owner sign in at `/partners.html` with a six-digit email code. There are no passwords or JWTs. Successful verification creates a 12-hour server-side session referenced by a Secure, HttpOnly, SameSite=Strict cookie. Mutating dashboard requests also require an exact same-origin request and a session-specific CSRF token.

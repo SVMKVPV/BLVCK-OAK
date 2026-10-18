@@ -18,6 +18,26 @@ async function request(action) {
   if (!response.ok) throw new Error(result.error || 'Unable to load this quote.');
   return result;
 }
+
+function renderInstalments(currentQuote) {
+  const plan = currentQuote.paymentPlan;
+  const selected = plan.type === 'instalments_15';
+  $('[data-instalment-plan]').hidden = !selected;
+  if (!selected) return;
+  $('[data-instalment-count]').textContent = `${plan.paidInstalments} of 15 payments confirmed · ${plan.remainingInstalments} remaining`;
+  $('[data-instalment-progress]').value = plan.paidInstalments;
+  $('[data-instalment-progress]').setAttribute('aria-label', `${plan.paidInstalments} of 15 payments confirmed`);
+  const schedule = $('[data-instalment-schedule]'); schedule.replaceChildren();
+  (plan.schedule || []).forEach((part) => {
+    const next = currentQuote.nextPayment?.instalmentNumber === part.number;
+    const item = document.createElement('li'); item.className = part.paid ? 'is-paid' : next ? 'is-next' : '';
+    const number = document.createElement('span'); number.textContent = `Part ${part.number}`;
+    const amount = document.createElement('strong'); amount.textContent = money(part.amountCents);
+    const state = document.createElement('small'); state.textContent = part.paid ? 'Paid' : next ? 'Next payment' : 'Remaining';
+    item.append(number, amount, state); schedule.append(item);
+  });
+}
+
 async function loadQuote() {
   if (!/^[a-f0-9]{32}$/.test(quoteId) || !/^[A-Za-z0-9_-]{43}$/.test(privateToken)) {
     status('This private link is incomplete. Ask Black Oak or your referral partner for the full approved payment link.', true); return;
@@ -30,6 +50,8 @@ async function loadQuote() {
     $('[data-client-name]').textContent = 'Prepared for ' + quote.customerName;
     $('[data-client-description]').textContent = quote.description;
     const payAsYouSell = quote.paymentPlan.type === 'pay_as_you_sell';
+    const instalments = quote.paymentPlan.type === 'instalments_15';
+    renderInstalments(quote);
     $('[data-sales-plan]').hidden = !payAsYouSell;
     if (payAsYouSell) {
       const method = quote.paymentPlan.method;
@@ -50,30 +72,36 @@ async function loadQuote() {
       $('[data-maintenance-button]').disabled = false;
       $('[data-maintenance-button]').firstChild.textContent = quote.maintenance.status === 'cancelled' ? 'Restart monthly maintenance ' : 'Accept monthly maintenance ';
       $('[data-maintenance-note]').textContent = quote.status === 'paid' ? 'Continuing opens Stripe Subscription Checkout. Completing it is your separate acceptance of the monthly maintenance charge.' : 'This option becomes available after the agreed website total is paid.';
-      $('[data-payment-policy]').textContent = 'Only the scope and total shown here are approved. Pay as You Sell stops when the website total is paid. Monthly maintenance is separate and applies only if you accept the maintenance offer.';
-    } else {
-      $('[data-payment-policy]').textContent = payAsYouSell ? 'Only the scope and total shown here are approved. Pay as You Sell contributions stop automatically when the website project total has been paid; no ongoing maintenance is included.' : 'Only the scope and total shown here are approved. There are no recurring charges. The remaining balance uses this same private link, with timing agreed with Black Oak.';
     }
+    const paymentPolicy = instalments
+      ? 'Only the scope and total shown here are approved. The one-off project total is split into 15 manually initiated payments. There is no additional deposit, interest or payment-plan fee. Pay each part through this private link at the time agreed with Black Oak.'
+      : payAsYouSell
+        ? 'Only the scope and total shown here are approved. Pay as You Sell contributions stop automatically when the website project total has been paid.'
+        : 'Only the scope and total shown here are approved. The remaining balance uses this same private link, with timing agreed with Black Oak.';
+    $('[data-payment-policy]').textContent = paymentPolicy + (quote.maintenance.enabled ? ' Monthly maintenance is separate and applies only if you accept the maintenance offer.' : ' There are no recurring maintenance charges.');
     $('[data-client-total]').textContent = money(quote.totalCents);
     $('[data-client-paid]').textContent = money(quote.paidCents);
-    $('[data-client-balance]').textContent = money(Math.max(0, quote.totalCents - quote.paidCents));
+    $('[data-client-balance]').textContent = money(instalments ? quote.paymentPlan.balanceCents : Math.max(0, quote.totalCents - quote.paidCents));
     $('[data-refund-row]').hidden = !quote.refundedCents;
     $('[data-client-refunded]').textContent = money(quote.refundedCents);
     const labels = { approved: 'Approved proposal', deposit_paid: 'Deposit received', paid: 'Paid in full', cancelled: 'Quote cancelled', payment_review: 'Payments paused for review' };
-    $('[data-client-state]').textContent = labels[quote.status] || quote.status;
+    $('[data-client-state]').textContent = instalments && quote.status === 'deposit_paid' ? 'Part paid' : labels[quote.status] || quote.status;
     $('[data-client-state]').className = 'status-pill ' + quote.status;
     $('[data-pay-button]').hidden = !quote.nextPayment;
     $('[data-pay-button]').disabled = false;
     $('[data-client-due]').textContent = quote.nextPayment ? money(quote.nextPayment.amountCents) : '—';
-    $('[data-due-label]').textContent = quote.nextPayment?.stage === 'deposit' ? 'Deposit due now' : quote.nextPayment?.stage === 'balance' ? 'Remaining balance' : quote.nextPayment?.stage === 'sales_contribution' ? 'Accrued from sales' : 'Due now';
-    $('[data-pay-button]').firstChild.textContent = quote.nextPayment?.stage === 'deposit' ? 'Pay deposit securely ' : quote.nextPayment?.stage === 'balance' ? 'Pay remaining balance ' : quote.nextPayment?.stage === 'sales_contribution' ? 'Pay sales contribution ' : 'Pay in full securely ';
+    const nextInstalment = instalments && quote.nextPayment?.instalmentNumber;
+    $('[data-due-label]').textContent = nextInstalment ? `Instalment ${nextInstalment} of 15` : quote.nextPayment?.stage === 'deposit' ? 'Deposit due now' : quote.nextPayment?.stage === 'balance' ? 'Remaining balance' : quote.nextPayment?.stage === 'sales_contribution' ? 'Accrued from sales' : instalments ? 'No instalment payable' : 'Due now';
+    $('[data-pay-button]').firstChild.textContent = nextInstalment ? `Pay instalment ${nextInstalment} of 15 — ${money(quote.nextPayment.amountCents).replace('$', 'A$')} ` : quote.nextPayment?.stage === 'deposit' ? 'Pay deposit securely ' : quote.nextPayment?.stage === 'balance' ? 'Pay remaining balance ' : quote.nextPayment?.stage === 'sales_contribution' ? 'Pay sales contribution ' : 'Pay in full securely ';
     const history = $('[data-payment-history]'); history.replaceChildren();
     if (!quote.payments.length) {
       const item = document.createElement('p'); item.className = 'muted'; item.textContent = 'No payment has been confirmed yet.'; history.append(item);
     }
     quote.payments.forEach((payment) => {
       const item = document.createElement('div'); item.className = 'payment-entry';
-      item.textContent = money(payment.amountCents) + ' · ' + payment.stage + ' · ' + new Date(payment.paidAt).toLocaleDateString('en-AU') + (payment.refundedCents ? ' · Refunded ' + money(payment.refundedCents) : '');
+      const instalment = String(payment.stage).match(/^instalment_([1-9]|1[0-5])$/);
+      const stage = instalment ? `Instalment ${instalment[1]} of 15` : payment.stage;
+      item.textContent = money(payment.amountCents) + ' · ' + stage + ' · ' + new Date(payment.paidAt).toLocaleDateString('en-AU') + (payment.refundedCents ? ' · Refunded ' + money(payment.refundedCents) : '');
       history.append(item);
     });
     if (quote.status === 'paid' && parameters.get('maintenance') === 'returned' && quote.maintenance.status === 'active') status('Your website balance is paid and monthly maintenance is now active.');
@@ -88,6 +116,7 @@ async function loadQuote() {
     else if (!quote.nextPayment) status('This proposal has expired. Contact Black Oak for a new approved quote.', true);
     else if (quote.nextPayment.stage === 'sales_contribution') status('Stripe recorded eligible sales. The calculated contribution shown here is now payable.');
     else if (parameters.get('payment') === 'returned') status('This page shows confirmed payments only. If your latest payment is not listed yet, refresh shortly.');
+    else if (instalments) status(`Your next payment is instalment ${quote.nextPayment.instalmentNumber} of 15. Pay each part through this private link at the agreed time.`);
     else status('Review your approved scope and price. You will enter card details only on Stripe.');
   } catch (error) { status(error.message, true); }
 }

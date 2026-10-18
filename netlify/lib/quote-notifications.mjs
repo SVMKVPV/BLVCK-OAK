@@ -1,11 +1,12 @@
 import { emailShell, escapeHtml, formatAud, getOwnerEmail, sendEmail } from './email.mjs';
 import { grossPaid, quoteLink } from './quotes.mjs';
+import { instalmentStageLabel } from './instalments.mjs';
 
 export async function notifyQuotePayment(quote, session) {
   if (session.payment_status !== 'paid') return;
   const payment = quote.payments.find((item) => item.sessionId === session.id);
   if (!payment) return;
-  const stageLabel = payment.stage === 'sales_contribution' ? 'Pay as You Sell contribution' : payment.stage.replaceAll('_', ' ');
+  const stageLabel = instalmentStageLabel(payment.stage) || (payment.stage === 'sales_contribution' ? 'Pay as You Sell contribution' : payment.stage.replaceAll('_', ' '));
   const remaining = Math.max(0, quote.totalCents - grossPaid(quote));
   const description = `${quote.service}\n${quote.description}\nClient: ${quote.customerName}\nPayment: ${formatAud(payment.amountCents)} (${stageLabel})\nRemaining: ${formatAud(remaining)}`;
   const owner = getOwnerEmail();

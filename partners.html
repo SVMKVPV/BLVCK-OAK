@@ -7,8 +7,8 @@
   <title>Partner Workspace — Black Oak</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=12"><link rel="stylesheet" href="portal.css?v=7">
-  <script src="partners.js?v=8" defer></script>
+  <link rel="stylesheet" href="style.css?v=12"><link rel="stylesheet" href="portal.css?v=8">
+  <script src="partners.js?v=9" defer></script>
 </head>
 <body class="workspace-body">
   <header class="workspace-header">
@@ -111,9 +111,13 @@
             <div class="field-pair"><label>Client name<input name="customerName" required minlength="2" maxlength="100" autocomplete="off"></label><label>Client email<input name="customerEmail" type="email" required maxlength="160" autocomplete="off"></label></div>
             <label>Service / project title<input name="service" required minlength="3" maxlength="120" placeholder="e.g. Website redesign + booking system"></label>
             <label>What is included?<textarea name="description" required minlength="20" maxlength="3000" rows="5" placeholder="Pages, features, agreed deliverables, timing and exclusions…"></textarea></label>
-            <div class="field-pair"><label>Total price (AUD)<input name="total" type="number" min="100" max="100000" step="0.01" inputmode="decimal" required placeholder="2900.00"></label><label>Deposit (AUD)<input name="deposit" type="number" min="0" max="100000" step="0.01" inputmode="decimal" required value="0"></label></div>
+            <div class="field-pair"><label>Total price (AUD)<input name="total" type="number" min="100" max="100000" step="0.01" inputmode="decimal" required placeholder="2900.00"></label><label data-deposit-field>Deposit (AUD)<input name="deposit" type="number" min="0" max="100000" step="0.01" inputmode="decimal" required value="0"></label></div>
             <div class="payment-plan-fields">
-              <label>Payment option<select name="paymentPlan" data-payment-plan><option value="standard">Standard deposit and balance</option><option value="pay_as_you_sell">Pay as You Sell — tracked through Stripe</option></select></label>
+              <label>Payment option<select name="paymentPlan" data-payment-plan><option value="standard">Standard deposit and balance</option><option value="instalments_15">15-part payment plan</option><option value="pay_as_you_sell">Pay as You Sell — tracked through Stripe</option></select></label>
+              <div data-instalment-plan-fields hidden>
+                <p class="payment-plan-note">Split the complete project total into 15 payments, with no additional deposit, interest or payment-plan fees. The client pays each part manually through their private quote link. Agree payment timing with the client in the scope above. Monthly maintenance remains separate.</p>
+                <p class="instalment-preview" data-instalment-preview aria-live="polite"></p>
+              </div>
               <div data-pay-as-you-sell-fields hidden>
                 <label>How sales contribute<select name="payAsYouSellMethod" data-sales-method><option value="percentage">Percentage of every Stripe sale</option><option value="fixed_per_sale">Fixed amount from every Stripe sale</option><option value="sales_milestone">Fixed payment after a set number of sales</option></select></label>
                 <label data-sales-percent>Percentage of each sale<input name="payAsYouSellPercent" type="number" min="1" max="100" step="0.01" inputmode="decimal" value="10"><span class="field-hint">Example: 10 means 10% of each successful AUD sale becomes payable.</span></label>
@@ -124,8 +128,8 @@
               <label class="maintenance-choice"><input name="maintenanceEnabled" type="checkbox" data-maintenance-enabled> Offer separately agreed monthly maintenance</label>
               <label data-maintenance-amount hidden>Monthly maintenance (AUD)<input name="maintenanceMonthly" type="number" min="25" max="10000" step="0.01" inputmode="decimal" value="99"><span class="field-hint">Maintenance is separate from the website balance and begins only after the client accepts it.</span></label>
             </div>
-            <div class="quote-calculation"><span>Due first <strong data-due-preview>A$0</strong></span><span>Then balance <strong data-balance-preview>A$0</strong></span></div>
-            <p class="small-muted">Use 0 deposit for full payment. Totals A$100–A$100,000; each instalment at least A$50. The total is the complete agreed customer price, including any applicable tax.</p>
+            <div class="quote-calculation"><span><span data-due-preview-label>Due first</span><strong data-due-preview>A$0</strong></span><span><span data-balance-preview-label>Then balance</span><strong data-balance-preview>A$0</strong></span></div>
+            <p class="small-muted"><span data-standard-deposit-note>For standard payments, use 0 deposit for full payment; a deposit and any remaining balance must each be at least A$50. </span>Totals A$100–A$100,000. The total is the complete agreed customer price, including any applicable tax.</p>
             <label data-review-note hidden>Review note<textarea name="reviewNote" maxlength="500" rows="2" placeholder="Optional note for the partner"></textarea></label>
             <button class="button button-gold" type="submit" data-save-quote>Submit for approval <span>↗</span></button>
             <button class="quiet-button danger-button" type="button" data-decline hidden>Decline this quote</button>
@@ -134,7 +138,7 @@
           <p class="workspace-policy">Custom prices do not automatically receive the Enterprise 60% offer or standard package commissions. Any custom-job commission requires a separate owner agreement.</p>
         </section>
         <section class="workspace-card quote-list-panel">
-          <div class="card-heading"><h2 data-list-title>Your quotes</h2><label class="filter-label">Show<select data-quote-filter><option value="all">All quotes</option><option value="pending_approval">Awaiting approval</option><option value="approved">Approved</option><option value="deposit_paid">Deposit paid</option><option value="paid">Paid in full</option><option value="payment_review">Payment review</option><option value="declined">Declined</option></select></label></div>
+          <div class="card-heading"><h2 data-list-title>Your quotes</h2><label class="filter-label">Show<select data-quote-filter><option value="all">All quotes</option><option value="pending_approval">Awaiting approval</option><option value="approved">Approved</option><option value="deposit_paid">Part paid / deposit paid</option><option value="paid">Paid in full</option><option value="payment_review">Payment review</option><option value="declined">Declined</option></select></label></div>
           <div data-quote-list class="quote-list"><p class="muted">Your quotes will appear here.</p></div>
           <p class="small-muted">Showing the latest 100 quotes. Payments are confirmed by Stripe, never by a browser message.</p>
         </section>

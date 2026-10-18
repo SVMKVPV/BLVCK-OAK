@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
-import { buildEstimateBrief, calculateEstimate, formatRange } from '../quote-builder.js';
+import { buildEstimateBrief, calculateEstimate, formatRange, formatInstalmentEstimate, splitInstalmentAmounts } from '../quote-builder.js';
 
 const selection = {
   websiteBuild: 'new',
@@ -65,4 +65,45 @@ test('advertised package inclusions do not increase package base prices', () => 
   assert.deepEqual(essential.oneOff, { min: 500, max: 500 });
   assert.deepEqual(professional.oneOff, { min: 1500, max: 1500 });
   assert.deepEqual(enterprise.oneOff, { min: 2900, max: 2900 });
+});
+
+test('15-part estimates keep every cent of the quoted price and separate monthly services', () => {
+  for (const totalCents of [10000, 50000, 150000, 290000, 290001, 10000000]) {
+    const parts = splitInstalmentAmounts(totalCents);
+    assert.equal(parts.length, 15);
+    assert.equal(parts.reduce((sum, cents) => sum + cents, 0), totalCents);
+    assert.ok(parts.every(Number.isInteger));
+    assert.ok(Math.max(...parts) - Math.min(...parts) <= 1);
+    assert.deepEqual(parts, [...parts].sort((a, b) => b - a));
+  }
+  assert.deepEqual(splitInstalmentAmounts(50000), [...Array(5).fill(3334), ...Array(10).fill(3333)]);
+  const estimate = calculateEstimate({ ...selection, websiteLevel: 'essential', marketingSetup: [], payment: 'instalments_15' });
+  assert.equal(estimate.instalments.instalmentCount, 15);
+  assert.deepEqual(estimate.oneOff, { min: 500, max: 500 });
+  assert.deepEqual(estimate.monthly, { min: 500, max: 1200 });
+  assert.equal(estimate.instalments.minAmountsCents.reduce((sum, cents) => sum + cents, 0), 50000);
+  const display = formatInstalmentEstimate(estimate);
+  assert.equal(display.range, 'A$33.33–A$33.34 per part');
+  assert.equal(display.breakdown, '5 parts of A$33.34, then 10 parts of A$33.33. Total A$500.00.');
+});
+
+test('15-part price ranges and generated briefs explain the approved one-off payment schedule', () => {
+  const estimate = calculateEstimate({ ...selection, payment: 'instalments_15' });
+  const display = formatInstalmentEstimate(estimate);
+  assert.equal(display.range, 'A$130.00–A$180.00 per part');
+  assert.equal(display.breakdown, 'At A$1,950.00: 15 parts of A$130.00. At A$2,700.00: 15 parts of A$180.00.');
+  const brief = buildEstimateBrief(estimate, 'BOQ-INSTALMENTS');
+  assert.match(brief, /15-part payment plan/);
+  assert.ok(brief.includes(display.breakdown));
+  assert.match(brief, /manually initiated/);
+  assert.match(brief, /No additional deposit, interest or payment-plan fees/);
+  assert.match(brief, /Optional monthly services are separate/);
+  assert.match(brief, /not a binding offer/);
+});
+
+test('monthly-only quotes cannot be split into 15 one-off payments', () => {
+  assert.throws(() => calculateEstimate({ ...selection, websiteBuild: 'none', websiteLevel: '', features: [], services: [], marketingSetup: [], monthly: ['maintenance'], payment: 'instalments_15' }), /one-off project work.*Monthly services are billed separately/);
+  assert.equal(formatInstalmentEstimate(calculateEstimate(selection)), null);
+  assert.throws(() => splitInstalmentAmounts(100.5), /valid one-off total/);
+  assert.throws(() => splitInstalmentAmounts(-100), /valid one-off total/);
 });

@@ -1,6 +1,7 @@
 import { randomBytes } from 'node:crypto';
 import { PortalError, portalStore, secretToken, siteOrigin, validEmail } from './portal-auth.mjs';
 import { payAsYouSellAccruedCents, publicPaymentArrangement, readPaymentPlan, validatePaymentArrangement } from './pay-as-you-sell.mjs';
+import { INSTALMENT_COUNT, INSTALMENT_PLAN_TYPE, readInstalmentProgress, validateInstalmentAttempt } from './instalments.mjs';
 
 export const CUSTOM_CHECKOUT_VERSION = 'black_oak_custom_v1';
 
@@ -19,7 +20,9 @@ function cleanText(value, label, min, max) {
 export function validateQuoteInput(body) {
   const totalCents = audToCents(body.total);
   const depositCents = audToCents(body.deposit || '0');
+  const arrangement = validatePaymentArrangement(body);
   if (totalCents < 10000 || totalCents > 10000000) throw new PortalError('Custom totals must be between A$100 and A$100,000.');
+  if (arrangement.paymentPlan.type === INSTALMENT_PLAN_TYPE && depositCents !== 0) throw new PortalError('The 15-part plan includes the first instalment. Set the additional deposit to A$0.');
   if (depositCents > totalCents) throw new PortalError('The deposit cannot exceed the total.');
   if (depositCents > 0 && depositCents < 5000) throw new PortalError('The minimum deposit is A$50.');
   if (depositCents < totalCents && depositCents > 0 && totalCents - depositCents < 5000) throw new PortalError('The remaining balance must be at least A$50.');
@@ -29,7 +32,7 @@ export function validateQuoteInput(body) {
     service: cleanText(body.service, 'Service name', 3, 120),
     description: cleanText(body.description, 'Description', 20, 3000),
     customerName: cleanText(body.customerName, 'Client name', 2, 100), customerEmail,
-    totalCents, depositCents, ...validatePaymentArrangement(body),
+    totalCents, depositCents, ...arrangement,
   };
 }
 
@@ -59,11 +62,16 @@ export const refunded = (quote) => quote.payments.reduce((sum, payment) => sum +
 
 export function nextPayment(quote, now = Date.now()) {
   if (!['approved', 'deposit_paid'].includes(quote.status)) return null;
-  const paid = grossPaid(quote);
   const plan = readPaymentPlan(quote);
+  const instalments = plan.type === INSTALMENT_PLAN_TYPE ? readInstalmentProgress(quote) : null;
+  const paid = grossPaid(quote);
   if (plan.type !== 'pay_as_you_sell' && !paid && Date.parse(quote.expiresAt) <= now) return null;
   const remaining = quote.totalCents - paid;
   if (remaining <= 0) return null;
+  if (instalments) {
+    const part = instalments.schedule[instalments.paidInstalments];
+    return part ? { stage: `instalment_${part.number}`, amountCents: part.amountCents, instalmentNumber: part.number, instalmentCount: INSTALMENT_COUNT } : null;
+  }
   if (!paid && quote.depositCents > 0 && quote.depositCents < quote.totalCents) return { stage: 'deposit', amountCents: quote.depositCents };
   if (plan.type === 'pay_as_you_sell') {
     const due = Math.max(0, payAsYouSellAccruedCents(quote) - paid);
@@ -90,8 +98,11 @@ export function publicQuote(quote) {
 
 export function applyPaidSession(quote, session) {
   if (session.payment_status !== 'paid') return quote;
+  const instalments = readInstalmentProgress(quote);
   if (quote.payments.some((payment) => payment.sessionId === session.id)) return quote;
+  if (instalments && quote.payments.some((payment) => payment.paymentIntentId === session.payment_intent)) throw new PortalError('This Stripe payment is already recorded against an instalment.', 409);
   const attempt = quote.checkout;
+  validateInstalmentAttempt(quote, attempt);
   if (!attempt || session.metadata?.checkout_version !== CUSTOM_CHECKOUT_VERSION
     || session.metadata?.quote_id !== quote.id || session.metadata?.attempt_id !== attempt.id
     || Number(session.metadata?.quote_revision) !== quote.revision

@@ -52,7 +52,35 @@ export const packageInclusions = Object.freeze({
 });
 
 const timelineLabels = Object.freeze({ flexible: 'Flexible timing', 'one-month': 'Within one month', urgent: 'Urgent — as soon as possible', planning: 'Still planning' });
-const paymentLabels = Object.freeze({ discuss: 'Discuss the best option', standard: 'Standard deposit and balance', staged: 'Staged project payments', 'pay-as-you-sell': 'Ask about Pay as You Sell' });
+const paymentLabels = Object.freeze({ discuss: 'Discuss the best option', standard: 'Standard deposit and balance', staged: 'Staged project payments', instalments_15: '15-part payment plan', 'pay-as-you-sell': 'Ask about Pay as You Sell' });
+const instalmentMoney = (cents) => new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' }).format(cents / 100).replace('$', 'A$');
+
+export function splitInstalmentAmounts(totalCents) {
+  if (!Number.isSafeInteger(totalCents) || totalCents < 15) throw new Error('Enter a valid one-off total for the 15-part payment plan.');
+  const base = Math.floor(totalCents / 15);
+  const remainder = totalCents % 15;
+  return Array.from({ length: 15 }, (_, index) => base + (index < remainder ? 1 : 0));
+}
+
+function instalmentBreakdown(amounts) {
+  const largerCount = amounts.filter((amount) => amount === amounts[0]).length;
+  return largerCount === 15
+    ? `15 parts of ${instalmentMoney(amounts[0])}`
+    : `${largerCount} ${largerCount === 1 ? 'part' : 'parts'} of ${instalmentMoney(amounts[0])}, then ${15 - largerCount} ${15 - largerCount === 1 ? 'part' : 'parts'} of ${instalmentMoney(amounts[14])}`;
+}
+
+export function formatInstalmentEstimate(estimate) {
+  if (!estimate.instalments) return null;
+  const { minAmountsCents, maxAmountsCents } = estimate.instalments;
+  const min = minAmountsCents[14];
+  const max = maxAmountsCents[0];
+  return {
+    range: `${instalmentMoney(min)}${min === max ? '' : `–${instalmentMoney(max)}`} per part`,
+    breakdown: estimate.oneOff.min === estimate.oneOff.max
+      ? `${instalmentBreakdown(minAmountsCents)}. Total ${instalmentMoney(Math.round(estimate.oneOff.min * 100))}.`
+      : `At ${instalmentMoney(Math.round(estimate.oneOff.min * 100))}: ${instalmentBreakdown(minAmountsCents)}. At ${instalmentMoney(Math.round(estimate.oneOff.max * 100))}: ${instalmentBreakdown(maxAmountsCents)}.`,
+  };
+}
 
 function chosenItems(values, catalog, field) {
   const unique = [...new Set(Array.isArray(values) ? values : [])];
@@ -94,13 +122,21 @@ export function calculateEstimate(selection) {
   if (!oneOffItems.length && !monthlyItems.length) throw new Error('Choose at least one service or marketing option to generate an estimate.');
   if (!Object.hasOwn(timelineLabels, selection.timeline)) throw new Error('Choose a valid project timing.');
   if (!Object.hasOwn(paymentLabels, selection.payment)) throw new Error('Choose a valid payment preference.');
+  const oneOff = total(oneOffItems);
+  const instalments = selection.payment === 'instalments_15';
+  if (instalments && !oneOff.max) throw new Error('Add one-off project work to use the 15-part payment plan. Monthly services are billed separately.');
   return {
-    oneOff: total(oneOffItems),
+    oneOff,
     monthly: total(monthlyItems),
     oneOffItems,
     monthlyItems,
     timeline: timelineLabels[selection.timeline],
     payment: paymentLabels[selection.payment],
+    instalments: instalments ? {
+      instalmentCount: 15,
+      minAmountsCents: splitInstalmentAmounts(Math.round(oneOff.min * 100)),
+      maxAmountsCents: splitInstalmentAmounts(Math.round(oneOff.max * 100)),
+    } : null,
     industry: String(selection.industry || '').trim().slice(0, 100),
     notes: String(selection.notes || '').trim().slice(0, 500),
   };
@@ -137,11 +173,17 @@ function estimateReference() {
 export function buildEstimateBrief(estimate, reference) {
   const oneOffText = estimate.oneOff.max ? `${formatRange(estimate.oneOff)} AUD` : 'None selected';
   const monthlyText = estimate.monthly.max ? `${formatRange(estimate.monthly)} AUD per month` : 'None selected';
+  const instalments = formatInstalmentEstimate(estimate);
   const lines = [
     'BLACK OAK SELF-QUOTE — INDICATIVE ESTIMATE ONLY',
     `Reference: ${reference}`,
     `Estimated one-off project: ${oneOffText}`,
     `Optional ongoing services: ${monthlyText}`,
+    ...(instalments ? [
+      `Payment preference: 15-part payment plan — ${instalments.range}.`,
+      instalments.breakdown,
+      '15 manually initiated payments through the private quote link, with timing agreed with Black Oak. No additional deposit, interest or payment-plan fees. Optional monthly services are separate. Final amounts require an approved quote.',
+    ] : []),
     '',
     'Selected one-off work:',
     ...(estimate.oneOffItems.length ? estimate.oneOffItems.map((item) => `- ${item.label}`) : ['- None']),
@@ -151,7 +193,7 @@ export function buildEstimateBrief(estimate, reference) {
     '',
     `Industry: ${estimate.industry || 'Not supplied'}`,
     `Timing: ${estimate.timeline}`,
-    `Payment preference: ${estimate.payment}`,
+    ...(!instalments ? [`Payment preference: ${estimate.payment}`] : []),
     ...(estimate.notes ? [`Other requirements: ${estimate.notes}`] : []),
     '',
     'This is a planning range, not a binding offer or final quote. Final scope and price require Black Oak confirmation. Third-party fees, advertising spend, hosting and paid software are excluded unless confirmed in writing. Referral eligibility and discounts are checked separately.',
@@ -215,6 +257,10 @@ function initialiseBuilder() {
       document.querySelector('[data-one-off-estimate]').textContent = formatRange(estimate.oneOff);
       document.querySelector('[data-monthly-estimate]').textContent = formatRange(estimate.monthly);
       document.querySelector('[data-monthly-estimate-card]').hidden = estimate.monthly.max === 0;
+      const instalments = formatInstalmentEstimate(estimate);
+      document.querySelector('[data-instalment-estimate-card]').hidden = !instalments;
+      document.querySelector('[data-instalment-estimate]').textContent = instalments?.range || '';
+      document.querySelector('[data-instalment-breakdown]').textContent = instalments?.breakdown || '';
       const list = document.querySelector('[data-estimate-lines]');
       list.replaceChildren();
       [...estimate.oneOffItems, ...estimate.monthlyItems.map((item) => ({ ...item, label: `${item.label} — monthly` }))].forEach((item) => {
@@ -229,6 +275,7 @@ function initialiseBuilder() {
       result.hidden = false;
       result.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (error) {
+      result.hidden = true;
       status.textContent = error.message;
       status.classList.add('error');
     }

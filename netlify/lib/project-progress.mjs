@@ -1,4 +1,5 @@
 import { PortalError, siteOrigin } from './portal-auth.mjs';
+import { readInstalmentProgress } from './instalments.mjs';
 
 export const progressStages = Object.freeze({
   planning: 'Planning',
@@ -95,11 +96,13 @@ export function projectProgressLink(quote) {
 
 export function publicProjectProgress(quote) {
   const progress = readProjectProgress(quote);
+  const instalments = readInstalmentProgress(quote);
   return {
     id: quote.id,
     customerName: quote.customerName,
     service: quote.service,
     status: quote.status,
+    ...(instalments ? { paymentPlan: instalments } : {}),
     progress: {
       ...progress,
       stageLabel: progressStages[progress.stage],

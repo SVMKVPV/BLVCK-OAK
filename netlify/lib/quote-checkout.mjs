@@ -3,8 +3,10 @@ import { PortalError } from './portal-auth.mjs';
 import { notifyQuotePayment } from './quote-notifications.mjs';
 import { CUSTOM_CHECKOUT_VERSION, nextPayment, quoteLink, settleQuotePayment } from './quotes.mjs';
 import { stopCompletedSalesTracking } from './pay-as-you-sell.mjs';
+import { instalmentStageLabel, validateInstalmentAttempt } from './instalments.mjs';
 
 export function checkoutParameters(quote, attempt) {
+  validateInstalmentAttempt(quote, attempt);
   const link = new URL(quoteLink(quote));
   link.searchParams.set('payment', 'returned');
   const cancel = new URL(quoteLink(quote));
@@ -12,10 +14,11 @@ export function checkoutParameters(quote, attempt) {
   const metadata = { checkout_version: CUSTOM_CHECKOUT_VERSION, quote_id: quote.id, quote_revision: String(quote.revision), attempt_id: attempt.id, payment_stage: attempt.stage, partner_code: quote.referralCode, commission_policy: 'owner_review_required' };
   return {
     mode: 'payment', payment_method_types: ['card'], customer_email: quote.customerEmail,
+    integration_identifier: 'blvck_oak_custom_qndttcba',
     billing_address_collection: 'required', customer_creation: 'always',
     client_reference_id: quote.id, metadata, payment_intent_data: { metadata },
     success_url: link.toString(), cancel_url: cancel.toString(),
-    line_items: [{ quantity: 1, price_data: { currency: 'aud', unit_amount: attempt.amountCents, product_data: { name: `${quote.service} — ${attempt.stage === 'deposit' ? 'deposit' : attempt.stage === 'balance' ? 'remaining balance' : attempt.stage === 'sales_contribution' ? 'Pay as You Sell contribution' : 'full payment'}`, description: quote.description.slice(0, 480) } } }],
+    line_items: [{ quantity: 1, price_data: { currency: 'aud', unit_amount: attempt.amountCents, product_data: { name: `${quote.service} — ${instalmentStageLabel(attempt.stage) || (attempt.stage === 'deposit' ? 'deposit' : attempt.stage === 'balance' ? 'remaining balance' : attempt.stage === 'sales_contribution' ? 'Pay as You Sell contribution' : 'full payment')}`, description: quote.description.slice(0, 480) } } }],
   };
 }
 
@@ -43,6 +46,7 @@ export async function openQuoteCheckout(id, stripe, store) {
       continue;
     }
     const attempt = quote.checkout;
+    validateInstalmentAttempt(quote, attempt);
     let session;
     if (attempt.sessionId) {
       session = await stripe.checkout.sessions.retrieve(attempt.sessionId);
