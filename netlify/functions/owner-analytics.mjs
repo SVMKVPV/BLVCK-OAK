@@ -34,7 +34,20 @@ async function visitSummary(store, since) {
   const { blobs } = await store.list({ prefix:'analytics-visit/' });
   const rows = (await Promise.all(blobs.slice(-5000).map(({key})=>store.get(key,{type:'json'})))).filter(Boolean);
   const recent = rows.filter(v => Number(v.at || 0) >= since*1000);
+  const group = (keyFn, labelKey, max = 12) => Object.entries(recent.reduce((totals, row) => {
+    const key = String(keyFn(row) || 'Unknown').slice(0,120);
+    totals[key] = (totals[key] || 0) + 1;
+    return totals;
+  }, {})).sort((a,b)=>b[1]-a[1]).slice(0,max).map(([label,views])=>({[labelKey]:label,views}));
+  const sources = group(v => v.campaign?.utm_source || v.source || (() => {
+    try { return new URL(v.referrer).hostname; } catch { return 'Direct / unknown'; }
+  })(), 'source');
   return {
+    sources,
+    campaigns:group(v => v.campaign?.utm_campaign || 'No campaign', 'campaign'),
+    referralCodes:group(v => v.campaign?.ref || 'No referral code', 'code'),
+    countries:group(v => v.country || 'Unknown', 'country'),
+    cities:group(v => v.city && v.city !== 'Unknown' ? [v.city,v.country].filter(Boolean).join(', ') : 'Unknown', 'city'),
     views: recent.length,
     uniqueVisitors: new Set(recent.map(v=>v.visitor).filter(Boolean)).size,
     topPages: Object.entries(recent.reduce((a,v)=>{const p=String(v.path||'/').slice(0,160);a[p]=(a[p]||0)+1;return a;},{})).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([path,views])=>({path,views}))
