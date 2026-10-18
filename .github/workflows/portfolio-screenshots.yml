@@ -1,0 +1,35 @@
+name: Capture portfolio homepages
+on:
+  push:
+    branches: [main]
+    paths:
+      - scripts/capture-portfolio.cjs
+      - .github/workflows/portfolio-screenshots.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Prepare capture browser
+        run: |
+          npm install --prefix /tmp/portfolio-capture playwright@1.58.2
+          /tmp/portfolio-capture/node_modules/.bin/playwright install --with-deps chromium
+      - name: Capture actual homepage designs
+        env:
+          PLAYWRIGHT_MODULE: /tmp/portfolio-capture/node_modules/playwright
+        run: node scripts/capture-portfolio.cjs
+      - name: Publish captured thumbnails
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/portfolio/screenshots portfolio.html
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Show actual homepage screenshots in portfolio cards"
+          git push origin HEAD:main
