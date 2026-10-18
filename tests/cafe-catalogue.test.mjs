@@ -44,14 +44,20 @@ test('cafe marketplace entries keep gated previews and honest demo features', ()
   assert.equal(new Set(products.map(item => item.rank)).size, products.length);
 });
 
-test('portfolio presents both cafe previews and the correct concept count', () => {
+test('portfolio presents both cafe previews and the correct concept count', async () => {
   const gallery = portfolio.match(/<section class="concept-gallery"[\s\S]*?<\/section>/)?.[0];
   assert.ok(gallery, 'Interactive concept gallery is available');
   const declaredCount = Number(gallery.match(/<strong>(\d+)<\/strong>/)?.[1]);
   assert.equal((gallery.match(/class="concept-card\b/g) || []).length, declaredCount);
   for (const cafe of cafes) {
     assert.ok(gallery.includes(`href="${cafe.preview}"`));
-    assert.ok(gallery.includes(`src="assets/portfolio/${cafe.id}.webp"`));
+    const card = [...gallery.matchAll(/<a\b[^>]*class="concept-card\b[^>]*>[\s\S]*?<\/a>/g)]
+      .map(match => match[0]).find(item => item.includes(`href="${cafe.preview}"`));
+    const image = card?.match(/<img\b[^>]*src="(assets\/portfolio\/screenshots\/[^"<>]+\.jpg)"[^>]*>/);
+    assert.ok(image, `${cafe.name} shows a captured homepage`);
+    assert.match(image[0], /alt="[^"]+website homepage preview"/);
+    const bytes = await readFile(new URL(`../${image[1]}`, import.meta.url));
+    assert.equal(bytes.readUInt16BE(0), 0xffd8, 'Screenshot is a real JPEG');
     assert.ok(gallery.includes(`<h3>${cafe.name}</h3>`));
   }
 });
