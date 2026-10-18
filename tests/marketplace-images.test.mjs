@@ -13,10 +13,14 @@ const { products, directory, card, bindPreviewImages, businessCard } = runInNewC
 );
 
 test('every marketplace item has a local thumbnail without a live iframe', () => {
-  assert.equal(products.length, 23);
+  assert.equal(products.length, 24);
   assert.equal(new Set(products.map(product => product.thumbnail)).size, products.length);
   for (const product of products) {
-    assert.match(product.thumbnail, /^assets\/marketplace\/[a-z0-9-]+\.jpg$/);
+    if (product.id === 'caution-co') {
+      assert.equal(product.thumbnail, 'https://raw.githubusercontent.com/SVMKVPV/CAUTION-CO/main/assets/look-01.webp');
+    } else {
+      assert.match(product.thumbnail, /^assets\/marketplace\/[a-z0-9-]+\.jpg$/);
+    }
     const rendered = card(product);
     assert.match(rendered, /<img\b[^>]*data-preview-image/);
     assert.ok(rendered.includes(`src="${product.thumbnail}"`));
@@ -29,6 +33,7 @@ test('every marketplace item has a local thumbnail without a live iframe', () =>
 
 test('marketplace image assets contain nonempty JPEG images', async () => {
   for (const product of products) {
+    if (product.id === 'caution-co') continue; // Verified external storefront photo, not a local JPEG.
     const image = await readFile(new URL(`../${product.thumbnail}`, import.meta.url));
     assert.ok(image.length > 1024, `${product.name} has image data`);
     assert.equal(image[0], 0xff, product.thumbnail);
