@@ -95,7 +95,8 @@ test('15-part price ranges and generated briefs explain the approved one-off pay
   const brief = buildEstimateBrief(estimate, 'BOQ-INSTALMENTS');
   assert.match(brief, /15-part payment plan/);
   assert.ok(brief.includes(display.breakdown));
-  assert.match(brief, /manually initiated/);
+  assert.match(brief, /15 scheduled parts, paid manually/);
+  assert.match(brief, /Pay extra towards later parts or clear the balance early/);
   assert.match(brief, /No additional deposit, interest or payment-plan fees/);
   assert.match(brief, /Optional monthly services are separate/);
   assert.match(brief, /not a binding offer/);

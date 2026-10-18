@@ -145,12 +145,15 @@ At the discounted Enterprise price, the platform receives A$1,160 before Stripe 
 
 Select **15-part payment plan** in the self-quote builder, custom quote form, or owner approval form. The public self-quote remains an indicative request; the owner confirms the final scope, total and payment timing before the client uses an approved private payment link.
 
-- The fixed plan is `instalments_15`. The server divides the approved one-off total into exactly 15 instalments in integer cents, distributing any remainder over the first parts. There is no additional deposit: the first instalment is payment 1 of 15.
-- Each part is paid separately through Stripe Checkout from the same private quote link. This plan does not create automatic weekly or monthly debits. Agree the payment dates with the client in the quote description.
+- The fixed plan is `instalments_15`. The server divides the approved one-off total into 15 scheduled parts in integer cents, distributing any remainder over the first parts. There is no additional deposit.
+- The client can pay the next part, add an optional extra amount, or select the complete remaining balance. Extra money credits the earliest unpaid parts and can partially or fully cover later parts, so the project can be paid off in fewer than 15 transactions. The original scheduled amounts remain visible alongside each part's paid and remaining amounts.
+- Each payment is initiated manually through Stripe Checkout from the same private quote link. This plan does not create automatic weekly or monthly debits. Agree the payment dates with the client in the quote description.
 - The client page and partner/owner dashboard show the schedule, completed part count and remaining balance. For A$1,500 this is 15 × A$100; for A$2,900 it is 5 × A$193.34 plus 10 × A$193.33.
-- Signed Checkout webhooks and return-page reconciliation reuse the existing payment-attempt locks and idempotency handling. Successful parts 1–14 retain the internal `deposit_paid` status (shown as part paid); part 15 marks the quote `paid` and stops further quote payments.
+- Signed Checkout webhooks and return-page reconciliation reuse the existing payment-attempt locks and idempotency handling. A partly paid total retains the internal `deposit_paid` status (shown as part paid); settling the approved total marks all 15 parts paid and stops further quote payments.
+- Extra payments are capped at the unpaid quote balance and never change the approved total. Requests include the balance the client reviewed; a changed balance requires a refresh. Each new attempt stores its base and extra amounts. Changing an open Checkout amount first expires the old unpaid Stripe session, then reserves a new immutable attempt; a paid, processing or uncertain session cannot be silently replaced.
+- AUD card payments have a A$0.50 minimum. A smaller unfinished part is combined with credit toward the following part to meet that minimum. An extra amount that would leave a final balance of A$0.01–A$0.49 is rejected; the client must reduce the extra or select the full remaining balance. No amount is silently increased.
 - Refunds and disputes put the quote on payment review. Monthly services and any separately offered maintenance remain separate from the 15 one-off payments.
-- No new Stripe products, subscriptions, secrets or webhook event types are required. Deploy the updated Functions together with the frontend. `node --test tests/quote-instalments.test.mjs` exercises the schedule and settlement flow with simulated Stripe responses.
+- No new Stripe products, subscriptions, secrets or webhook event types are required. Deploy the updated Functions together with the frontend. `node --test tests/quote-instalments.test.mjs tests/quote-extra-payments.test.mjs` exercises the schedule, extra-payment allocation, checkout races and settlement flow with simulated Stripe responses.
 
 ## Partner authentication and private links
 

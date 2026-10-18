@@ -78,6 +78,12 @@ function fakeStripe() {
         return structuredClone(session);
       },
       async retrieve(id) { return structuredClone(sessions.get(id)); },
+      async expire(id) {
+        const session = sessions.get(id);
+        if (!session || session.status !== 'open' || session.payment_status !== 'unpaid') throw new Error('Session cannot expire.');
+        session.status = 'expired';
+        return structuredClone(session);
+      },
     } },
   };
 }
@@ -86,8 +92,18 @@ function publicPlan(paidInstalments) {
   return {
     type: 'instalments_15', instalmentCount: 15, paidInstalments, remainingInstalments: 15 - paidInstalments,
     balanceCents: 290000 - expectedAmounts.slice(0, paidInstalments).reduce((sum, amount) => sum + amount, 0),
-    schedule: expectedAmounts.map((amountCents, index) => ({ number: index + 1, amountCents, paid: index < paidInstalments })),
+    schedule: expectedAmounts.map((amountCents, index) => ({
+      number: index + 1, amountCents, paid: index < paidInstalments,
+      paidCents: index < paidInstalments ? amountCents : 0,
+      remainingCents: index < paidInstalments ? 0 : amountCents, partial: false,
+    })),
   };
+}
+
+function assertNextPayment(quote, expected) {
+  const actual = nextPayment(quote);
+  if (expected === null) return assert.equal(actual, null);
+  for (const [key, value] of Object.entries(expected)) assert.equal(actual[key], value, `next payment ${key}`);
 }
 
 test('15-part schedules round in cents and preserve the exact quote total at both price bounds', () => {
@@ -120,7 +136,7 @@ test('quote creation fixes the plan at 15 parts and rejects a separate deposit o
   assert.deepEqual(quote.paymentPlan, { type: 'instalments_15', version: 'black_oak_instalments_v1', instalmentCount: 15 });
   assert.equal(quote.depositCents, 0);
   assert.deepEqual(quote.payments, []);
-  assert.deepEqual(nextPayment(quote), { stage: 'instalment_1', amountCents: 19334, instalmentNumber: 1, instalmentCount: 15 });
+  assertNextPayment(quote, { stage: 'instalment_1', amountCents: 19334, instalmentNumber: 1, instalmentCount: 15 });
   for (const deposit of ['0.01', '50', '600', '2900']) assert.throws(() => instalmentQuote({ deposit }), PortalError);
   assert.throws(() => instalmentQuote({ instalmentCount: 3 }), PortalError);
   assert.throws(() => instalmentQuote({ paymentPlan: { type: 'instalments_15', instalmentCount: 1 } }), PortalError);
@@ -179,7 +195,7 @@ test('all 15 checkout settlements advance exactly once and stop at the agreed to
     assert.equal(quote.checkout, null);
     assert.deepEqual(publicQuote(quote).paymentPlan, publicPlan(index + 1));
     assert.deepEqual(publicPaymentArrangement(quote, grossPaid(quote)).paymentPlan, publicPlan(index + 1));
-    assert.deepEqual(nextPayment(quote), index === 14 ? null : {
+    assertNextPayment(quote, index === 14 ? null : {
       stage: `instalment_${index + 2}`, amountCents: expectedAmounts[index + 1], instalmentNumber: index + 2, instalmentCount: 15,
     });
   }
@@ -304,7 +320,7 @@ test('approval and quote expiry protect the first instalment while an active pai
   assert.equal(stripe.creations, 0);
   const first = attemptedQuote();
   const active = { ...applyPaidSession(first, paidSession(first)), expiresAt: '2000-01-01T00:00:00Z' };
-  assert.deepEqual(nextPayment(active), { stage: 'instalment_2', amountCents: 19334, instalmentNumber: 2, instalmentCount: 15 });
+  assertNextPayment(active, { stage: 'instalment_2', amountCents: 19334, instalmentNumber: 2, instalmentCount: 15 });
 });
 
 test('refund and dispute events retain their review hold when an instalment payment settles afterwards', async () => {

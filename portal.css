@@ -115,7 +115,19 @@
 .instalment-schedule li.is-paid small { color: #b1d4b4; }
 .instalment-schedule li.is-next { border-color: #8d743b; background: #221f14; }
 .instalment-schedule li.is-next small { color: var(--gold-light); }
+.instalment-schedule li.is-partial { border-color: #867047; background: #211b12; }
+.instalment-schedule .instalment-credit { line-height: 1.6; color: #ddc992; }
 .client-totals [data-pay-button] { white-space: normal; text-align: left; line-height: 1.7; }
+.extra-payment { padding: 20px; margin: 0 0 22px; border: 1px solid #665734; background: #10140e; }
+.extra-payment label { display: block; margin-bottom: 10px; color: #dcd6b7; font-size: 12px; font-weight: 600; }
+.extra-payment input { width: 100%; min-width: 0; padding: 13px; border: 1px solid #625634; background: #090d09; color: #eeead6; font: inherit; font-size: 17px; box-sizing: border-box; }
+.extra-payment input:focus-visible { outline: 2px solid var(--gold-light); outline-offset: 2px; }
+.extra-payment input[aria-invalid="true"] { border-color: #d88c7d; }
+.extra-payment .quiet-button { width: 100%; white-space: normal; line-height: 1.7; }
+.extra-payment-summary { margin-top: 20px; padding-top: 10px; border-top: 1px solid #3b402f; }
+.extra-payment-summary p { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px 14px; margin: 10px 0; color: #aab39d; font-size: 12px; line-height: 1.7; }
+.extra-payment-summary strong { color: #eadba9; }
+.extra-payment .form-status { margin-bottom: 0; }
 .field-hint { display: block; margin-top: 7px; color: #7f887b; font-size: 10px; font-weight: 400; }
 .workspace .maintenance-choice { display: flex; align-items: center; gap: 10px; padding-top: 17px; border-top: 1px solid #30382d; }
 .maintenance-choice input { accent-color: var(--gold); }

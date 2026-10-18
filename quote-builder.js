@@ -182,7 +182,7 @@ export function buildEstimateBrief(estimate, reference) {
     ...(instalments ? [
       `Payment preference: 15-part payment plan — ${instalments.range}.`,
       instalments.breakdown,
-      '15 manually initiated payments through the private quote link, with timing agreed with Black Oak. No additional deposit, interest or payment-plan fees. Optional monthly services are separate. Final amounts require an approved quote.',
+      '15 scheduled parts, paid manually through the private quote link with timing agreed with Black Oak. Pay extra towards later parts or clear the balance early. No additional deposit, interest or payment-plan fees. Optional monthly services are separate. Final amounts require an approved quote.',
     ] : []),
     '',
     'Selected one-off work:',

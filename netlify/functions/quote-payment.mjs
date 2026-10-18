@@ -48,7 +48,7 @@ export default async function handler(request, context) {
     }
     if (body.action === 'connect_sales_start') return json({ url: await createSalesConnectionUrl(quote, store) });
     if (body.action === 'maintenance_checkout') return json(await openMaintenanceCheckout(quote.id, getStripe(), store));
-    if (body.action === 'checkout') return json(await openQuoteCheckout(quote.id, getStripe(), store));
+    if (body.action === 'checkout') return json(await openQuoteCheckout(quote.id, getStripe(), store, { extraAmount: body.extraAmount, expectedPaidCents: body.expectedPaidCents }));
     throw new PortalError('Unknown payment action.');
   } catch (error) {
     console.error('Custom quote payment failed:', paymentFailure(error));

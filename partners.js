@@ -108,21 +108,26 @@ function renderQuotes() {
       '<p>' + escape(quote.customerName) + ' · ' + escape(quote.customerEmail) + (dashboard.isOwner ? '<br>Partner: ' + escape(quote.partnerName) + ' · ' + escape(quote.referralCode) : '') + '</p>' +
       '<details><summary>Service description</summary><p>' + escape(quote.description) + '</p></details>' +
       (quote.paymentPlan.type === 'pay_as_you_sell' ? '<p class="record-plan"><strong>Pay as You Sell</strong> · ' + escape(quote.paymentPlan.method.label) + '<br>' + (quote.paymentPlan.connected || quote.paymentPlan.trackingComplete ? escape(quote.paymentPlan.salesCount) + ' Stripe sales recorded · ' + money(quote.paymentPlan.contributionCents) + ' accrued' + (quote.paymentPlan.trackingComplete ? ' · tracking ended when paid' : '') : 'Waiting for the client to connect Stripe') + '</p>' : '') +
-      (instalments ? '<p class="record-plan"><strong>15-part payment plan</strong> · ' + escape(quote.paymentPlan.paidInstalments) + ' of 15 paid · ' + escape(quote.paymentPlan.remainingInstalments) + ' remaining<br>Manual payments through the private quote link, with timing agreed with the client.</p>' : '') +
+      (instalments ? '<p class="record-plan"><strong>15-part payment plan</strong> · ' + escape(quote.paymentPlan.paidInstalments) + ' of 15 parts fully paid · ' + escape(quote.paymentPlan.remainingInstalments) + ' remaining<br>' + escape(quote.payments.length) + ' confirmed ' + (quote.payments.length === 1 ? 'payment' : 'payments') + '. Extra payments cover later parts and can finish the plan sooner.</p>' : '') +
       (quote.maintenance.enabled ? '<p class="record-plan"><strong>Maintenance offered</strong> · ' + money(quote.maintenance.monthlyCents) + ' per month · ' + escape(quote.maintenance.status.replaceAll('_', ' ')) + '</p>' : '') +
       '<div class="record-numbers"><span>Total<strong>' + money(quote.totalCents) + '</strong></span><span>' + (instalments ? 'Balance<strong>' + money(quote.paymentPlan.balanceCents) : 'Deposit<strong>' + money(quote.depositCents)) + '</strong></span><span>Paid<strong>' + money(quote.paidCents) + '</strong></span>' + (quote.progressLink ? '<span>Project progress<strong>' + escape(quote.progress.percentage) + '%</strong></span>' : '') + '</div>' +
       (dashboard.isOwner && quote.portfolio?.published ? '<p class="portfolio-published-status"><strong>Published in portfolio</strong> · ' + escape(quote.portfolio.title) + '</p>' : '') +
       (quote.reviewNote ? '<p>Owner note: ' + escape(quote.reviewNote) + '</p>' : '');
     if (instalments) {
       const details = document.createElement('details');
-      const summary = document.createElement('summary'); summary.textContent = 'View all 15 payments';
+      const summary = document.createElement('summary'); summary.textContent = 'View 15 scheduled parts';
       const schedule = document.createElement('ol'); schedule.className = 'instalment-schedule';
       (quote.paymentPlan.schedule || []).forEach((part) => {
-        const item = document.createElement('li'); item.className = part.paid ? 'is-paid' : '';
+        const item = document.createElement('li'); item.className = part.paid ? 'is-paid' : part.partial ? 'is-partial' : '';
         const number = document.createElement('span'); number.textContent = `Part ${part.number}`;
         const amount = document.createElement('strong'); amount.textContent = money(part.amountCents);
-        const state = document.createElement('small'); state.textContent = part.paid ? 'Paid' : quote.nextPayment?.instalmentNumber === part.number ? 'Next payment' : 'Remaining';
-        item.append(number, amount, state); schedule.append(item);
+        const state = document.createElement('small'); state.textContent = part.paid ? 'Paid' : part.partial ? 'Part paid' : quote.nextPayment?.instalmentNumber === part.number ? 'Next payment' : 'Remaining';
+        item.append(number, amount, state);
+        if (part.partial) {
+          const credit = document.createElement('small'); credit.className = 'instalment-credit'; credit.textContent = `${money(part.paidCents)} paid · ${money(part.remainingCents)} remaining`;
+          item.append(credit);
+        }
+        schedule.append(item);
       });
       details.append(summary, schedule); article.append(details);
     }
@@ -394,8 +399,8 @@ function calculatePreview() {
   $('[data-due-preview-label]').textContent = instalments ? 'Part 1 of 15' : 'Due first';
   $('[data-balance-preview-label]').textContent = instalments ? 'Remaining 14 parts' : 'Then balance';
   $('[data-instalment-preview]').textContent = !total ? 'Enter the project total to see the 15-part breakdown.' : largerCount
-    ? `${largerCount} ${largerCount === 1 ? 'payment' : 'payments'} of ${money(base + 1)}, then ${15 - largerCount} ${15 - largerCount === 1 ? 'payment' : 'payments'} of ${money(base)}. Total ${money(total)}.`
-    : `15 payments of ${money(base)}. Total ${money(total)}.`;
+    ? `${largerCount} ${largerCount === 1 ? 'part' : 'parts'} of ${money(base + 1)}, then ${15 - largerCount} ${15 - largerCount === 1 ? 'part' : 'parts'} of ${money(base)}. Total ${money(total)}.`
+    : `15 parts of ${money(base)}. Total ${money(total)}.`;
 }
 function updatePaymentFields() {
   const form = $('[data-quote-form]');

@@ -1,7 +1,7 @@
 import { randomBytes } from 'node:crypto';
 import { PortalError, portalStore, secretToken, siteOrigin, validEmail } from './portal-auth.mjs';
 import { payAsYouSellAccruedCents, publicPaymentArrangement, readPaymentPlan, validatePaymentArrangement } from './pay-as-you-sell.mjs';
-import { INSTALMENT_COUNT, INSTALMENT_PLAN_TYPE, readInstalmentProgress, validateInstalmentAttempt } from './instalments.mjs';
+import { INSTALMENT_PLAN_TYPE, nextInstalmentPayment, readInstalmentProgress, validateInstalmentAttempt } from './instalments.mjs';
 
 export const CUSTOM_CHECKOUT_VERSION = 'black_oak_custom_v1';
 
@@ -68,10 +68,7 @@ export function nextPayment(quote, now = Date.now()) {
   if (plan.type !== 'pay_as_you_sell' && !paid && Date.parse(quote.expiresAt) <= now) return null;
   const remaining = quote.totalCents - paid;
   if (remaining <= 0) return null;
-  if (instalments) {
-    const part = instalments.schedule[instalments.paidInstalments];
-    return part ? { stage: `instalment_${part.number}`, amountCents: part.amountCents, instalmentNumber: part.number, instalmentCount: INSTALMENT_COUNT } : null;
-  }
+  if (instalments) return nextInstalmentPayment(instalments);
   if (!paid && quote.depositCents > 0 && quote.depositCents < quote.totalCents) return { stage: 'deposit', amountCents: quote.depositCents };
   if (plan.type === 'pay_as_you_sell') {
     const due = Math.max(0, payAsYouSellAccruedCents(quote) - paid);
@@ -91,7 +88,11 @@ export function publicQuote(quote) {
     totalCents: quote.totalCents, depositCents: quote.depositCents, status: quote.status,
     paidCents, refundedCents: refunded(quote), nextPayment: nextPayment(quote),
     expiresAt: quote.expiresAt, createdAt: quote.createdAt,
-    payments: quote.payments.map(({ stage, amountCents, paidAt, refundedCents = 0 }) => ({ stage, amountCents, paidAt, refundedCents })),
+    payments: quote.payments.map(({ stage, amountCents, paidAt, refundedCents = 0, baseAmountCents, extraAmountCents, instalmentEndNumber }) => ({
+      stage, amountCents, paidAt, refundedCents,
+      ...(baseAmountCents !== undefined ? { baseAmountCents, extraAmountCents } : {}),
+      ...(instalmentEndNumber !== undefined ? { instalmentEndNumber } : {}),
+    })),
     ...publicPaymentArrangement(quote, paidCents),
   };
 }
@@ -114,7 +115,10 @@ export function applyPaidSession(quote, session) {
     throw new PortalError('Custom payment did not match its approved quote.', 409);
   }
   const review = quote.paymentReviews?.[session.payment_intent];
-  const payment = { sessionId: session.id, paymentIntentId: session.payment_intent, amountCents: session.amount_total, stage: attempt.stage, paidAt: new Date().toISOString(), refundedCents: review?.refundedCents || 0, disputed: Boolean(review?.disputed) };
+  const payment = { sessionId: session.id, paymentIntentId: session.payment_intent, amountCents: session.amount_total, stage: attempt.stage, paidAt: new Date().toISOString(), refundedCents: review?.refundedCents || 0, disputed: Boolean(review?.disputed),
+    ...(instalments && attempt.baseAmountCents !== undefined ? { baseAmountCents: attempt.baseAmountCents, extraAmountCents: attempt.extraAmountCents } : {}),
+    ...(instalments && attempt.instalmentEndNumber !== undefined ? { instalmentEndNumber: attempt.instalmentEndNumber } : {}),
+  };
   return { ...quote, payments: [...quote.payments, payment], status: quote.status === 'payment_review' ? 'payment_review' : (grossPaid(quote) + payment.amountCents === quote.totalCents ? 'paid' : 'deposit_paid'), checkout: null, updatedAt: new Date().toISOString() };
 }
 

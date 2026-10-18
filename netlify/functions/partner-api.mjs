@@ -19,7 +19,7 @@ async function notifyQuote(quote, approved = false) {
   const groups = new Map();
   instalments?.schedule.forEach(({ amountCents }) => groups.set(amountCents, (groups.get(amountCents) || 0) + 1));
   const paymentTerms = instalments
-    ? `15-part payment plan: ${[...groups].map(([amount, count]) => `${count} × ${formatAud(amount)}`).join(' + ')}. No additional deposit. Each instalment is paid through the private quote link; payment timing is agreed with the client.`
+    ? `15-part payment plan: ${[...groups].map(([amount, count]) => `${count} × ${formatAud(amount)}`).join(' + ')}. No additional deposit. Pay through the private quote link at the agreed times. Optional extra payments credit later parts and can settle the balance early.`
     : `Deposit: ${formatAud(quote.depositCents)}`;
   await sendEmail({ to, subject: `${title} — ${quote.service}`, text: `${quote.service}\n${quote.description}\nClient: ${quote.customerName} (${quote.customerEmail})\nTotal: ${formatAud(quote.totalCents)}\n${paymentTerms}\n${url}`, html: emailShell(title, `<p style="color:#b6b5ae;line-height:1.8"><strong>${escapeHtml(quote.service)}</strong><br>Client: ${escapeHtml(quote.customerName)}<br>Total: ${formatAud(quote.totalCents)}<br>${escapeHtml(paymentTerms)}</p><p style="color:#b6b5ae;white-space:pre-wrap">${escapeHtml(quote.description)}</p><p><a style="color:#f1d48c" href="${escapeHtml(url)}">${approved ? 'Open the client payment page' : 'Review in the owner dashboard'}</a></p>`), idempotencyKey: `quote-${approved ? 'approved' : 'submitted'}-${quote.id}-${quote.revision}` }).catch((error) => console.error('Quote notification failed:', error.name));
 }
