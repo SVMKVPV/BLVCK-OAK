@@ -19,3 +19,31 @@
 .shelf__track {
   overflow-x: auto !important;
 }
+
+/* Keep the real tree visible as a still, with a working link into the studio. */
+.oak-origin {
+  height: 100svh;
+  min-height: 620px;
+}
+
+.oak-origin-stage {
+  position: relative;
+}
+
+.oak-origin-video,
+.oak-origin-canvas,
+.oak-origin-grain,
+.oak-origin-scroll,
+.oak-origin-progress,
+.oak-origin-brand {
+  display: none !important;
+}
+
+.oak-origin-actions {
+  top: calc(var(--header-h) + 18px);
+  bottom: auto;
+}
+
+.oak-origin-chapter {
+  transition: none;
+}

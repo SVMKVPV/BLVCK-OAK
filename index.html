@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#07090c" />
+    <meta name="theme-color" content="#080909" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
@@ -68,17 +68,66 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="studio.css?v=2" />
-    <link rel="stylesheet" href="future-ui.css?v=1" />
+    <link rel="stylesheet" href="studio.css?v=3" />
+    <link rel="stylesheet" href="future-ui.css?v=2" />
     <script src="future-ui.js?v=1" defer></script>
-    <script src="future-scene.js?v=1" defer></script>
+    <link rel="stylesheet" href="studio-intro.css?v=2" />
+    <script src="cinematic-intro.js?v=8" defer></script>
     <script src="studio.js?v=2" defer></script>
     <script src="script.js?v=13" defer></script>
   </head>
   <body class="future-home" data-future-ui>
-    <noscript><link rel="stylesheet" href="studio-noscript.css?v=2" /></noscript>
+    <noscript><link rel="stylesheet" href="studio-noscript.css?v=3" /></noscript>
     <a class="skip-link" href="#main-content">Skip to content</a>
     <div class="page-progress" aria-hidden="true"><span></span></div>
+
+    <section class="oak-origin" id="oak-origin" data-oak-origin aria-labelledby="oak-origin-title">
+      <div class="oak-origin-stage" data-oak-stage>
+        <img class="oak-origin-poster" src="assets/obsidian-oak-scroll-poster.webp" width="720" height="1280" alt="" aria-hidden="true" fetchpriority="high" decoding="async" />
+        <video class="oak-origin-video" data-oak-video data-orientation="portrait-ccw" muted playsinline preload="auto" poster="assets/obsidian-oak-scroll-poster.webp" disablepictureinpicture aria-hidden="true">
+          <source src="assets/obsidian-oak-scroll-ccw.mp4" type="video/mp4" />
+        </video>
+        <canvas class="oak-origin-canvas" data-oak-canvas aria-hidden="true"></canvas>
+        <div class="oak-origin-grain" aria-hidden="true"></div>
+        <div class="oak-origin-brand" aria-hidden="true"><span>BLVCK</span> OAK <small>/ ORIGIN</small></div>
+
+        <div class="oak-origin-story" data-oak-story>
+          <article class="oak-origin-chapter is-active" data-oak-chapter="0">
+            <p>Chapter 01 / The source</p>
+            <h2 id="oak-origin-title">Every digital story<br /><em>begins with a seed.</em></h2>
+            <span>Scroll to enter the BLVCK OAK journey.</span>
+          </article>
+          <article class="oak-origin-chapter" data-oak-chapter="1" aria-hidden="true">
+            <p>Chapter 02 / The canopy</p>
+            <h2>Every leaf holds<br /><em>a world of its own.</em></h2>
+            <span>Rooted in nature. Shaped by change. Ready for what comes next.</span>
+          </article>
+          <article class="oak-origin-chapter" data-oak-chapter="2" aria-hidden="true">
+            <p>Chapter 03 / Transformation</p>
+            <h2>Nothing remarkable<br /><em>stands still.</em></h2>
+            <span>Old forms become fuel. Strong ideas survive the fire.</span>
+          </article>
+          <article class="oak-origin-chapter" data-oak-chapter="3" aria-hidden="true">
+            <p>Chapter 04 / New growth</p>
+            <h2>From ash,<br /><em>direction takes root.</em></h2>
+            <span>A sharper identity. A stronger system. A new beginning.</span>
+          </article>
+          <article class="oak-origin-chapter oak-origin-chapter-final" data-oak-chapter="4" aria-hidden="true">
+            <p>BLVCK OAK / Sydney, Australia</p>
+            <h2>The journey<br /><em>begins here.</em></h2>
+            <span>Continue into the BLVCK OAK studio experience.</span>
+          </article>
+        </div>
+
+        <div class="oak-origin-actions">
+          <button class="motion-toggle" type="button" data-motion-toggle data-public-action aria-pressed="false"><span class="motion-toggle__icon" aria-hidden="true">Ⅱ</span><span data-motion-label>Pause motion</span></button>
+          <a class="oak-origin-skip" href="#main-content" data-oak-skip data-public-action>Enter studio <span aria-hidden="true">↘</span></a>
+        </div>
+        <div class="oak-origin-scroll" data-oak-scroll-cue aria-hidden="true"><i></i><span>Scroll to transform</span></div>
+        <div class="oak-origin-progress" aria-hidden="true"><span data-oak-progress></span></div>
+        <p class="sr-only">A scroll-controlled three-dimensional obsidian oak rotates against a mirrored wall. Molten gold veins pulse through its branches as fire becomes ash and a new oak grows before the BLVCK OAK studio is revealed.</p>
+      </div>
+    </section>
 
     <header class="site-header" id="site-header">
       <a class="wordmark" href="#top" aria-label="Blvck Oak home">
@@ -123,22 +172,13 @@
       <button type="button" data-dismiss-notice aria-label="Dismiss payment message">×</button>
     </div>
 
-    <main id="main-content">
-      <section class="hero" id="top" aria-labelledby="hero-title">
+    <main id="main-content" tabindex="-1">
+      <section class="hero hero--tree-return" id="top" aria-labelledby="hero-title">
         <span class="legacy-anchor" id="brand-film" aria-hidden="true"></span>
         <div class="hero__grid" aria-hidden="true"></div>
-        <div class="future-scene" data-future-scene aria-hidden="true">
-          <div class="future-scene__halo"></div>
-          <div class="future-scene__orbit future-scene__orbit--one"></div>
-          <div class="future-scene__orbit future-scene__orbit--two"></div>
-          <div class="future-scene__fallback" data-future-fallback><span class="future-scene__leaf"></span></div>
-          <canvas class="future-scene__canvas" data-future-canvas></canvas>
-          <div class="future-scene__ground"></div>
-          <span class="future-scene__note">FORM / FUNCTION / FORWARD</span>
-        </div>
         <div class="hero__content">
           <p class="eyebrow hero__eyebrow"><span aria-hidden="true"></span> INDEPENDENT DIGITAL STUDIO · SYDNEY</p>
-          <h1 id="hero-title">Made to<br /><em>move you<br />forward.</em></h1>
+          <h1 id="hero-title">Made to move<br /><em>you forward.</em></h1>
           <p class="hero__lede">Distinctive websites. Connected systems.<br />We bring design, search and automation together around what your business does next.</p>
           <div class="hero__actions">
             <a class="button button--gold" href="quote.html">Build an estimate <span aria-hidden="true">↗</span></a>

@@ -39,14 +39,14 @@ test('studio homepage preserves production SEO, routes and commercial journeys',
   assert.match(html, /data-enterprise-referral/);
   assert.match(html, /data-enterprise-apply/);
   assert.match(html, /<section[^>]*id="top"[^>]*>/);
-  assert.match(html, /data-future-scene/);
-  assert.match(html, /data-future-canvas/);
-  assert.doesNotMatch(html, /data-oak-origin|data-oak-video/);
-  assert.doesNotMatch(html, /<script[^>]*src="cinematic-intro\.js/);
-  assert.doesNotMatch(html, /<link[^>]*href="studio-intro\.css/);
+  assert.match(html, /data-oak-origin/);
+  assert.match(html, /data-oak-video/);
+  assert.match(html, /<source[^>]*src="assets\/obsidian-oak-scroll-ccw\.mp4"[^>]*type="video\/mp4"/);
+  assert.doesNotMatch(html, /data-future-scene|data-future-canvas/);
+  assert.doesNotMatch(html, /<script[^>]*src="future-scene\.js/);
   assert.doesNotMatch(html, /href="https:\/\/blvckoak\.com\.au\/(?:quote|book|portfolio)\.html"/);
 
-  for (const asset of ['studio.css', 'studio.js', 'future-ui.css', 'future-ui.js', 'future-scene.js']) {
+  for (const asset of ['studio.css', 'studio.js', 'studio-intro.css', 'cinematic-intro.js', 'future-ui.css', 'future-ui.js']) {
     assert.ok(build.includes(`'${asset}'`), `${asset} is copied into the release`);
     assert.ok(html.includes(asset), `${asset} is loaded by the homepage`);
   }
@@ -72,18 +72,27 @@ test('studio interactions are isolated and the mobile menu contains keyboard foc
   assert.doesNotMatch(html, /src="sales(?:-config)?\.js/);
 });
 
-test('homepage provides immediate content and a CSP-compatible static scene fallback without JavaScript', async () => {
-  const [html, noScriptCss, build] = await Promise.all([
-    read('index.html'), read('studio-noscript.css'), read('scripts/build.mjs'),
+test('restored tree has a real content shortcut and a CSP-compatible still fallback without JavaScript', async () => {
+  const [html, noScriptCss, introCss, build, poster] = await Promise.all([
+    read('index.html'), read('studio-noscript.css'), read('studio-intro.css'), read('scripts/build.mjs'),
+    readFile(new URL('../assets/obsidian-oak-scroll-poster.webp', import.meta.url)),
   ]);
   assert.match(html, /<noscript>\s*<link rel="stylesheet" href="studio-noscript\.css(?:\?v=\d+)?"\s*\/>\s*<\/noscript>/);
   assert.doesNotMatch(html, /<noscript>[\s\S]*?<style>/);
   assert.match(html, /href="#main-content"[^>]*>Skip to content/);
-  assert.match(html, /class="[^"]*\bfuture-scene__fallback\b/);
-  assert.match(html, /<div[^>]*data-future-scene[^>]*aria-hidden="true"/);
-  assert.ok(html.indexOf('id="main-content"') < html.indexOf('data-future-scene'), 'the scene decorates the main content instead of gating access to it');
+  assert.match(html, /<a[^>]*href="#main-content"[^>]*data-oak-skip/);
+  assert.match(html, /<main[^>]*id="main-content"[^>]*tabindex="-1"/);
+  assert.ok(html.indexOf('data-oak-origin') < html.indexOf('id="main-content"'), 'the original scroll sequence opens before the studio content');
+  assert.match(html, /<img[^>]*class="oak-origin-poster"[^>]*src="assets\/obsidian-oak-scroll-poster\.webp"[^>]*alt=""[^>]*aria-hidden="true"/);
+  assert.match(html, /<video[^>]*data-oak-video[^>]*muted[^>]*playsinline[^>]*poster="assets\/obsidian-oak-scroll-poster\.webp"[^>]*aria-hidden="true"/);
+  assert.equal(poster.toString('ascii', 0, 4), 'RIFF');
+  assert.equal(poster.toString('ascii', 8, 12), 'WEBP');
+  assert.ok(poster.byteLength > 1_000, 'the still fallback is a real image asset');
+  assert.match(introCss, /\.oak-origin-poster\s*\{/);
   assert.match(html, /<button[^>]*data-motion-toggle/);
   assert.match(noScriptCss, /\.motion-toggle[^{}]*\{\s*display:\s*none\s*!important/);
-  assert.match(noScriptCss, /\.future-scene__fallback[^{}]*\{\s*opacity:\s*1\s*!important/);
+  assert.match(noScriptCss, /\.oak-origin\s*\{[^}]*height:\s*100svh/);
+  assert.match(noScriptCss, /\.oak-origin-stage\s*\{[^}]*position:\s*relative/);
+  assert.match(noScriptCss, /\.oak-origin-video,[\s\S]*?display:\s*none\s*!important/);
   assert.ok(build.includes("'studio-noscript.css'"));
 });

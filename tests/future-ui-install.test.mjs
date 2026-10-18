@@ -37,7 +37,7 @@ test('shared theme installs once on studio pages while preserving forms and inde
     assert.ok(output.includes(form), `${name} preserves every form field and submit hook`);
     assert.ok(output.includes(scripts), `${name} preserves feature script tags and ordering`);
     assert.match(output, /class="workspace" data-page="quote"/);
-    assert.match(output, /name="theme-color" content="#07090c"/);
+    assert.match(output, /name="theme-color" content="#080909"/);
   }
   assert.ok(first.get('index.html').includes('future-ui.js?v=7'), 'an existing asset version is retained');
   for (const name of ['client-preview.html', 'previews/index.html', 'previews/quote.html', 'community/sample-cafe/index.html']) {

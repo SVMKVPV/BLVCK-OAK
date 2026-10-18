@@ -4,7 +4,7 @@ import test from 'node:test';
 
 const read = (file) => readFile(new URL(`../${file}`, import.meta.url), 'utf8');
 
-test('retained cinematic assets preserve the oak renderer, video timing and procedural fallback', async () => {
+test('restored cinematic assets preserve the original oak renderer, video timing and procedural fallback', async () => {
   const [css, client, build, packageJson, cinematicVideo] = await Promise.all([
     read('studio-intro.css'),
     read('cinematic-intro.js'),

@@ -4,9 +4,14 @@
   --oak-exit: 0;
   position: relative;
   z-index: 40;
+  height: 100svh;
+  min-height: 620px;
+  background: #030404;
+}
+
+.oak-origin.is-scroll-ready {
   height: 580vh;
   min-height: 3600px;
-  background: #030404;
 }
 
 .oak-origin-stage {
@@ -44,6 +49,19 @@
   background: linear-gradient(180deg, transparent, rgba(2, 3, 3, 0.72) 58%, #030404);
 }
 
+/* A frame from the original film stays visible until motion is ready. */
+.oak-origin-poster {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #010101;
+  opacity: calc(1 - var(--oak-exit));
+  pointer-events: none;
+}
+
 .oak-origin-video,
 .oak-origin-canvas {
   position: absolute;
@@ -77,13 +95,7 @@
 }
 
 .oak-origin.is-video-fallback.is-webgl-fallback .oak-origin-canvas {
-  opacity: 0.82;
-}
-
-.oak-origin.is-reel-render {
-  height: 100vh;
-  height: 100svh;
-  min-height: 720px;
+  opacity: 0;
 }
 
 .oak-origin.is-reel-render .oak-origin-stage {
@@ -355,7 +367,7 @@
 }
 
 @media (max-width: 800px) {
-  .oak-origin {
+  .oak-origin.is-scroll-ready {
     height: 500vh;
     min-height: 3000px;
   }
@@ -446,7 +458,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .oak-origin {
+  .oak-origin,
+  .oak-origin.is-scroll-ready {
     height: 100vh;
     height: 100svh;
     min-height: 620px;
@@ -469,13 +482,105 @@
   }
 }
 
-noscript .oak-origin {
-  display: none;
+/* The restored tree shares the site's existing motion preference. */
+.oak-origin-actions {
+  position: absolute;
+  z-index: 9;
+  top: clamp(20px, 4.5vh, 42px);
+  right: clamp(20px, 4vw, 64px);
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-noscript + main .site-header {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  transform: none;
+.oak-origin-actions .oak-origin-skip {
+  position: static;
+}
+
+.oak-origin-actions .motion-toggle {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid rgba(240, 237, 229, 0.18);
+  border-radius: 999px;
+  color: var(--stone);
+  background: rgba(7, 8, 8, 0.72);
+  backdrop-filter: blur(12px);
+}
+
+.oak-origin.is-motion-paused .oak-origin-grain,
+.oak-origin.is-motion-paused .oak-origin-scroll i::after {
+  animation-play-state: paused;
+}
+
+.oak-origin.is-motion-paused .oak-origin-chapter {
+  transition: none;
+}
+
+/* The studio content follows the full tree opening without a second sculpture. */
+.hero.hero--tree-return {
+  justify-content: center;
+  min-height: min(840px, 100svh);
+  padding: 132px var(--gutter) 134px;
+  text-align: center;
+  background: radial-gradient(ellipse at 50% 32%, #171511 0, #0b0c0c 40%, var(--ink) 78%);
+}
+
+.hero--tree-return .hero__content {
+  width: min(900px, 100%);
+  max-width: 900px;
+}
+
+.hero--tree-return h1 {
+  font-size: clamp(42px, 7.7vw, 112px);
+  line-height: 1.04;
+  letter-spacing: -0.065em;
+}
+
+.hero--tree-return .hero__lede {
+  max-width: 530px;
+  margin-inline: auto;
+}
+
+.hero--tree-return .hero__eyebrow,
+.hero--tree-return .hero__actions {
+  justify-content: center;
+}
+
+.hero--tree-return .hero__grid {
+  mask-image: radial-gradient(ellipse at center, #000, transparent 72%);
+}
+
+@media (max-width: 800px) {
+  .oak-origin-actions {
+    top: 18px;
+    right: 16px;
+    bottom: 20px;
+    flex-direction: column-reverse;
+    justify-content: space-between;
+    align-items: flex-end;
+    pointer-events: none;
+  }
+
+  .oak-origin-actions > * { pointer-events: auto; }
+
+  .hero.hero--tree-return {
+    min-height: 0;
+    padding: 114px var(--gutter) 120px;
+  }
+
+  .hero--tree-return h1 {
+    font-size: clamp(40px, 10vw, 76px);
+  }
+}
+
+/* Reel capture remains one screen at the mobile scroll breakpoint. */
+.oak-origin.is-reel-render {
+  height: 100vh;
+  height: 100svh;
+  min-height: 720px;
+}
+
+@media print {
+  .oak-origin { display: none !important; }
+  .hero.hero--tree-return { min-height: 0; padding: 40px 30px; background: #fff; }
 }

@@ -22,6 +22,14 @@
   const reelMode = query.get('oak-render') === 'reel' || stage.dataset.oakRender === 'reel';
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const coarsePointer = window.matchMedia('(pointer: coarse)');
+  function currentMotionPreference() {
+    if (reducedMotion.matches || document.hidden || document.body.dataset.motionPaused === 'true') return true;
+    if (!document.body.hasAttribute('data-future-ui-ready')) {
+      try { return sessionStorage.getItem('blvckoak-motion-paused') === 'true'; } catch { /* Keep the available device preference. */ }
+    }
+    return false;
+  }
+  let motionPaused = currentMotionPreference();
   const TAU = Math.PI * 2;
   const DEG_15 = Math.PI / 12;
   const HEADER_LOOP_SECONDS = 72;
@@ -40,6 +48,7 @@
   let activeChapter = -1;
   let introVisible = true;
   let frameId = 0;
+  let scrollFrame = 0;
   let videoReelFrame = 0;
   let videoReelStartedAt = 0;
   let previousVideoReelTime = 0;
@@ -47,7 +56,11 @@
   let videoDuration = VIDEO_END_SECONDS;
   let threeStarted = false;
   let rendererCleanup = () => {};
+  let rendererSyncMotion = () => {};
   const pointer = { x: 0, y: 0, targetX: 0, targetY: 0 };
+
+  // Without this script, the original tree remains a single, usable still.
+  intro.classList.add('is-scroll-ready');
 
   function setChapter(index) {
     if (index === activeChapter) return;
@@ -61,6 +74,7 @@
 
   function queueVideoScrub(force = false) {
     if (!(video instanceof HTMLVideoElement) || !videoReady) return;
+    if (document.hidden || (!force && (motionPaused || !introVisible))) return;
     // Only one seek is allowed at a time. If progress changes while a seek is
     // active, the seeked listener calls this again using the latest progress.
     if (video.seeking && !force) return;
@@ -77,7 +91,7 @@
 
   function animateVideoReel(now) {
     videoReelFrame = 0;
-    if (!videoReady || threeStarted || reducedMotion.matches || !reelMode) return;
+    if (!videoReady || threeStarted || motionPaused || document.hidden || !introVisible || !reelMode) return;
     if (!videoReelStartedAt) videoReelStartedAt = now;
     const cycle = ((now - videoReelStartedAt) / 1000) % REEL_LOOP_SECONDS;
     if (cycle < previousVideoReelTime) previousVideoReelTime = 0;
@@ -92,31 +106,46 @@
   }
 
   function activateVideo() {
-    if (!(video instanceof HTMLVideoElement)) return;
+    if (!(video instanceof HTMLVideoElement) || threeStarted) return;
     const availableDuration = Number.isFinite(video.duration) ? video.duration : VIDEO_END_SECONDS;
     videoDuration = Math.max(0, Math.min(VIDEO_END_SECONDS, availableDuration - 1 / 48));
     video.pause();
     videoReady = true;
-    intro.classList.add('is-video-ready');
     queueVideoScrub(true);
-    if (reelMode && !reducedMotion.matches && !videoReelFrame) {
+    revealDecodedVideo();
+    if (reelMode && !motionPaused && !document.hidden && introVisible && !videoReelFrame) {
       videoReelStartedAt = 0;
       videoReelFrame = window.requestAnimationFrame(animateVideoReel);
     }
   }
 
-  function handleVideoMotionPreference() {
-    intro.classList.toggle('is-reduced-motion', reducedMotion.matches);
-    if (skipButton) skipButton.firstChild.textContent = reducedMotion.matches ? 'Enter site ' : 'Skip intro ';
-    cancelAnimationFrame(videoReelFrame);
-    videoReelFrame = 0;
-    videoReelStartedAt = 0;
-    if (reducedMotion.matches) applyStoryProgress(0.9);
-    else if (reelMode && videoReady) videoReelFrame = window.requestAnimationFrame(animateVideoReel);
-    else updateScrollProgress();
+  function revealDecodedVideo() {
+    if (videoReady && video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA && !video.seeking) {
+      intro.classList.add('is-video-ready');
+    }
   }
 
-  function applyStoryProgress(value) {
+  function syncPlayback() {
+    cancelAnimationFrame(videoReelFrame);
+    videoReelFrame = 0;
+    if (!motionPaused && !document.hidden && introVisible && reelMode && videoReady) {
+      videoReelFrame = window.requestAnimationFrame(animateVideoReel);
+    }
+    if (!document.hidden && introVisible) queueVideoScrub(reducedMotion.matches);
+    rendererSyncMotion();
+  }
+
+  function handleVideoMotionPreference(event) {
+    motionPaused = Boolean(event?.detail?.paused ?? currentMotionPreference());
+    intro.classList.toggle('is-reduced-motion', reducedMotion.matches);
+    intro.classList.toggle('is-motion-paused', motionPaused);
+    intro.dataset.oakPaused = String(motionPaused);
+    if (reducedMotion.matches) applyStoryProgress(0.9, true);
+    else if (!motionPaused) updateScrollProgress();
+    syncPlayback();
+  }
+
+  function applyStoryProgress(value, forceVideo = false) {
     storyProgress = clamp(value);
     const chapter = storyProgress < 0.155 ? 0
       : storyProgress < 0.345 ? 1
@@ -127,27 +156,37 @@
     intro.style.setProperty('--oak-progress', storyProgress.toFixed(4));
     intro.style.setProperty('--oak-exit', smoothstep(0.955, 1, storyProgress).toFixed(4));
     intro.classList.toggle('has-progress', storyProgress > 0.025);
-    queueVideoScrub();
+    queueVideoScrub(forceVideo);
   }
 
   function updateScrollProgress() {
     const rect = intro.getBoundingClientRect();
-    if (!reelMode) {
+    if (!reelMode && !motionPaused) {
       const travel = Math.max(1, intro.offsetHeight - window.innerHeight);
-      applyStoryProgress(reducedMotion.matches ? 0.9 : -rect.top / travel);
+      applyStoryProgress(-rect.top / travel);
     }
     const active = rect.bottom > window.innerHeight * 0.42 && rect.top < window.innerHeight * 0.55;
     document.body.classList.toggle('oak-intro-active', active);
   }
 
-  function enterOfficialSite() {
+  function scheduleScrollProgress() {
+    if (scrollFrame) return;
+    scrollFrame = requestAnimationFrame(() => {
+      scrollFrame = 0;
+      updateScrollProgress();
+    });
+  }
+
+  function enterOfficialSite(event) {
+    event.preventDefault();
     const top = officialSite.getBoundingClientRect().top + window.scrollY;
-    window.scrollTo({ top, behavior: reducedMotion.matches ? 'auto' : 'smooth' });
+    window.scrollTo({ top, behavior: motionPaused ? 'auto' : 'smooth' });
+    officialSite.focus({ preventScroll: true });
   }
 
   skipButton?.addEventListener('click', enterOfficialSite);
   stage.addEventListener('pointermove', (event) => {
-    if (coarsePointer.matches || reducedMotion.matches) return;
+    if (coarsePointer.matches || motionPaused) return;
     const rect = stage.getBoundingClientRect();
     pointer.targetX = (event.clientX - rect.left) / rect.width - 0.5;
     pointer.targetY = (event.clientY - rect.top) / rect.height - 0.5;
@@ -159,18 +198,24 @@
 
   const visibilityObserver = new IntersectionObserver(([entry]) => {
     introVisible = entry.isIntersecting;
+    syncPlayback();
   }, { threshold: 0 });
   visibilityObserver.observe(intro);
-  window.addEventListener('scroll', updateScrollProgress, { passive: true });
-  updateScrollProgress();
+  window.addEventListener('scroll', scheduleScrollProgress, { passive: true });
+  window.addEventListener('resize', scheduleScrollProgress, { passive: true });
+  window.addEventListener('blvckoak:motion-change', handleVideoMotionPreference);
+  document.addEventListener('visibilitychange', syncPlayback);
+  window.addEventListener('pageshow', handleVideoMotionPreference);
   intro.classList.toggle('is-reel-render', reelMode);
-  intro.classList.toggle('is-reduced-motion', reducedMotion.matches);
-  if (skipButton && reducedMotion.matches) skipButton.firstChild.textContent = 'Enter site ';
+  applyStoryProgress(storyProgress);
+  handleVideoMotionPreference();
+  updateScrollProgress();
   if (video instanceof HTMLVideoElement) {
     video.addEventListener('loadedmetadata', activateVideo, { once: true });
     video.addEventListener('loadeddata', activateVideo, { once: true });
-    video.addEventListener('seeked', () => queueVideoScrub());
-    video.addEventListener('error', () => startProceduralFallback(video.error || new Error('The cinematic MP4 could not be decoded.')), { once: true });
+    video.addEventListener('seeked', () => { revealDecodedVideo(); queueVideoScrub(); });
+    // Source failures do not bubble, so capture them as well as video errors.
+    video.addEventListener('error', () => startProceduralFallback(video.error || new Error('The cinematic MP4 could not be decoded.')), { once: true, capture: true });
     if (video.readyState >= HTMLMediaElement.HAVE_METADATA) activateVideo();
     else video.load();
   }
@@ -751,10 +796,12 @@
     scene.add(dust, embers, ash, explosion, fogBank);
 
     let mobile = false;
-    let startTime = performance.now();
+    let animationTime = 0;
+    let lastActiveFrame = 0;
     let lastFrame = 0;
     let previousReelTime = 0;
     let destroyed = false;
+    let contextLost = false;
 
     function resize() {
       const rect = stage.getBoundingClientRect();
@@ -852,12 +899,15 @@
     }
 
     function animate(now) {
+      frameId = 0;
+      if (destroyed || contextLost || motionPaused || !introVisible || document.hidden) return;
       frameId = window.requestAnimationFrame(animate);
-      if (destroyed || !introVisible || document.hidden) return;
       const minimumFrame = coarsePointer.matches ? 1000 / 30 : 1000 / 60;
       if (now - lastFrame < minimumFrame) return;
       lastFrame = now;
-      const time = (now - startTime) / 1000;
+      if (lastActiveFrame) animationTime += Math.min(0.1, (now - lastActiveFrame) / 1000);
+      lastActiveFrame = now;
+      const time = animationTime;
       const reelCycle = time % REEL_LOOP_SECONDS;
       const progress = reelMode ? reelStory(reelCycle) : storyProgress;
       if (reelMode) applyStoryProgress(progress);
@@ -872,34 +922,48 @@
     const resizeHandler = () => {
       resize();
       updateScrollProgress();
-      if (reducedMotion.matches) renderReducedMotion();
+      if (!contextLost && !document.hidden && motionPaused) {
+        if (reducedMotion.matches) renderReducedMotion();
+        else render(animationTime, storyProgress, animationTime % REEL_LOOP_SECONDS);
+      }
     };
     const motionHandler = () => {
-      intro.classList.toggle('is-reduced-motion', reducedMotion.matches);
-      if (skipButton) skipButton.firstChild.textContent = reducedMotion.matches ? 'Enter site ' : 'Skip intro ';
       cancelAnimationFrame(frameId);
-      startTime = performance.now();
-      resize();
+      frameId = 0;
+      lastActiveFrame = 0;
+      if (destroyed || contextLost || document.hidden || !introVisible) return;
       if (reducedMotion.matches) renderReducedMotion();
-      else frameId = window.requestAnimationFrame(animate);
+      else if (!motionPaused) frameId = window.requestAnimationFrame(animate);
     };
 
     window.addEventListener('resize', resizeHandler, { passive: true });
-    reducedMotion.addEventListener?.('change', motionHandler);
+    rendererSyncMotion = motionHandler;
     canvas.addEventListener('webglcontextlost', (event) => {
       event.preventDefault();
+      contextLost = true;
       intro.classList.add('is-webgl-fallback');
       cancelAnimationFrame(frameId);
+      frameId = 0;
+    });
+    // Registered after WebGLRenderer so its own context recovery runs first.
+    canvas.addEventListener('webglcontextrestored', () => {
+      if (destroyed) return;
+      contextLost = false;
+      resize();
+      render(animationTime, storyProgress, animationTime % REEL_LOOP_SECONDS);
+      intro.classList.remove('is-webgl-fallback');
+      motionHandler();
     });
     resize();
     if (reducedMotion.matches) renderReducedMotion();
-    else frameId = window.requestAnimationFrame(animate);
+    else render(animationTime, storyProgress);
+    motionHandler();
 
     rendererCleanup = () => {
       destroyed = true;
       cancelAnimationFrame(frameId);
+      rendererSyncMotion = () => {};
       window.removeEventListener('resize', resizeHandler);
-      reducedMotion.removeEventListener?.('change', motionHandler);
       scene.traverse((object) => {
         object.geometry?.dispose?.();
         if (Array.isArray(object.material)) object.material.forEach((material) => material.dispose());
@@ -937,11 +1001,21 @@
   if (!(video instanceof HTMLVideoElement)) {
     startProceduralFallback(new Error('The cinematic video element is unavailable.'));
   }
-  window.addEventListener('pagehide', () => {
+  window.addEventListener('pagehide', (event) => {
+    cancelAnimationFrame(frameId);
+    frameId = 0;
+    cancelAnimationFrame(videoReelFrame);
+    videoReelFrame = 0;
+    cancelAnimationFrame(scrollFrame);
+    scrollFrame = 0;
+    if (event.persisted) return;
     rendererCleanup();
     visibilityObserver.disconnect();
     reducedMotion.removeEventListener?.('change', handleVideoMotionPreference);
-    cancelAnimationFrame(frameId);
-    cancelAnimationFrame(videoReelFrame);
-  }, { once: true });
+    window.removeEventListener('blvckoak:motion-change', handleVideoMotionPreference);
+    document.removeEventListener('visibilitychange', syncPlayback);
+    window.removeEventListener('pageshow', handleVideoMotionPreference);
+    window.removeEventListener('scroll', scheduleScrollProgress);
+    window.removeEventListener('resize', scheduleScrollProgress);
+  });
 })();
