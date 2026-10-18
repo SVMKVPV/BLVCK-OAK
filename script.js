@@ -739,6 +739,6 @@ initialiseHeroCanvas();
 
 // Privacy-minimized first-party page-view analytics. No cookies, fingerprinting or marketing identifiers.
 if (location.protocol === 'https:' && !/\/(partners|login)(\.html)?$/i.test(location.pathname)) {
-  const sendView = () => fetch('/.netlify/functions/analytics-visit', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({path:location.pathname,referrer:document.referrer}),keepalive:true,credentials:'same-origin'}).catch(()=>{});
+  const sendView = () => fetch('/.netlify/functions/analytics-visit', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({path:location.pathname,referrer:document.referrer,...Object.fromEntries(['utm_source','utm_medium','utm_campaign','ref'].map(k=>[k,new URLSearchParams(location.search).get(k)||'']).filter(([,v])=>v))}),keepalive:true,credentials:'same-origin'}).catch(()=>{});
   if (document.readyState === 'complete') sendView(); else window.addEventListener('load',sendView,{once:true});
 }
