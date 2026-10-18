@@ -1,0 +1,547 @@
+{
+  "purpose": "Illustrative cover photographs for the BLVCK OAK portfolio gallery.",
+  "photos": [
+    {
+      "slug": "aurelis",
+      "title": "AURELIS",
+      "description": "Curved architectural interior with sculptural walkways",
+      "photographer": "J. Young Jeong",
+      "source": "https://unsplash.com/photos/modern-museum-interior-with-curved-architectural-design-bOzUVio7SYI",
+      "license": "Unsplash License",
+      "licenseUrl": "https://unsplash.com/license",
+      "imageUrl": "https://images.unsplash.com/photo-1746952793223-dc18160abe98",
+      "files": [
+        {
+          "path": "assets/portfolio/aurelis.webp",
+          "width": 1200,
+          "height": 750,
+          "bytes": 114816
+        },
+        {
+          "path": "assets/portfolio/aurelis-small.webp",
+          "width": 600,
+          "height": 375,
+          "bytes": 37794
+        }
+      ]
+    },
+    {
+      "slug": "wedding",
+      "title": "Cinematic Wedding Invitation",
+      "description": "Wedding invitation stationery with ribbon and dried flowers",
+      "photographer": "Micah & Sammie Chaffin",
+      "source": "https://unsplash.com/photos/wedding-stationery-suite-with-neutral-ribbon-and-dried-flowers-R3I0suktDrM",
+      "license": "Unsplash License",
+      "licenseUrl": "https://unsplash.com/license",
+      "imageUrl": "https://images.unsplash.com/photo-1758825178518-ca48833a6c57",
+      "files": [
+        {
+          "path": "assets/portfolio/wedding.webp",
+          "width": 1200,
+          "height": 750,
+          "bytes": 50970
+        },
+        {
+          "path": "assets/portfolio/wedding-small.webp",
+          "width": 600,
+          "height": 375,
+          "bytes": 19088
+        }
+      ]
+    },
+    {
+      "slug": "bakery",
+      "title": "Bambi’s Bakery",
+      "description": "Pink frosted celebration cake decorated with roses",
+      "photographer": "David Holifield",
+      "source": "https://unsplash.com/photos/pink-and-white-floral-cake-MeLI9WKUp2w",
+      "license": "Unsplash License",
+      "licenseUrl": "https://unsplash.com/license",
+      "imageUrl": "https://images.unsplash.com/photo-1584818676673-f034ea74ccfc",
+      "files": [
+        {
+          "path": "assets/portfolio/bakery.webp",
+          "width": 1200,
+          "height": 750,
+          "bytes": 102998
+        },
+        {
+          "path": "assets/portfolio/bakery-small.webp",
+          "width": 600,
+          "height": 375,
+          "bytes": 45360
+        }
+      ]
+    },
+    {
+      "slug": "creator",
+      "title": "Link in bio",
+      "description": "Content creator recording a video with a phone on a tripod",
+      "photographer": "Vitaly Gariev",
+      "source": "https://unsplash.com/photos/man-sitting-on-couch-recording-video-on-phone--XElUs-xs2A",
+      "license": "Unsplash License",
+      "licenseUrl": "https://unsplash.com/license",
+      "imageUrl": "https://images.unsplash.com/photo-1758874384113-4059f76860c5",
+      "files": [
+        {
+          "path": "assets/portfolio/creator.webp",
+          "width": 1200,
+          "height": 750,
+          "bytes": 100342
+        },
+        {
+          "path": "assets/portfolio/creator-small.webp",
+          "width": 600,
+          "height": 375,
+          "bytes": 41142
+        }
+      ]
+    },
+    {
+      "slug": "homewares",
+      "title": "Market concept",
+      "description": "Sculptural ceramic vase and homewares on a console",
+      "photographer": "Mathilde Langevin",
+      "source": "https://unsplash.com/photos/white-ceramic-vase-on-brown-wooden-table-WUrXahlyjBo",
+      "license": "Unsplash License",
+      "licenseUrl": "https://unsplash.com/license",
+      "imageUrl": "https://images.unsplash.com/photo-1612196808214-b8e1d6145a8c",
+      "files": [
+        {
+          "path": "assets/portfolio/homewares.webp",
+          "width": 1200,
+          "height": 750,
+          "bytes": 81760
+        },
+        {
+          "path": "assets/portfolio/homewares-small.webp",
+          "width": 600,
+          "height": 375,
+          "bytes": 26038
+        }
+      ]
+    },
+    {
+      "slug": "cafe",
+      "title": "Café",
+      "description": "Latte and croissant on a wooden café table",
+      "photographer": "Rizky Subagja",
+      "source": "https://unsplash.com/photos/latte-croissant-and-book-on-cafe-table-1k7TnX5GAww",
+      "license": "Unsplash License",
+      "licenseUrl": "https://unsplash.com/license",
+      "imageUrl": "https://images.unsplash.com/photo-1542372147193-a7aca54189cd",
+      "files": [
+        {
+          "path": "assets/portfolio/cafe.webp",
+          "width": 1200,
+          "height": 750,
+          "bytes": 85238
+        },
+        {
+          "path": "assets/portfolio/cafe-small.webp",
+          "width": 600,
+          "height": 375,
+          "bytes": 32456
+        }
+      ]
+    },
+    {
+      "slug": "restaurant",
+      "title": "Restaurant",
+      "description": "Restaurant table set with wine glasses and plates",
+      "photographer": "Vidar Nordli-Mathisen",
+      "source": "https://unsplash.com/photos/tilt-photography-of-fine-dining-Fxn_HNp0Rzk",
+      "license": "Unsplash License",
+      "licenseUrl": "https://unsplash.com/license",
+      "imageUrl": "https://images.unsplash.com/photo-1520379368547-f7f3887bf9ea",
+      "files": [
+        {
+          "path": "assets/portfolio/restaurant.webp",
+          "width": 1200,
+          "height": 750,
+          "bytes": 57458
+        },
+        {
+          "path": "assets/portfolio/restaurant-small.webp",
+          "width": 600,
+          "height": 375,
+          "bytes": 24104
+        }
+      ]
+    },
+    {
+      "slug": "tablepulse",
+      "title": "TablePulse",
+      "description": "Phone beside a coffee and croissant on a café table",
+      "photographer": "matthew Feeney",
+      "source": "https://unsplash.com/photos/iphone-x-on-table-FQy-u40itt4",
+      "license": "Unsplash License",
+      "licenseUrl": "https://unsplash.com/license",
+      "imageUrl": "https://images.unsplash.com/photo-1532242305467-30c28b81c90b",
+      "files": [
+        {
+          "path": "assets/portfolio/tablepulse.webp",
+          "width": 1200,
+          "height": 750,
+          "bytes": 214592
+        },
+        {
+          "path": "assets/portfolio/tablepulse-small.webp",
+          "width": 600,
+          "height": 375,
+          "bytes": 60450
+        }
+      ]
+    },
+    {
+      "slug": "aurora-cafe",
+      "title": "Aurora Cafe",
+      "description": "Airy café interior filled with greenery and natural light",
+      "photographer": "Monaz Nazary",
+      "source": "https://unsplash.com/photos/bright-airy-cafe-filled-with-lush-green-plants-zqVoqDAWZeg",
+      "license": "Unsplash License",
+      "licenseUrl": "https://unsplash.com/license",
+      "imageUrl": "https://images.unsplash.com/photo-1769501203675-919307554822",
+      "files": [
+        {
+          "path": "assets/portfolio/aurora-cafe.webp",
+          "width": 1200,
+          "height": 750,
+          "bytes": 185648
+        },
+        {
+          "path": "assets/portfolio/aurora-cafe-small.webp",
+          "width": 600,
+          "height": 375,
+          "bytes": 69330
+        }
+      ]
+    },
+    {
+      "slug": "limestone-cafe",
+      "title": "Limestone Café",
+      "description": "Barista preparing coffee behind a café counter",
+      "photographer": "Linh Quach",
+      "source": "https://unsplash.com/photos/barista-preparing-coffee-behind-a-counter-ENmA1oRNNx8",
+      "license": "Unsplash License",
+      "licenseUrl": "https://unsplash.com/license",
+      "imageUrl": "https://images.unsplash.com/photo-1767528402222-0d0cab161a39",
+      "files": [
+        {
+          "path": "assets/portfolio/limestone-cafe.webp",
+          "width": 1200,
+          "height": 750,
+          "bytes": 57812
+        },
+        {
+          "path": "assets/portfolio/limestone-cafe-small.webp",
+          "width": 600,
+          "height": 375,
+          "bytes": 25592
+        }
+      ]
+    },
+    {
+      "slug": "cicheti",
+      "title": "Cafe Cicheti & Co",
+      "description": "Neighbourhood café with wooden tables and plants",
+      "photographer": "Phước Sang",
+      "source": "https://unsplash.com/photos/cozy-cafe-interior-with-wooden-tables-and-plants-F_tgnJBIArw",
+      "license": "Unsplash License",
+      "licenseUrl": "https://unsplash.com/license",
+      "imageUrl": "https://images.unsplash.com/photo-1774576752179-3408c26b774f",
+      "files": [
+        {
+          "path": "assets/portfolio/cicheti.webp",
+          "width": 1200,
+          "height": 750,
+          "bytes": 115094
+        },
+        {
+          "path": "assets/portfolio/cicheti-small.webp",
+          "width": 600,
+          "height": 375,
+          "bytes": 44486
+        }
+      ]
+    },
+    {
+      "slug": "detailing",
+      "title": "ShineWorks Detailing",
+      "description": "Detailer polishing the paintwork of a red vehicle",
+      "photographer": "Zac Nielson",
+      "source": "https://unsplash.com/photos/man-in-white-t-shirt-standing-beside-red-car-q94A6k81lAQ",
+      "license": "Unsplash License",
+      "licenseUrl": "https://unsplash.com/license",
+      "imageUrl": "https://images.unsplash.com/photo-1614888441158-de25f0ea4bc5",
+      "files": [
+        {
+          "path": "assets/portfolio/detailing.webp",
+          "width": 1200,
+          "height": 750,
+          "bytes": 89966
+        },
+        {
+          "path": "assets/portfolio/detailing-small.webp",
+          "width": 600,
+          "height": 375,
+          "bytes": 29352
+        }
+      ]
+    },
+    {
+      "slug": "electrical",
+      "title": "VoltForge / Electrical",
+      "description": "Electrician testing an electrical switchboard",
+      "photographer": "Toolmash Expo",
+      "creditUrl": "https://unsplash.com/@toolmash",
+      "source": "https://unsplash.com/photos/electrician-testing-electrical-panel-with-multimeter-PkHf7BUWbtk",
+      "license": "Unsplash License",
+      "licenseUrl": "https://unsplash.com/license",
+      "imageUrl": "https://images.unsplash.com/photo-1758101755915-462eddc23f57",
+      "files": [
+        {
+          "path": "assets/portfolio/electrical.webp",
+          "width": 1200,
+          "height": 750,
+          "bytes": 104660
+        },
+        {
+          "path": "assets/portfolio/electrical-small.webp",
+          "width": 600,
+          "height": 375,
+          "bytes": 49128
+        }
+      ]
+    },
+    {
+      "slug": "brightforge",
+      "title": "Brightforge Electrical",
+      "description": "Electrician tool belt with pliers and hand tools",
+      "photographer": "Bolt Belts",
+      "creditUrl": "https://unsplash.com/@boltbeltshop",
+      "source": "https://unsplash.com/photos/tool-belt-filled-with-various-hand-tools-bzVQ_fceXJk",
+      "license": "Unsplash License",
+      "licenseUrl": "https://unsplash.com/license",
+      "imageUrl": "https://images.unsplash.com/photo-1765518440022-10242cc86895",
+      "files": [
+        {
+          "path": "assets/portfolio/brightforge.webp",
+          "width": 1200,
+          "height": 750,
+          "bytes": 122138
+        },
+        {
+          "path": "assets/portfolio/brightforge-small.webp",
+          "width": 600,
+          "height": 375,
+          "bytes": 51052
+        }
+      ]
+    },
+    {
+      "slug": "medical",
+      "title": "Lumina Health / Medical booking",
+      "description": "Clinician preparing a patient beside a medical scanner",
+      "photographer": "Accuray",
+      "creditUrl": "https://unsplash.com/@accuray",
+      "source": "https://unsplash.com/photos/a-doctor-examining-a-patient-eRJCXdb3Q48",
+      "license": "Unsplash License",
+      "licenseUrl": "https://unsplash.com/license",
+      "imageUrl": "https://images.unsplash.com/photo-1666214276389-393fb7dbc75c",
+      "files": [
+        {
+          "path": "assets/portfolio/medical.webp",
+          "width": 1200,
+          "height": 750,
+          "bytes": 55684
+        },
+        {
+          "path": "assets/portfolio/medical-small.webp",
+          "width": 600,
+          "height": 375,
+          "bytes": 24680
+        }
+      ]
+    },
+    {
+      "slug": "car-wash",
+      "title": "PrismWash / Car wash",
+      "description": "Worker pressure-washing a car covered in foam, black and white",
+      "photographer": "Avenir Visuals",
+      "creditUrl": "https://unsplash.com/@avenir_visuals",
+      "source": "https://unsplash.com/photos/person-washing-a-car-covered-in-foam-52VoFM9fPV8",
+      "license": "Unsplash License",
+      "licenseUrl": "https://unsplash.com/license",
+      "imageUrl": "https://images.unsplash.com/photo-1769641156607-16833781bc16",
+      "files": [
+        {
+          "path": "assets/portfolio/car-wash.webp",
+          "width": 1200,
+          "height": 750,
+          "bytes": 200390
+        },
+        {
+          "path": "assets/portfolio/car-wash-small.webp",
+          "width": 600,
+          "height": 375,
+          "bytes": 64858
+        }
+      ]
+    },
+    {
+      "slug": "mechanics",
+      "title": "Apex Motorworks / Mechanics",
+      "description": "Two mechanics working under an open car bonnet",
+      "photographer": "uma dantara",
+      "creditUrl": "https://unsplash.com/@umadantara",
+      "source": "https://unsplash.com/photos/a-man-working-on-a-car-engine-in-a-garage-5SH7iAdcyrg",
+      "license": "Unsplash License",
+      "licenseUrl": "https://unsplash.com/license",
+      "imageUrl": "https://images.unsplash.com/photo-1676035292549-b046020bca87",
+      "files": [
+        {
+          "path": "assets/portfolio/mechanics.webp",
+          "width": 1200,
+          "height": 750,
+          "bytes": 261548
+        },
+        {
+          "path": "assets/portfolio/mechanics-small.webp",
+          "width": 600,
+          "height": 375,
+          "bytes": 75874
+        }
+      ]
+    },
+    {
+      "slug": "anand-motors",
+      "title": "Anand Motors",
+      "description": "Mechanic working on a car engine in a workshop",
+      "photographer": "Sten Rademaker",
+      "creditUrl": "https://unsplash.com/@stenrademaker",
+      "source": "https://unsplash.com/photos/mechanic-working-on-car-engine-UZUzvJEvKnI",
+      "license": "Unsplash License",
+      "licenseUrl": "https://unsplash.com/license",
+      "imageUrl": "https://images.unsplash.com/photo-1615906655593-ad0386982a0f",
+      "files": [
+        {
+          "path": "assets/portfolio/anand-motors.webp",
+          "width": 1200,
+          "height": 750,
+          "bytes": 94870
+        },
+        {
+          "path": "assets/portfolio/anand-motors-small.webp",
+          "width": 600,
+          "height": 375,
+          "bytes": 32572
+        }
+      ]
+    },
+    {
+      "slug": "cleaning",
+      "title": "PureHaus / Cleaning",
+      "description": "Gloved cleaner dusting a chair in a domestic kitchen",
+      "photographer": "Katie Pearse",
+      "creditUrl": "https://unsplash.com/@glistenacademy",
+      "source": "https://unsplash.com/photos/a-person-in-white-gloves-is-cleaning-a-chair-WnuDJlnuOhU",
+      "license": "Unsplash License",
+      "licenseUrl": "https://unsplash.com/license",
+      "imageUrl": "https://images.unsplash.com/photo-1713110824336-f78c320dcf8e",
+      "files": [
+        {
+          "path": "assets/portfolio/cleaning.webp",
+          "width": 1200,
+          "height": 750,
+          "bytes": 92754
+        },
+        {
+          "path": "assets/portfolio/cleaning-small.webp",
+          "width": 600,
+          "height": 375,
+          "bytes": 33210
+        }
+      ]
+    },
+    {
+      "slug": "shv-cleaning",
+      "title": "SHV Clean Service",
+      "description": "Cleaner mopping a commercial building floor beside tall windows",
+      "photographer": "Gil Ribeiro",
+      "creditUrl": "https://unsplash.com/@gileres",
+      "source": "https://unsplash.com/photos/3hO8igCybds",
+      "license": "Unsplash License",
+      "licenseUrl": "https://unsplash.com/license",
+      "imageUrl": "https://images.unsplash.com/photo-1603712725038-e9334ae8f39f",
+      "files": [
+        {
+          "path": "assets/portfolio/shv-cleaning.webp",
+          "width": 1200,
+          "height": 750,
+          "bytes": 100432
+        },
+        {
+          "path": "assets/portfolio/shv-cleaning-small.webp",
+          "width": 600,
+          "height": 375,
+          "bytes": 37400
+        }
+      ]
+    },
+    {
+      "slug": "landscaping",
+      "title": "Verdant Form / Landscaping",
+      "description": "Landscaped garden with clipped hedges and planted borders",
+      "photographer": "Gaurav Kumar",
+      "creditUrl": "https://unsplash.com/@countingframez",
+      "source": "https://unsplash.com/photos/a-beautifully-landscaped-garden-with-lush-greenery-KC5h_cxLSxM",
+      "license": "Unsplash License",
+      "licenseUrl": "https://unsplash.com/license",
+      "imageUrl": "https://images.unsplash.com/photo-1751717887057-a847b8f9667a",
+      "files": [
+        {
+          "path": "assets/portfolio/landscaping.webp",
+          "width": 1200,
+          "height": 750,
+          "bytes": 427976
+        },
+        {
+          "path": "assets/portfolio/landscaping-small.webp",
+          "width": 600,
+          "height": 375,
+          "bytes": 122556
+        }
+      ]
+    },
+    {
+      "slug": "vanguard",
+      "title": "Vanguard Relocations",
+      "description": "Couple carrying moving boxes into a new home",
+      "photographer": "Vitaly Gariev",
+      "creditUrl": "https://unsplash.com/@silverkblack",
+      "source": "https://unsplash.com/photos/couple-carrying-moving-boxes-into-a-new-home-vV5iOAidkQE",
+      "license": "Unsplash License",
+      "licenseUrl": "https://unsplash.com/license",
+      "imageUrl": "https://images.unsplash.com/photo-1758523670991-ee93bc48d81d",
+      "files": [
+        {
+          "path": "assets/portfolio/vanguard.webp",
+          "width": 1200,
+          "height": 750,
+          "bytes": 83714
+        },
+        {
+          "path": "assets/portfolio/vanguard-small.webp",
+          "width": 600,
+          "height": 375,
+          "bytes": 33786
+        }
+      ]
+    }
+  ],
+  "existingBeautyImage": {
+    "path": "assets/marketplace/beauty-concept.jpg",
+    "description": "Existing BLVCK OAK cosmetics concept image reused for the two Velora Beauty cards."
+  }
+}

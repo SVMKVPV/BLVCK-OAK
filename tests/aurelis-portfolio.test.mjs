@@ -30,9 +30,15 @@ test('AURELIS appears once in the interactive concepts gallery with honest acces
   assert.ok(card, 'AURELIS links to its published Site');
   assert.match(card, /<h3>AURELIS<\/h3>/);
   assert.match(card, /protected preview/i);
-  assert.match(card, /concept-aurelis-art/);
+  const photo = card.match(/<img\b[^>]*class="concept-photo-cover"[^>]*>/)?.[0];
+  assert.ok(photo, 'AURELIS has a local photo thumbnail');
+  assert.match(photo, /src="assets\/portfolio\/aurelis\.webp"/);
+  assert.match(photo, /srcset="assets\/portfolio\/aurelis-small\.webp 600w, assets\/portfolio\/aurelis\.webp 1200w"/);
+  assert.match(photo, /alt="[^"]+"/);
+  assert.match(photo, /width="1200" height="750"/);
+  assert.doesNotMatch(card, /<iframe\b|concept-aurelis-art/);
   assert.equal(cards.filter(item => item.includes(`href="${preview}"`)).length, 1);
-  assert.match(styles, /\.concept-aurelis-art\{/);
+  assert.match(styles, /\.portfolio-page \.concept-browser-shot > \.concept-photo-cover\s*\{[^}]*object-fit:\s*cover/);
 });
 
 test('release verification recognizes declared protected previews', () => {

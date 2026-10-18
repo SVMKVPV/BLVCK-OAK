@@ -51,7 +51,7 @@ test('portfolio presents both cafe previews and the correct concept count', () =
   assert.equal((gallery.match(/class="concept-card\b/g) || []).length, declaredCount);
   for (const cafe of cafes) {
     assert.ok(gallery.includes(`href="${cafe.preview}"`));
-    assert.ok(gallery.includes(`src="${cafe.preview}"`));
+    assert.ok(gallery.includes(`src="assets/portfolio/${cafe.id}.webp"`));
     assert.ok(gallery.includes(`<h3>${cafe.name}</h3>`));
   }
 });
