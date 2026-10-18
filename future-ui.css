@@ -173,6 +173,8 @@ body[data-future-ui]:is(.oakpay-marketing, .oakpay-app-body) .op-btn:not(.op-btn
 body[data-future-ui]:is(.oakpay-marketing, .oakpay-app-body) :is(.op-form label, .op-card-head p, .op-metric small, .op-metric span, .op-balance small, .op-balance span, .op-stat-grid small, .op-stat-grid span, .op-feature-grid small, .op-empty, .op-sidebar-foot small, .op-activity-item span) { color: #a2afb6; }
 body[data-future-ui].oakpay-app-body .op-sidebar nav button:is(:hover, .is-active) { border-color: #476454; background: #14221d; }
 body[data-future-ui].oakpay-app-body .op-sidebar nav button.is-active::before { box-shadow: none; }
+body[data-future-ui].oakpay-app-body :is(.op-grid-2, .op-card) { min-width: 0; }
+body[data-future-ui].oakpay-app-body .op-table-wrap { max-width: 100%; overflow-x: auto; }
 body[data-future-ui].oakpay-marketing :is(.op-orbit, .op-orbit::before, .op-orbit::after, .op-orbit i) { border-color: rgba(184, 245, 223, .15); }
 body[data-future-ui].oakpay-marketing .op-orbit i:nth-child(1) { background: radial-gradient(circle, rgba(184, 245, 223, .08), transparent 70%); box-shadow: none; }
 body[data-future-ui].oakpay-marketing .op-reward-meter i { background: linear-gradient(90deg, #548f7b, #b8f5df); }
