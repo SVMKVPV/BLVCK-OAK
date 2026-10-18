@@ -4,6 +4,7 @@ import { profiles } from '../community/profiles.mjs';
 import { buildCommunity } from './build-community.mjs';
 import { prepareRelease } from './prepare-release.mjs';
 import { markUnavailableLinks } from './unavailable-links.mjs';
+import { installFutureUi } from './install-future-ui.mjs';
 
 const root = resolve(import.meta.dirname, '..');
 const output = resolve(root, 'dist');
@@ -14,7 +15,7 @@ await mkdir(output, { recursive: true });
 for (const file of [
   'community.js','community.css','site-access.js','site-access.css','index.html','referrals.html','contact.html','privacy.html','terms.html','refunds.html',
   'portfolio.html','marketplace.html','marketplace.css','marketplace.js','quote.html','style.css','studio.css','studio-intro.css','studio-noscript.css','og.png','cinematic-intro.js','script.js','studio.js',
-  'partners.html','partners.js','portal.css','pay.html','pay.js','progress.html','progress.js',
+  'partners.html','partners.js','portal.css','pay.html','pay.js','progress.html','progress.js','future-ui.css','future-ui.js','future-scene.js',
   'portfolio.js','quote-builder.js','audit.html','book.html','ai-generator.html','ai-generator.css','ai-generator.js','sales-config.js','sales.js',
   'oakpay.html','oakpay-app.html','oakpay.css','oakpay-app.js',
   'robots.txt','sitemap.xml','favicon.ico','favicon.svg','apple-touch-icon.png','android-chrome-192x192.png','android-chrome-512x512.png','site.webmanifest'
@@ -29,12 +30,23 @@ await cp(
   resolve(root, 'node_modules/three/build/three.module.min.js'),
   resolve(output, 'vendor/three.module.min.js'),
 );
+// Keep the loader on the exact installed Three.js version and the site's own origin.
+for (const [source, target] of [
+  ['loaders/GLTFLoader.js', 'GLTFLoader.js'],
+  ['utils/BufferGeometryUtils.js', 'BufferGeometryUtils.js'],
+]) {
+  const module = (await readFile(resolve(root, 'node_modules/three/examples/jsm', source), 'utf8'))
+    .replaceAll("from 'three'", "from './three.module.min.js'")
+    .replaceAll("from '../utils/BufferGeometryUtils.js'", "from './BufferGeometryUtils.js'");
+  await writeFile(resolve(output, 'vendor', target), module);
+}
 await buildCommunity(output);
 const sitemapPath = resolve(output, 'sitemap.xml');
 const communityUrls = ['/community.html', ...profiles.map(p => `/community/${p.slug}/`)];
 await writeFile(sitemapPath, (await readFile(sitemapPath, 'utf8')).replace('</urlset>', communityUrls.map(path => `<url><loc>https://blvckoak.com.au${path}</loc></url>`).join('\n') + '\n</urlset>'));
 await prepareRelease(output);
 await markUnavailableLinks(output);
+await installFutureUi(output);
 
 // Run before feature scripts on every published page, including generated pages.
 async function installAccessGate(directory) {

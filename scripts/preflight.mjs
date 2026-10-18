@@ -42,6 +42,10 @@ const requiredFiles = [
   'netlify/lib/pay-as-you-sell.mjs',
   'index.html',
   'cinematic-intro.js',
+  'future-ui.js',
+  'future-ui.css',
+  'future-scene.js',
+  'assets/models/titanium-oak-leaf.glb',
   'style.css',
   'referrals.html',
   'contact.html',
@@ -64,7 +68,8 @@ for (const file of requiredFiles) {
 
 const index = await readFile(resolve(root, 'index.html'), 'utf8');
 const client = await readFile(resolve(root, 'script.js'), 'utf8');
-const cinematicIntro = await readFile(resolve(root, 'cinematic-intro.js'), 'utf8');
+const futureScene = await readFile(resolve(root, 'future-scene.js'), 'utf8');
+const futureUi = await readFile(resolve(root, 'future-ui.js'), 'utf8');
 const stylesheet = await readFile(resolve(root, 'style.css'), 'utf8');
 const redirects = await readFile(resolve(root, 'netlify.toml'), 'utf8');
 const marketplace = await readFile(resolve(root, 'marketplace.html'), 'utf8');
@@ -75,11 +80,11 @@ if (!stylesheet.trimStart().startsWith(':root') || stylesheet.includes('\uFFFD')
 for (const selector of ['.site-header', '.pricing-grid', '.side-menu', '.oak-origin']) {
   if (!stylesheet.includes(selector)) failures.push(`style.css is missing required selector: ${selector}`);
 }
-if (!/data-oak-origin/.test(index) || !/cinematic-intro\.js/.test(index)) {
-  failures.push('Homepage cinematic intro is not connected.');
+if (!/data-future-scene/.test(index) || !/data-future-fallback/.test(index) || !/future-scene\.js/.test(index)) {
+  failures.push('Homepage interactive scene or static fallback is not connected.');
 }
-if (!/prefers-reduced-motion/.test(cinematicIntro) || !/data-oak-skip/.test(index)) {
-  failures.push('Homepage cinematic intro is missing motion accessibility controls.');
+if (!/prefers-reduced-motion/.test(futureScene) || !/prefers-reduced-motion/.test(futureUi) || !/data-motion-toggle/.test(index)) {
+  failures.push('Homepage is missing motion accessibility controls.');
 }
 if (SHOPS_ENABLED && (!/marketplace\.css/.test(marketplace) || !/marketplace\.js/.test(marketplace) || !/data-product-grid/.test(marketplace))) {
   failures.push('Live Marketplace is missing its catalogue assets or product-grid hook.');

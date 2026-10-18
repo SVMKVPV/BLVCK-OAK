@@ -1,0 +1,341 @@
+/* Shared BLVCK OAK shell. Customer previews do not opt in to this theme. */
+body[data-future-ui] {
+  --future-bg: #07090c;
+  --future-panel: #0e1318;
+  --future-panel-raised: #141b22;
+  --future-paper: #f1f4f3;
+  --future-muted: #a2afb6;
+  --future-accent: #b8f5df;
+  --future-line: rgba(219, 233, 230, .15);
+  --future-line-bright: rgba(184, 245, 223, .42);
+  --future-ease: cubic-bezier(.2, .7, .2, 1);
+  --ink: var(--future-bg);
+  --ink-soft: #0d1117;
+  --ink-raised: var(--future-panel-raised);
+  --paper: var(--future-paper);
+  --stone: #b9c4c8;
+  --muted: var(--future-muted);
+  --gold: var(--future-accent);
+  --gold-light: #d4ffef;
+  --gold2: #d4ffef;
+  --ember: #5d998d;
+  --line: var(--future-line);
+  --line-bright: var(--future-line-bright);
+  --display: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --op-ink: var(--future-bg);
+  --op-panel: var(--future-panel);
+  --op-panel-2: var(--future-panel-raised);
+  --op-paper: var(--future-paper);
+  --op-muted: var(--future-muted);
+  --op-line: var(--future-line);
+  --op-gold: var(--future-accent);
+  --op-gold-soft: #d4ffef;
+  color-scheme: dark;
+  accent-color: var(--future-accent);
+}
+
+body[data-future-ui] ::selection { color: #08130f; background: #b8f5df; }
+body[data-future-ui] :is(a, button, summary, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--future-accent);
+  outline-offset: 5px;
+}
+body[data-future-ui] :is(input, textarea, select):focus-visible { outline-offset: 3px; }
+
+/* Refine the existing application pages without changing their layout. */
+body[data-future-ui]:not(.future-home) {
+  color: var(--future-paper);
+  background: radial-gradient(ellipse at 90% 0, rgba(128, 190, 180, .055), transparent 36rem), var(--future-bg);
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+body[data-future-ui]:not(.future-home) :is(h1, h2, h3, .package-price, .client-due strong, .progress-overview-heading > strong) {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  letter-spacing: -.04em;
+}
+body[data-future-ui]:not(.future-home) :is(h1, h2) { font-weight: 600; }
+body[data-future-ui]:not(.future-home) h3 { font-weight: 600; letter-spacing: -.025em; }
+body[data-future-ui]:not(.future-home) :is(.brand, .op-brand, .side-menu nav a, .quote-step-heading > span, .quote-result-prices strong, .referral-code-link, .op-screen-top, .op-balance strong, .op-metric strong, .op-reward-card > strong, .hero-panel-top strong, .price, .drawer-total strong, .upcoming-row span) {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+body[data-future-ui]:not(.future-home) :is(.quote-result-prices strong, .client-due strong, .workspace-metrics strong, .record-numbers strong, .extra-payment-summary strong, .op-balance strong, .op-metric strong, .op-reward-card > strong, .price, .drawer-total strong) {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.025em;
+}
+body[data-future-ui]:not(.future-home) :is(.section-label, .eyebrow, .workspace-tag, .package-topline) {
+  color: var(--future-accent);
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+  letter-spacing: .13em;
+}
+body[data-future-ui]:not(.future-home) :is(.site-header, .workspace-header) {
+  background: rgba(7, 9, 12, .96);
+  border-color: var(--future-line);
+}
+body[data-future-ui]:not(.future-home) :is(.side-menu, .mobile-menu, .modal, .checkout-modal, dialog) {
+  color: var(--future-paper);
+  background-color: #0c1117;
+  border-color: var(--future-line);
+}
+body[data-future-ui]:not(.future-home) :is(.portfolio-hero, .self-quote-intro, .referrals, .link-hub-showcase, .auth-explainer, .progress-overview, .progress-editor) {
+  background: radial-gradient(ellipse at 95% 5%, rgba(145, 220, 198, .065), transparent 65%), #0b1015;
+}
+body[data-future-ui]:not(.future-home) :is(.pricing, .faq, .closing-cta, .referral-page-main) { background-color: #0b0f14; }
+body[data-future-ui]:not(.future-home) :is(.workspace-card, .workspace-toolbar, .workspace-metrics article, .quote-record, .lead-record, .referral-panel, .quote-result, .package-card, .portfolio-card, .concept-photo-card, .sales-entry-grid > a) {
+  border-color: var(--future-line);
+  background-color: var(--future-panel);
+  background-image: linear-gradient(135deg, rgba(235, 248, 243, .022), transparent 55%);
+  box-shadow: 0 1px 0 rgba(231, 245, 238, .025) inset;
+}
+body[data-future-ui]:not(.future-home) :is(.workspace-card, .quote-record, .lead-record, .workspace-toolbar, .quote-result) { border-radius: 8px; }
+body[data-future-ui]:not(.future-home) :is(.package-card.featured, .instalment-plan, .extra-payment) {
+  border-color: rgba(184, 245, 223, .32);
+  background: linear-gradient(145deg, rgba(184, 245, 223, .055), transparent 65%), #0d1518;
+}
+body[data-future-ui]:not(.future-home) :is(.quote-calculation, .payment-plan-fields, .sales-plan, .maintenance-plan, .record-plan, .instalment-preview) {
+  background: #0b1318;
+  border-color: #30433f;
+  color: #c3d7d0;
+}
+body[data-future-ui]:not(.future-home) :is(.quote-calculation strong, .record-plan strong, .extra-payment-summary strong, .workspace-steps strong) { color: #d5eee4; }
+body[data-future-ui]:not(.future-home) :is(.muted, .small-muted, .workspace-policy, .field-hint, .payment-plan-note, .scope-description, .payment-entry, .workspace label, .client-totals dt, .quote-record p, .quote-record details, .quote-record .record-numbers, .workspace-metrics span) { color: #a6b4b8; }
+body[data-future-ui]:not(.future-home) :is(.client-totals dd, .workspace-metrics strong, .record-numbers strong, .quote-record summary) { color: var(--future-paper); }
+body[data-future-ui]:not(.future-home) :is(.workspace-business-registration, .footer-links a, .pricing-note) { color: #98a7ad; }
+
+body[data-future-ui]:not(.future-home) .button {
+  border-radius: 6px;
+  transition: background-color .2s ease, border-color .2s ease, color .2s ease, box-shadow .2s ease, transform .2s var(--future-ease);
+}
+body[data-future-ui]:not(.future-home) :is(.button-gold, .button--gold) {
+  background: linear-gradient(115deg, #d9fff0, #afe3d1);
+  color: #091512;
+  border: 1px solid #c9f6e6;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .25) inset;
+}
+body[data-future-ui]:not(.future-home) :is(.button-gold, .button--gold):hover {
+  background: #dcfff1;
+  box-shadow: 0 0 0 4px rgba(184, 245, 223, .055);
+}
+body[data-future-ui]:not(.future-home) :is(.button-dark, .button--glass, .button--ghost, .quiet-button) {
+  color: #d7e7e2;
+  background: #11191e;
+  border-color: #34453f;
+}
+body[data-future-ui]:not(.future-home) :is(.button-dark, .button--glass, .quiet-button):hover {
+  color: #e7fff6;
+  border-color: #749b8e;
+  background: #16221f;
+}
+body[data-future-ui]:not(.future-home) .danger-button { color: #ffc4bc; border-color: #925a57; background-color: #26181b; }
+body[data-future-ui]:not(.future-home) :is(.package-badge, .offer-badge) { background: var(--future-accent); color: #08130f; }
+body[data-future-ui]:not(.future-home) :is(.status-pill, .workspace-tag, .lead-badge) { color: #c6e9dd; background: #15251f; border-color: #3f6355; }
+body[data-future-ui]:not(.future-home) :is(.status-pill.payment_review, .status-pill.declined, .form-status.error, .workspace-status.error) { color: #ffc1b7; }
+body[data-future-ui]:not(.future-home) :is(.status-pill.payment_review, .status-pill.declined) { background: #2a1b1e; border-color: #8a5352; }
+body[data-future-ui]:not(.future-home) .auth-tabs button[aria-pressed='true'] { color: #d6f8e9; background: #14241f; border-color: #547969; }
+body[data-future-ui]:not(.future-home) .progress-track span { background: linear-gradient(90deg, #548f7b, #b8f5df); }
+
+/* Native controls retain their sizing, number spinners and browser behavior. */
+body[data-future-ui]:not(.future-home) :is(input:not([type='checkbox']):not([type='radio']):not([type='submit']):not([type='button']):not([type='reset']):not([type='hidden']):not([type='range']):not([type='color']), textarea, select) {
+  color: #f0f7f4;
+  background-color: #0a1015;
+  border-color: #3b4c49;
+  border-radius: 5px;
+  caret-color: #c5ffe7;
+  letter-spacing: normal;
+  font-variant-numeric: tabular-nums;
+}
+body[data-future-ui]:not(.future-home) :is(input, textarea)::placeholder { color: #95a5aa; opacity: 1; }
+body[data-future-ui]:not(.future-home) :is(input, select, textarea):disabled { opacity: .65; }
+body[data-future-ui]:not(.future-home) [aria-invalid='true'] { border-color: #e8a297; }
+body[data-future-ui]:not(.future-home) :is(.extra-payment input, .extra-payment label) { color: #e1f2e9; }
+body[data-future-ui]:not(.future-home) .instalment-schedule li { color: #aabbc0; border-color: #30403f; background: #0a1216; }
+body[data-future-ui]:not(.future-home) .instalment-schedule strong { color: #ecf8f1; }
+body[data-future-ui]:not(.future-home) .instalment-schedule small { color: #a5b5b6; }
+body[data-future-ui]:not(.future-home) .instalment-schedule li.is-paid { background: #10261e; border-color: #365d4c; }
+body[data-future-ui]:not(.future-home) .instalment-schedule li.is-next { background: #162823; border-color: #90c6ae; }
+body[data-future-ui]:not(.future-home) .instalment-schedule li.is-partial { background: #182a2b; border-color: #679992; }
+body[data-future-ui]:not(.future-home) .instalment-schedule .instalment-credit { color: #c3efde; }
+
+/* Quote choices and totals keep their native form structure and selected state. */
+body[data-future-ui].self-quote-page .self-quote-intro::before { border-color: rgba(184, 245, 223, .19); box-shadow: none; }
+body[data-future-ui].self-quote-page :is(.self-quote-trust span, .quote-result-heading > span) { color: #b4c9c0; border-color: #3c514a; }
+body[data-future-ui].self-quote-page :is(.quote-choice, .quote-check, .quote-subsection, .quote-result-prices article) { background: #0e1519; border-color: #34443f; border-radius: 6px; }
+body[data-future-ui].self-quote-page :is(.quote-choice, .quote-check):hover { border-color: #7caa99; }
+body[data-future-ui].self-quote-page :is(.quote-choice, .quote-check):has(input:checked) { background: #15251f; border-color: #b8f5df; }
+body[data-future-ui].self-quote-page :is(.quote-choice small, .quote-check small, .quote-step-note, .quote-result-note, .quote-result-prices small) { color: #a0b1b3; }
+body[data-future-ui].self-quote-page .quote-marketing-step { background: radial-gradient(ellipse at 90% 20%, rgba(184, 245, 223, .04), transparent 65%); }
+body[data-future-ui].self-quote-page .quote-estimate-disclaimer { color: #aec0bb; border-color: #679482; background: #101c19; }
+
+/* OakPay uses its own shell and control names. Keep data tables and view layout intact. */
+body[data-future-ui]:is(.oakpay-marketing, .oakpay-app-body) :is(.op-nav, .op-app-topbar, .op-sidebar) { background: #0a1015; border-color: var(--future-line); }
+body[data-future-ui].oakpay-marketing :is(.op-hero, .op-security, .op-cta) { background: radial-gradient(ellipse at 82% 20%, rgba(184, 245, 223, .055), transparent 55%), var(--future-bg); }
+body[data-future-ui]:is(.oakpay-marketing, .oakpay-app-body) :is(.op-card, .op-metric, .op-integration, .op-screen, .op-reward-card) { background: var(--future-panel); border-color: var(--future-line); }
+body[data-future-ui]:is(.oakpay-marketing, .oakpay-app-body) :is(.op-primary, .op-nav-cta, .op-btn-primary) { color: #091512; background: linear-gradient(115deg, #d9fff0, #afe3d1); border-color: #c9f6e6; border-radius: 5px; }
+body[data-future-ui]:is(.oakpay-marketing, .oakpay-app-body) .op-btn:not(.op-btn-primary) { color: #d7e7e2; background: #11191e; border-color: #40564c; border-radius: 5px; }
+body[data-future-ui]:is(.oakpay-marketing, .oakpay-app-body) :is(.op-form label, .op-card-head p, .op-metric small, .op-metric span, .op-balance small, .op-balance span, .op-stat-grid small, .op-stat-grid span, .op-feature-grid small, .op-empty, .op-sidebar-foot small, .op-activity-item span) { color: #a2afb6; }
+body[data-future-ui].oakpay-app-body .op-sidebar nav button:is(:hover, .is-active) { border-color: #476454; background: #14221d; }
+body[data-future-ui].oakpay-app-body .op-sidebar nav button.is-active::before { box-shadow: none; }
+body[data-future-ui].oakpay-marketing :is(.op-orbit, .op-orbit::before, .op-orbit::after, .op-orbit i) { border-color: rgba(184, 245, 223, .15); }
+body[data-future-ui].oakpay-marketing .op-orbit i:nth-child(1) { background: radial-gradient(circle, rgba(184, 245, 223, .08), transparent 70%); box-shadow: none; }
+body[data-future-ui].oakpay-marketing .op-reward-meter i { background: linear-gradient(90deg, #548f7b, #b8f5df); }
+body[data-future-ui].oakpay-app-body .future-motion-toggle { left: auto; right: max(16px, env(safe-area-inset-right)); }
+
+/* Generated BLVCK OAK announcements share the same accent, keeping status copy. */
+body[data-future-ui].upcoming-body :is(.upcoming-kicker, .upcoming-panel > p, .upcoming-row span) { color: #b8f5df; }
+body[data-future-ui].upcoming-body .upcoming-panel { background: linear-gradient(145deg, #15211e, #0d1318); border-color: #3c5349; border-radius: 12px; }
+body[data-future-ui].upcoming-body .upcoming-actions a { border-color: #4d675b; }
+body[data-future-ui].upcoming-body .upcoming-actions a:first-child { color: #091512; background: #c5f5e1; }
+
+/* Light sections keep dark ink; a theme change must not lower their contrast. */
+body[data-future-ui]:not(.future-home) .process { background: #e5ede9; color: #14251f; }
+body[data-future-ui]:not(.future-home) .process :is(.section-label, .section-heading > p, .process-grid p, .process-grid article > span) { color: #405b51; }
+body[data-future-ui]:not(.future-home) .process-grid,
+body[data-future-ui]:not(.future-home) .process-grid article { border-color: #afc5ba; }
+body[data-future-ui]:not(.future-home) .how { color: #14251f; background: #e5ede9; }
+body[data-future-ui]:not(.future-home) .how :is(.section-label, .step span, .step p) { color: #405b51; }
+
+/* Decorative effects compose with existing card layouts via individual rotate. */
+body[data-future-ui] [data-future-card] { position: relative; isolation: isolate; }
+body[data-future-ui] .future-card-light {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  display: block;
+  border-radius: inherit;
+  background: radial-gradient(180px circle at var(--future-pointer-x, 50%) var(--future-pointer-y, 50%), rgba(184, 245, 223, .085), transparent 80%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .3s ease;
+}
+body[data-future-ui] [data-future-card].future-card-hover > .future-card-light { opacity: 1; }
+body[data-future-ui] [data-future-parallax] { translate: 0 var(--future-parallax-y, 0px); }
+
+/* Legacy reveal scripts can still add classes, but content never relies on JS
+   to become readable. New entrances use transient Web Animations instead. */
+body[data-future-ui] :is(.reveal, [data-reveal]) { opacity: 1; visibility: visible; }
+body[data-future-ui] :is(.reveal, [data-reveal]):not(.is-visible) { transform: none; }
+
+.future-cursor {
+  --future-cursor-enabled: 1;
+  position: fixed;
+  z-index: 2147483000;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+  color: #c8ffe9;
+  contain: layout style;
+}
+.future-cursor::before {
+  content: '';
+  position: absolute;
+  top: -12px;
+  left: -12px;
+  width: 24px;
+  height: 24px;
+  border: 1px solid rgba(205, 255, 235, .65);
+  border-radius: 50%;
+  background: rgba(7, 13, 12, .34);
+  box-shadow: 0 0 0 1px rgba(3, 8, 7, .45);
+  transition: width .17s ease, height .17s ease, left .17s ease, top .17s ease, background-color .17s ease;
+}
+.future-cursor::after {
+  content: '';
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  top: -1.5px;
+  left: -1.5px;
+  border-radius: 50%;
+  background: #e2fff3;
+}
+.future-cursor.is-visible { opacity: 1; }
+.future-cursor.is-action::before { top: -20px; left: -20px; width: 40px; height: 40px; background: #c7f5e4; border-color: #dfffee; }
+.future-cursor.is-action::after { opacity: 0; }
+.future-cursor__glyph { position: absolute; top: -11px; left: -6px; opacity: 0; color: #11251c; font: 500 17px/22px system-ui, sans-serif; }
+.future-cursor.is-action .future-cursor__glyph { opacity: 1; }
+.future-cursor__label { position: absolute; top: -12px; left: 27px; padding: 6px 9px; border: 1px solid #426155; border-radius: 4px; background: #0b1814; color: #d6f8e9; opacity: 0; white-space: nowrap; font: 600 9px/1.4 'Plus Jakarta Sans', system-ui, sans-serif; letter-spacing: .09em; text-transform: uppercase; }
+.future-cursor.is-action .future-cursor__label { opacity: 1; }
+
+body[data-future-ui] .future-motion-toggle {
+  position: fixed;
+  z-index: 90;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  left: max(16px, env(safe-area-inset-left));
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 40px;
+  padding: 10px 13px;
+  border: 1px solid #3c5049;
+  border-radius: 5px;
+  color: #d0e1d9;
+  background: #0c1417;
+  font: 600 10px/1.4 'Plus Jakarta Sans', system-ui, sans-serif;
+  letter-spacing: .04em;
+  cursor: pointer;
+}
+body[data-future-ui] .future-motion-toggle:hover { border-color: #90bdaa; color: #e4fff1; }
+body[data-future-ui] .future-motion-indicator { width: 5px; height: 5px; border-radius: 50%; background: #b8f5df; }
+body[data-future-ui] .future-motion-toggle[aria-pressed='true'] .future-motion-indicator { background: #7e8d91; }
+body[data-future-ui] .future-motion-toggle:disabled { color: #a1aeb1; cursor: default; }
+
+@media (hover: hover) and (pointer: fine) {
+  body[data-future-ui][data-motion-active='true'] [data-future-card] { rotate: var(--future-tilt, 0deg); transition: rotate .22s var(--future-ease), border-color .22s ease, box-shadow .22s ease; }
+  body[data-future-ui][data-motion-active='true'] [data-future-card].future-card-hover { transition-duration: .1s; }
+  body[data-future-ui][data-future-cursor-ready='true'] .future-cursor-target,
+  body[data-future-ui][data-future-cursor-ready='true'].future-cursor-target { cursor: none !important; }
+}
+@media (hover: none), (pointer: coarse) {
+  .future-cursor { display: none !important; }
+  body[data-future-ui] [data-future-card] { rotate: none !important; }
+  body[data-future-ui] .future-card-light { display: none; }
+}
+
+/* Shared pause includes old decorative CSS, not just newly added effects. */
+body[data-future-ui][data-motion-paused='true'] *,
+body[data-future-ui][data-motion-paused='true'] *::before,
+body[data-future-ui][data-motion-paused='true'] *::after { animation-play-state: paused !important; transition-duration: 0s !important; scroll-behavior: auto !important; }
+body[data-future-ui][data-motion-paused='true'] [data-future-card] { rotate: none !important; }
+body[data-future-ui][data-motion-paused='true'] [data-future-parallax] { translate: none !important; }
+body[data-future-ui][data-motion-paused='true'] :is(.future-cursor, .future-card-light) { opacity: 0 !important; }
+html:has(body[data-future-ui][data-motion-paused='true']) { scroll-behavior: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  html:has(body[data-future-ui]) { scroll-behavior: auto; }
+  body[data-future-ui] *, body[data-future-ui] *::before, body[data-future-ui] *::after { animation: none !important; transition-duration: 0s !important; scroll-behavior: auto !important; }
+  body[data-future-ui] [data-future-card] { rotate: none !important; }
+  body[data-future-ui] [data-future-parallax] { translate: none !important; }
+  body[data-future-ui] :is(.future-cursor, .future-card-light) { display: none !important; }
+}
+@media (forced-colors: active) {
+  .future-cursor { display: none !important; }
+  body[data-future-ui][data-future-cursor-ready='true'] .future-cursor-target,
+  body[data-future-ui][data-future-cursor-ready='true'].future-cursor-target { cursor: auto !important; }
+  body[data-future-ui] .future-card-light { display: none !important; }
+  body[data-future-ui] .future-motion-toggle { border: 1px solid ButtonText; color: ButtonText; background: ButtonFace; }
+}
+@media (max-width: 600px) {
+  body[data-future-ui]:not(.future-home) :is(input, select, textarea) { font-size: 16px; }
+  body[data-future-ui] .future-motion-toggle { min-height: 40px; padding: 9px 11px; }
+}
+/* The automatic control follows page content on touch/small screens so it
+   cannot cover quote details, form fields or payment actions while scrolling. */
+@media (max-width: 760px), (hover: none), (pointer: coarse) {
+  body[data-future-ui]:not(.future-home) .future-motion-toggle {
+    position: static;
+    margin: 16px max(20px, env(safe-area-inset-left)) max(24px, env(safe-area-inset-bottom));
+  }
+}
+@media (max-width: 760px) {
+  body[data-future-ui].oakpay-app-body .future-motion-toggle { margin-bottom: calc(88px + env(safe-area-inset-bottom)); }
+}
+@media print {
+  body[data-future-ui]:not(.future-home) { color: #111; background: #fff; color-scheme: light; }
+  body[data-future-ui]:not(.future-home) .quote-result { color: #111 !important; background: #fff !important; border-color: #333; box-shadow: none; }
+  body[data-future-ui]:not(.future-home) .quote-result :is(.quote-result-prices article, .quote-result-scope, .instalment-preview) { background: #fff !important; border-color: #bbb; }
+  body[data-future-ui] :is(.future-cursor, .future-card-light, .future-motion-toggle, [data-motion-toggle]) { display: none !important; }
+  body[data-future-ui] [data-future-card] { rotate: none !important; box-shadow: none !important; }
+  body[data-future-ui] [data-future-parallax] { translate: none !important; }
+  body[data-future-ui] :is(.reveal, [data-reveal], [data-future-reveal]) { opacity: 1 !important; transform: none !important; }
+}

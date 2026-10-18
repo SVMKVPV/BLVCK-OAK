@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#080909" />
+    <meta name="theme-color" content="#07090c" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
@@ -67,67 +67,29 @@
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="studio.css?v=1" />
-    <link rel="stylesheet" href="studio-intro.css?v=1" />
-    <script src="cinematic-intro.js?v=7" defer></script>
-    <script src="studio.js?v=1" defer></script>
-    <script src="script.js?v=12" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="studio.css?v=2" />
+    <link rel="stylesheet" href="future-ui.css?v=1" />
+    <script src="future-ui.js?v=1" defer></script>
+    <script src="future-scene.js?v=1" defer></script>
+    <script src="studio.js?v=2" defer></script>
+    <script src="script.js?v=13" defer></script>
   </head>
-  <body>
-    <noscript><link rel="stylesheet" href="studio-noscript.css?v=1" /></noscript>
+  <body class="future-home" data-future-ui>
+    <noscript><link rel="stylesheet" href="studio-noscript.css?v=2" /></noscript>
     <a class="skip-link" href="#main-content">Skip to content</a>
     <div class="page-progress" aria-hidden="true"><span></span></div>
-
-    <section class="oak-origin" data-oak-origin aria-labelledby="oak-origin-title">
-      <div class="oak-origin-stage" data-oak-stage>
-        <video class="oak-origin-video" data-oak-video data-orientation="portrait-ccw" muted playsinline preload="auto" disablepictureinpicture aria-hidden="true">
-          <source src="assets/obsidian-oak-scroll-ccw.mp4" type="video/mp4" />
-        </video>
-        <canvas class="oak-origin-canvas" data-oak-canvas aria-hidden="true"></canvas>
-        <div class="oak-origin-grain" aria-hidden="true"></div>
-        <div class="oak-origin-brand" aria-hidden="true"><span>BLVCK</span> OAK <small>/ ORIGIN</small></div>
-
-        <div class="oak-origin-story" data-oak-story>
-          <article class="oak-origin-chapter is-active" data-oak-chapter="0">
-            <p>Chapter 01 / The source</p>
-            <h2 id="oak-origin-title">Every digital story<br /><em>begins with a seed.</em></h2>
-            <span>Scroll to enter the BLVCK OAK journey.</span>
-          </article>
-          <article class="oak-origin-chapter" data-oak-chapter="1" aria-hidden="true">
-            <p>Chapter 02 / The canopy</p>
-            <h2>Every leaf holds<br /><em>a world of its own.</em></h2>
-            <span>Rooted in nature. Shaped by change. Ready for what comes next.</span>
-          </article>
-          <article class="oak-origin-chapter" data-oak-chapter="2" aria-hidden="true">
-            <p>Chapter 03 / Transformation</p>
-            <h2>Nothing remarkable<br /><em>stands still.</em></h2>
-            <span>Old forms become fuel. Strong ideas survive the fire.</span>
-          </article>
-          <article class="oak-origin-chapter" data-oak-chapter="3" aria-hidden="true">
-            <p>Chapter 04 / New growth</p>
-            <h2>From ash,<br /><em>direction takes root.</em></h2>
-            <span>A sharper identity. A stronger system. A new beginning.</span>
-          </article>
-          <article class="oak-origin-chapter oak-origin-chapter-final" data-oak-chapter="4" aria-hidden="true">
-            <p>BLVCK OAK / Sydney, Australia</p>
-            <h2>The journey<br /><em>begins here.</em></h2>
-            <span>Continue into the BLVCK OAK studio experience.</span>
-          </article>
-        </div>
-
-        <button class="oak-origin-skip" type="button" data-oak-skip data-public-action>Skip intro <span aria-hidden="true">↘</span></button>
-        <div class="oak-origin-scroll" data-oak-scroll-cue aria-hidden="true"><i></i><span>Scroll to transform</span></div>
-        <div class="oak-origin-progress" aria-hidden="true"><span data-oak-progress></span></div>
-        <p class="sr-only">A scroll-controlled three-dimensional obsidian oak rotates against a mirrored wall. Molten gold veins pulse through its branches as fire becomes ash and a new oak grows before the BLVCK OAK studio is revealed.</p>
-      </div>
-    </section>
 
     <header class="site-header" id="site-header">
       <a class="wordmark" href="#top" aria-label="Blvck Oak home">
         <span class="mark" aria-hidden="true"><span></span></span>
         <span><b>BLVCK</b> OAK</span>
       </a>
+      <nav class="desktop-navigation" aria-label="Main navigation">
+        <a href="#previews">The work</a>
+        <a href="#services">What we do</a>
+        <a href="#packages">Ways to work</a>
+      </nav>
       <div class="header-tools">
         <button class="icon-button search-trigger" type="button" data-search-open data-public-action aria-label="Search the site">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4 4"></path></svg>
@@ -140,10 +102,10 @@
 
     <div class="mobile-menu" id="mobile-navigation" data-mobile-menu hidden>
       <nav aria-label="Mobile navigation">
+        <a href="#previews">The work</a>
         <a href="#goals">Start with your goal</a>
         <a href="#services">Services</a>
         <a href="#packages">Ways to work</a>
-        <a href="#previews">Previews</a>
         <a href="#process">Process</a>
         <a href="#help">Help me decide</a>
         <a href="#explore">Explore more</a>
@@ -164,49 +126,88 @@
     <main id="main-content">
       <section class="hero" id="top" aria-labelledby="hero-title">
         <span class="legacy-anchor" id="brand-film" aria-hidden="true"></span>
-        <div class="hero__media" aria-hidden="true">
-          <video id="hero-film" muted loop playsinline preload="metadata" poster="assets/black-oak-brand-film-poster.jpg">
-            <source src="assets/black-oak-brand-film.mp4" type="video/mp4" />
-          </video>
+        <div class="hero__grid" aria-hidden="true"></div>
+        <div class="future-scene" data-future-scene aria-hidden="true">
+          <div class="future-scene__halo"></div>
+          <div class="future-scene__orbit future-scene__orbit--one"></div>
+          <div class="future-scene__orbit future-scene__orbit--two"></div>
+          <div class="future-scene__fallback" data-future-fallback><span class="future-scene__leaf"></span></div>
+          <canvas class="future-scene__canvas" data-future-canvas></canvas>
+          <div class="future-scene__ground"></div>
+          <span class="future-scene__note">FORM / FUNCTION / FORWARD</span>
         </div>
-        <div class="hero__veil" aria-hidden="true"></div>
         <div class="hero__content">
-          <p class="eyebrow">SYDNEY DIGITAL STUDIO</p>
-          <h1 id="hero-title">Built to look rare.<br /><em>Designed to perform.</em></h1>
-          <p class="hero__lede">Distinctive websites and the practical systems around them—search, automation, marketing and brand—organised so you can find your best next move.</p>
+          <p class="eyebrow hero__eyebrow"><span aria-hidden="true"></span> INDEPENDENT DIGITAL STUDIO · SYDNEY</p>
+          <h1 id="hero-title">Made to<br /><em>move you<br />forward.</em></h1>
+          <p class="hero__lede">Distinctive websites. Connected systems.<br />We bring design, search and automation together around what your business does next.</p>
           <div class="hero__actions">
             <a class="button button--gold" href="quote.html">Build an estimate <span aria-hidden="true">↗</span></a>
-            <a class="button button--glass" href="book.html">Book a call <span aria-hidden="true">↗</span></a>
+            <a class="button button--glass" href="book.html">Let’s talk <span aria-hidden="true">↗</span></a>
           </div>
-          <div class="hero__signals" aria-label="Studio highlights">
-            <span>Web</span><i></i><span>Search</span><i></i><span>Automation</span><i></i><span>Brand</span>
-          </div>
+          <a class="hero__work-link" href="#previews">See the work <span aria-hidden="true">↓</span></a>
         </div>
-        <button class="film-toggle" type="button" data-film-toggle data-public-action aria-label="Pause brand film">
-          <span data-film-label>Pause film</span>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path data-film-icon d="M8 6h3v12H8zm5 0h3v12h-3z"></path></svg>
-        </button>
-        <a class="hero__scroll" href="#goals"><span>Scroll to explore</span><i aria-hidden="true"></i></a>
+        <div class="hero__footer">
+          <div class="hero__signals" aria-label="Studio capabilities"><span>Web design</span><i></i><span>Search</span><i></i><span>Automation</span><i></i><span>Brand</span></div>
+          <a class="hero__scroll" href="#previews"><span>Scroll to explore</span><i aria-hidden="true">↓</i></a>
+          <button class="motion-toggle" type="button" data-motion-toggle data-public-action aria-pressed="false"><span class="motion-toggle__icon" aria-hidden="true">Ⅱ</span><span data-motion-label>Pause motion</span></button>
+        </div>
       </section>
 
       <nav class="category-strip" aria-label="Browse categories" data-category-strip>
         <div>
-          <span class="category-strip__label">Browse</span>
-          <a class="is-active" href="#goals">Your goal</a>
+          <span class="category-strip__label">THE STUDIO</span>
+          <a class="is-active" href="#previews">The work</a>
+          <a href="#goals">Your goal</a>
           <a href="#services">Services</a>
           <a href="#packages">Ways to work</a>
-          <a href="#previews">Previews</a>
           <a href="#process">Process</a>
           <a href="#help">Help</a>
           <a href="#explore">Explore more</a>
         </div>
       </nav>
 
+      <section class="shelf shelf--previews" id="previews" data-section-name="Previews" aria-labelledby="previews-title">
+        <div class="shelf__head" data-future-reveal>
+          <div>
+            <p class="eyebrow"><span>01</span> A LOOK INSIDE</p>
+            <h2 id="previews-title">Different businesses.<br /><em>Distinctive possibilities.</em></h2>
+            <p>Open the portfolio, then browse illustrative package previews that show range and visual direction.</p>
+          </div>
+          <div class="shelf__controls" data-shelf-controls>
+            <span class="shelf__count" data-shelf-count>01 / 04</span>
+            <button type="button" data-shelf-prev aria-label="Previous preview"><span aria-hidden="true">←</span></button>
+            <button type="button" data-shelf-next aria-label="Next preview"><span aria-hidden="true">→</span></button>
+          </div>
+        </div>
+        <div class="shelf__track shelf__track--wide" tabindex="0" aria-label="Portfolio and illustrative website previews. Use left and right arrow keys to browse." data-shelf-track>
+          <a data-future-card data-future-cursor="View work" class="shelf-card preview-card preview-card--portfolio" id="preview-portfolio" href="portfolio.html" data-search="portfolio selected work examples">
+            <img src="assets/og.webp" alt="Blvck Oak gold sculptural brand artwork" loading="lazy" />
+            <span class="preview-card__shade"></span><div><p>SELECTED WORK</p><h3>Open the portfolio</h3><span>Explore the work <i>↗</i></span></div>
+          </a>
+          <a data-future-card data-future-cursor="View package" class="shelf-card preview-card" id="preview-essential" href="#package-essential" data-search="essential illustrative package preview focused launch">
+            <span class="legacy-anchor" id="essential-demo" aria-hidden="true"></span>
+            <img src="assets/essential-preview.webp" alt="Illustrative Essential package website preview featuring a dark automotive design" loading="lazy" />
+            <span class="preview-card__shade"></span><div><p>ILLUSTRATIVE PACKAGE PREVIEW</p><h3>Essential / Focused launch</h3><span>View package <i>→</i></span></div>
+          </a>
+          <a data-future-card data-future-cursor="View package" class="shelf-card preview-card" id="preview-professional" href="#package-professional" data-search="professional illustrative package preview full presence">
+            <span class="legacy-anchor" id="professional-demo" aria-hidden="true"></span>
+            <img src="assets/professional-preview.webp" alt="Illustrative Professional package website preview featuring a dark technical design" loading="lazy" />
+            <span class="preview-card__shade"></span><div><p>ILLUSTRATIVE PACKAGE PREVIEW</p><h3>Professional / Full presence</h3><span>View package <i>→</i></span></div>
+          </a>
+          <a data-future-card data-future-cursor="View package" class="shelf-card preview-card" id="preview-enterprise" href="#package-enterprise" data-search="enterprise illustrative package preview connected system">
+            <span class="legacy-anchor" id="enterprise-demo" aria-hidden="true"></span>
+            <img src="assets/enterprise-preview.webp" alt="Illustrative Enterprise package website preview featuring Black Oak typography" loading="lazy" />
+            <span class="preview-card__shade"></span><div><p>ILLUSTRATIVE PACKAGE PREVIEW</p><h3>Enterprise / Connected system</h3><span>View package <i>→</i></span></div>
+          </a>
+        </div>
+        <div class="shelf__progress" aria-hidden="true"><span data-shelf-progress></span></div>
+      </section>
+
       <section class="shelf shelf--goals" id="goals" data-section-name="Your goal" aria-labelledby="goals-title">
         <span class="legacy-anchor" id="approach" aria-hidden="true"></span>
-        <div class="shelf__head">
+        <div class="shelf__head" data-future-reveal>
           <div>
-            <p class="eyebrow"><span>01</span> START WITH YOUR GOAL</p>
+            <p class="eyebrow"><span>02</span> START WITH YOUR GOAL</p>
             <h2 id="goals-title">What needs to change?</h2>
             <p>Choose the outcome that feels closest. The right combination of services comes second.</p>
           </div>
@@ -217,27 +218,27 @@
           </div>
         </div>
         <div class="shelf__track" tabindex="0" aria-label="Goals. Use left and right arrow keys to browse." data-shelf-track>
-          <button class="shelf-card goal-card goal-card--launch" id="goal-launch" type="button" data-detail="goal-launch" data-search="launch something new website brand direction">
+          <button data-future-card data-future-cursor="Details" class="shelf-card goal-card goal-card--launch" id="goal-launch" type="button" data-detail="goal-launch" data-search="launch something new website brand direction">
             <span class="card-index">01 / LAUNCH</span><span class="card-symbol" aria-hidden="true">↗</span>
             <div><h3>Start something new.</h3><p>Give a new offer, venture or brand a confident first home.</p><span class="card-action">See the path <i>→</i></span></div>
           </button>
-          <button class="shelf-card goal-card goal-card--upgrade" id="goal-upgrade" type="button" data-detail="goal-upgrade" data-search="upgrade replace outdated website redesign improve">
+          <button data-future-card data-future-cursor="Details" class="shelf-card goal-card goal-card--upgrade" id="goal-upgrade" type="button" data-detail="goal-upgrade" data-search="upgrade replace outdated website redesign improve">
             <span class="card-index">02 / UPGRADE</span><span class="card-symbol" aria-hidden="true">◫</span>
             <div><h3>Outgrow the old site.</h3><p>Keep what still works and remove the drag from everything else.</p><span class="card-action">See the path <i>→</i></span></div>
           </button>
-          <button class="shelf-card goal-card goal-card--search" id="goal-search" type="button" data-detail="goal-search" data-search="get found search seo visibility google content">
+          <button data-future-card data-future-cursor="Details" class="shelf-card goal-card goal-card--search" id="goal-search" type="button" data-detail="goal-search" data-search="get found search seo visibility google content">
             <span class="card-index">03 / GET FOUND</span><span class="card-symbol" aria-hidden="true">⌕</span>
             <div><h3>Become easier to find.</h3><p>Build search meaning, structure and useful content into the foundation.</p><span class="card-action">See the path <i>→</i></span></div>
           </button>
-          <button class="shelf-card goal-card goal-card--grow" id="goal-grow" type="button" data-detail="goal-grow" data-search="grow convert attention enquiries digital marketing campaigns">
+          <button data-future-card data-future-cursor="Details" class="shelf-card goal-card goal-card--grow" id="goal-grow" type="button" data-detail="goal-grow" data-search="grow convert attention enquiries digital marketing campaigns">
             <span class="card-index">04 / GROW</span><span class="card-symbol" aria-hidden="true">＋</span>
             <div><h3>Turn attention into enquiries.</h3><p>Connect campaigns and content to a clearer journey through the site.</p><span class="card-action">See the path <i>→</i></span></div>
           </button>
-          <button class="shelf-card goal-card goal-card--automate" id="goal-automate" type="button" data-detail="goal-automate" data-search="automate repetitive work ai workflows operations follow-up">
+          <button data-future-card data-future-cursor="Details" class="shelf-card goal-card goal-card--automate" id="goal-automate" type="button" data-detail="goal-automate" data-search="automate repetitive work ai workflows operations follow-up">
             <span class="card-index">05 / AUTOMATE</span><span class="card-symbol" aria-hidden="true">⌁</span>
             <div><h3>Reduce repetitive work.</h3><p>Move avoidable admin out of inboxes without losing human judgement.</p><span class="card-action">See the path <i>→</i></span></div>
           </button>
-          <button class="shelf-card goal-card goal-card--shape" id="goal-shape" type="button" data-detail="goal-shape" data-search="shape scope consulting roadmap not sure strategy">
+          <button data-future-card data-future-cursor="Details" class="shelf-card goal-card goal-card--shape" id="goal-shape" type="button" data-detail="goal-shape" data-search="shape scope consulting roadmap not sure strategy">
             <span class="card-index">06 / SHAPE</span><span class="card-symbol" aria-hidden="true">◇</span>
             <div><h3>Clarify the real brief.</h3><p>Separate the symptom from the need before committing to a build.</p><span class="card-action">See the path <i>→</i></span></div>
           </button>
@@ -246,10 +247,10 @@
       </section>
 
       <section class="shelf shelf--services" id="services" data-section-name="Services" aria-labelledby="services-title">
-        <div class="shelf__head">
+        <div class="shelf__head" data-future-reveal>
           <div>
-            <p class="eyebrow"><span>02</span> ADD THE RIGHT LAYERS</p>
-            <h2 id="services-title">Services that work together.</h2>
+            <p class="eyebrow"><span>03</span> THE RIGHT CAPABILITIES</p>
+            <h2 id="services-title">Design. Development.<br /><em>Everything connected.</em></h2>
             <p>Start with one capability or connect several into a single, deliberate system.</p>
           </div>
           <div class="shelf__controls" data-shelf-controls>
@@ -259,31 +260,31 @@
           </div>
         </div>
         <div class="shelf__track" tabindex="0" aria-label="Services. Use left and right arrow keys to browse." data-shelf-track>
-          <button class="shelf-card service-card service-card--web" id="service-websites" type="button" data-detail="service-websites" data-search="websites architecture design development performance responsive">
+          <button data-future-card data-future-cursor="Details" class="shelf-card service-card service-card--web" id="service-websites" type="button" data-detail="service-websites" data-search="websites architecture design development performance responsive">
             <span class="service-card__visual"><i></i><b>WEB / 01</b></span>
             <div><p class="card-index">WEBSITES</p><h3>Presence with purpose.</h3><p>Art direction, content flow and conversion logic in one blueprint.</p><span class="card-action">Explore <i>→</i></span></div>
           </button>
-          <button class="shelf-card service-card service-card--search" id="service-search" type="button" data-detail="service-search" data-search="seo search metadata crawlability content structure">
+          <button data-future-card data-future-cursor="Details" class="shelf-card service-card service-card--search" id="service-search" type="button" data-detail="service-search" data-search="seo search metadata crawlability content structure">
             <span class="legacy-anchor" id="seo-search" aria-hidden="true"></span>
             <span class="service-card__visual"><i></i><b>SEARCH / 02</b></span>
             <div><p class="card-index">SEO &amp; SEARCH</p><h3>Found for the right reasons.</h3><p>Search foundations designed into the site, not added as an afterthought.</p><span class="card-action">Explore <i>→</i></span></div>
           </button>
-          <button class="shelf-card service-card service-card--ai" id="service-automation" type="button" data-detail="service-automation" data-search="workflow ai automation integrations operations">
+          <button data-future-card data-future-cursor="Details" class="shelf-card service-card service-card--ai" id="service-automation" type="button" data-detail="service-automation" data-search="workflow ai automation integrations operations">
             <span class="legacy-anchor" id="workflow-ai" aria-hidden="true"></span>
             <span class="service-card__visual"><i></i><b>SYSTEMS / 03</b></span>
             <div><p class="card-index">WORKFLOW &amp; AI</p><h3>Automate the repetition.</h3><p>Useful connections that remove friction while keeping review where it matters.</p><span class="card-action">Explore <i>→</i></span></div>
           </button>
-          <button class="shelf-card service-card service-card--marketing" id="service-marketing" type="button" data-detail="service-marketing" data-search="digital marketing campaigns landing pages content lead magnets">
+          <button data-future-card data-future-cursor="Details" class="shelf-card service-card service-card--marketing" id="service-marketing" type="button" data-detail="service-marketing" data-search="digital marketing campaigns landing pages content lead magnets">
             <span class="legacy-anchor" id="digital-marketing" aria-hidden="true"></span>
             <span class="service-card__visual"><i></i><b>GROWTH / 04</b></span>
             <div><p class="card-index">DIGITAL MARKETING</p><h3>Give the site momentum.</h3><p>Campaigns, landing experiences and content systems that stay on-brand.</p><span class="card-action">Explore <i>→</i></span></div>
           </button>
-          <button class="shelf-card service-card service-card--brand" id="service-branding" type="button" data-detail="service-branding" data-search="branding identity visual assets launch social">
+          <button data-future-card data-future-cursor="Details" class="shelf-card service-card service-card--brand" id="service-branding" type="button" data-detail="service-branding" data-search="branding identity visual assets launch social">
             <span class="legacy-anchor" id="digital-branding" aria-hidden="true"></span>
             <span class="service-card__visual"><i></i><b>BRAND / 05</b></span>
             <div><p class="card-index">BRANDING &amp; ASSETS</p><h3>Make every touchpoint related.</h3><p>A practical visual system for the website, launch and everything around it.</p><span class="card-action">Explore <i>→</i></span></div>
           </button>
-          <button class="shelf-card service-card service-card--consult" id="service-consulting" type="button" data-detail="service-consulting" data-search="upgrades consulting workshops audits roadmaps existing site">
+          <button data-future-card data-future-cursor="Details" class="shelf-card service-card service-card--consult" id="service-consulting" type="button" data-detail="service-consulting" data-search="upgrades consulting workshops audits roadmaps existing site">
             <span class="legacy-anchor" id="consulting-coaching" aria-hidden="true"></span>
             <span class="legacy-anchor" id="website-upgrades" aria-hidden="true"></span>
             <span class="service-card__visual"><i></i><b>ADVISE / 06</b></span>
@@ -294,10 +295,10 @@
       </section>
 
       <section class="shelf shelf--packages" id="packages" data-section-name="Ways to work" aria-labelledby="packages-title">
-        <div class="shelf__head">
+        <div class="shelf__head" data-future-reveal>
           <div>
-            <p class="eyebrow"><span>03</span> WAYS TO WORK</p>
-            <h2 id="packages-title">A clear place to begin.</h2>
+            <p class="eyebrow"><span>04</span> WAYS TO WORK</p>
+            <h2 id="packages-title">Start with ambition.<br /><em>Give it a clear scope.</em></h2>
             <p>Four established starting points, plus a custom scope when the work crosses boundaries.</p>
           </div>
           <div class="shelf__controls" data-shelf-controls>
@@ -307,19 +308,19 @@
           </div>
         </div>
         <div class="shelf__track" tabindex="0" aria-label="Ways to work. Use left and right arrow keys to browse." data-shelf-track>
-          <button class="shelf-card price-card" id="package-essential" type="button" data-package="essential" data-search="essential package 500 focused launch">
+          <button data-future-card data-future-cursor="Choose" class="shelf-card price-card" id="package-essential" type="button" data-package="essential" data-search="essential package 500 focused launch">
             <span class="card-index">01 / ESSENTIAL</span><div><p class="price"><sup>A$</sup>500</p><h3>Focused launch.</h3><p>A polished starting point for one clear offer.</p><span class="card-action">Choose Essential <i>↗</i></span></div>
           </button>
-          <button class="shelf-card price-card price-card--featured" id="package-professional" type="button" data-package="professional" data-search="professional package 1500 full presence recommended">
+          <button data-future-card data-future-cursor="Choose" class="shelf-card price-card price-card--featured" id="package-professional" type="button" data-package="professional" data-search="professional package 1500 full presence recommended">
             <span class="recommended">RECOMMENDED</span><span class="card-index">02 / PROFESSIONAL</span><div><p class="price"><sup>A$</sup>1,500</p><h3>Full presence.</h3><p>Room to explain, prove and convert with confidence.</p><span class="card-action">Choose Professional <i>↗</i></span></div>
           </button>
-          <button class="shelf-card price-card" id="package-enterprise" type="button" data-package="enterprise" data-search="enterprise package 2900 connected digital system">
+          <button data-future-card data-future-cursor="Choose" class="shelf-card price-card" id="package-enterprise" type="button" data-package="enterprise" data-search="enterprise package 2900 connected digital system">
             <span class="card-index">03 / ENTERPRISE</span><div><p class="price"><sup>A$</sup>2,900</p><h3>Connected system.</h3><p>A complete digital presence for a more complex business.</p><span class="card-action">Choose Enterprise <i>↗</i></span></div>
           </button>
-          <a class="shelf-card price-card price-card--custom" id="package-custom" href="quote.html" data-search="custom scope website search automation marketing branding">
+          <a data-future-card data-future-cursor="Explore" class="shelf-card price-card price-card--custom" id="package-custom" href="quote.html" data-search="custom scope website search automation marketing branding">
             <span class="card-index">04 / CUSTOM SCOPE</span><div><p class="price price--word">LET’S SHAPE IT</p><h3>When the brief crosses boundaries.</h3><p>Connect web, search, automation, marketing or brand in one roadmap.</p><span class="card-action">Frame the brief <i>↗</i></span></div>
           </a>
-          <button class="shelf-card price-card" id="package-link-in-bio" type="button" data-package="link-in-bio" data-search="link in bio package 13.13 month branded links">
+          <button data-future-card data-future-cursor="Choose" class="shelf-card price-card" id="package-link-in-bio" type="button" data-package="link-in-bio" data-search="link in bio package 13.13 month branded links">
             <span class="card-index">05 / LINK IN BIO</span><div><p class="price"><sup>A$</sup>13.13<small>/month</small></p><h3>A focused quick start.</h3><p>A branded home for your most important links.</p><span class="card-action">Start monthly plan <i>↗</i></span></div>
           </button>
         </div>
@@ -331,51 +332,19 @@
           <span class="legacy-anchor" id="referral-signup" aria-hidden="true"></span>
         </div>
         <p class="price-note">Pricing is shown in AUD. Final inclusions, billing terms and applicable tax details are confirmed in the project scope.</p>
-        <div class="shelf__progress" aria-hidden="true"><span data-shelf-progress></span></div>
-      </section>
-
-      <section class="shelf shelf--previews" id="previews" data-section-name="Previews" aria-labelledby="previews-title">
-        <div class="shelf__head">
-          <div>
-            <p class="eyebrow"><span>04</span> SEE THE DESIGN LANGUAGE</p>
-            <h2 id="previews-title">See the work and possibilities.</h2>
-            <p>Open the portfolio, then browse illustrative package previews that show range and visual direction.</p>
-          </div>
-          <div class="shelf__controls" data-shelf-controls>
-            <span class="shelf__count" data-shelf-count>01 / 04</span>
-            <button type="button" data-shelf-prev aria-label="Previous preview"><span aria-hidden="true">←</span></button>
-            <button type="button" data-shelf-next aria-label="Next preview"><span aria-hidden="true">→</span></button>
-          </div>
-        </div>
-        <div class="shelf__track shelf__track--wide" tabindex="0" aria-label="Portfolio and illustrative website previews. Use left and right arrow keys to browse." data-shelf-track>
-          <a class="shelf-card preview-card preview-card--portfolio" id="preview-portfolio" href="portfolio.html" data-search="portfolio selected work examples">
-            <img src="assets/og.webp" alt="Blvck Oak gold sculptural brand artwork" loading="lazy" />
-            <span class="preview-card__shade"></span><div><p>SELECTED WORK</p><h3>Open the portfolio</h3><span>Explore the work <i>↗</i></span></div>
-          </a>
-          <a class="shelf-card preview-card" id="preview-essential" href="#package-essential" data-search="essential illustrative package preview focused launch">
-            <span class="legacy-anchor" id="essential-demo" aria-hidden="true"></span>
-            <img src="assets/essential-preview.webp" alt="Illustrative Essential package website preview featuring a dark automotive design" loading="lazy" />
-            <span class="preview-card__shade"></span><div><p>ILLUSTRATIVE PACKAGE PREVIEW</p><h3>Essential / Focused launch</h3><span>View package <i>→</i></span></div>
-          </a>
-          <a class="shelf-card preview-card" id="preview-professional" href="#package-professional" data-search="professional illustrative package preview full presence">
-            <span class="legacy-anchor" id="professional-demo" aria-hidden="true"></span>
-            <img src="assets/professional-preview.webp" alt="Illustrative Professional package website preview featuring a dark technical design" loading="lazy" />
-            <span class="preview-card__shade"></span><div><p>ILLUSTRATIVE PACKAGE PREVIEW</p><h3>Professional / Full presence</h3><span>View package <i>→</i></span></div>
-          </a>
-          <a class="shelf-card preview-card" id="preview-enterprise" href="#package-enterprise" data-search="enterprise illustrative package preview connected system">
-            <span class="legacy-anchor" id="enterprise-demo" aria-hidden="true"></span>
-            <img src="assets/enterprise-preview.webp" alt="Illustrative Enterprise package website preview featuring Black Oak typography" loading="lazy" />
-            <span class="preview-card__shade"></span><div><p>ILLUSTRATIVE PACKAGE PREVIEW</p><h3>Enterprise / Connected system</h3><span>View package <i>→</i></span></div>
-          </a>
+        <div class="payment-flex" data-future-reveal>
+          <div><p class="eyebrow">CUSTOM QUOTES / MORE FLEXIBILITY</p><h3>One project.<br />Fifteen scheduled parts.</h3></div>
+          <p>Choose the 15-part payment option for an approved custom quote. Pay manually at the agreed times, add extra, or clear the balance early.</p>
+          <a class="button button--glass" href="quote.html">Shape your quote <span aria-hidden="true">↗</span></a>
         </div>
         <div class="shelf__progress" aria-hidden="true"><span data-shelf-progress></span></div>
       </section>
 
       <section class="shelf shelf--process" id="process" data-section-name="Process" aria-labelledby="process-title">
-        <div class="shelf__head">
+        <div class="shelf__head" data-future-reveal>
           <div>
             <p class="eyebrow"><span>05</span> CONNECT TO LAUNCH</p>
-            <h2 id="process-title">A visible decision at every stage.</h2>
+            <h2 id="process-title">Clear from the first<br /><em>conversation.</em></h2>
             <p>A compact four-stage rhythm, followed by a handover shaped around the agreed scope.</p>
           </div>
           <div class="shelf__controls" data-shelf-controls>
@@ -385,19 +354,19 @@
           </div>
         </div>
         <div class="shelf__track" tabindex="0" aria-label="Project process. Use left and right arrow keys to browse." data-shelf-track>
-          <button class="shelf-card process-card" id="process-connect" type="button" data-detail="process-connect" data-search="connect process share context friction">
+          <button data-future-card data-future-cursor="Details" class="shelf-card process-card" id="process-connect" type="button" data-detail="process-connect" data-search="connect process share context friction">
             <span class="process-card__number">01</span><div><p class="card-index">CONNECT</p><h3>Start with context.</h3><p>Share what is changing, what is stuck and what the work needs to achieve.</p><span class="card-action">Open step <i>→</i></span></div>
           </button>
-          <button class="shelf-card process-card" id="process-align" type="button" data-detail="process-align" data-search="align process outcome scope inputs success">
+          <button data-future-card data-future-cursor="Details" class="shelf-card process-card" id="process-align" type="button" data-detail="process-align" data-search="align process outcome scope inputs success">
             <span class="process-card__number">02</span><div><p class="card-index">ALIGN</p><h3>Define the win.</h3><p>Lock the outcome, scope, inputs and the clearest measure of success.</p><span class="card-action">Open step <i>→</i></span></div>
           </button>
-          <button class="shelf-card process-card" id="process-build" type="button" data-detail="process-build" data-search="build process design development review">
+          <button data-future-card data-future-cursor="Details" class="shelf-card process-card" id="process-build" type="button" data-detail="process-build" data-search="build process design development review">
             <span class="process-card__number">03</span><div><p class="card-index">BUILD</p><h3>Make it reviewable.</h3><p>Shape the system in deliberate, working increments instead of one big reveal.</p><span class="card-action">Open step <i>→</i></span></div>
           </button>
-          <button class="shelf-card process-card" id="process-launch" type="button" data-detail="process-launch" data-search="launch process test publish checks">
+          <button data-future-card data-future-cursor="Details" class="shelf-card process-card" id="process-launch" type="button" data-detail="process-launch" data-search="launch process test publish checks">
             <span class="process-card__number">04</span><div><p class="card-index">LAUNCH</p><h3>Finish with confidence.</h3><p>Test the experience, confirm the essentials and put the work into the world.</p><span class="card-action">Open step <i>→</i></span></div>
           </button>
-          <button class="shelf-card process-card process-card--handover" id="process-handover" type="button" data-detail="process-handover" data-search="handover ownership files access support licensing">
+          <button data-future-card data-future-cursor="Details" class="shelf-card process-card process-card--handover" id="process-handover" type="button" data-detail="process-handover" data-search="handover ownership files access support licensing">
             <span class="process-card__number">＋</span><div><p class="card-index">HANDOVER</p><h3>Reduce dependency.</h3><p>Map the files, access and operating context agreed in the project scope.</p><span class="card-action">Open step <i>→</i></span></div>
           </button>
         </div>
@@ -405,10 +374,10 @@
       </section>
 
       <section class="shelf shelf--help" id="help" data-section-name="Help" aria-labelledby="help-title">
-        <div class="shelf__head">
+        <div class="shelf__head" data-future-reveal>
           <div>
             <p class="eyebrow"><span>06</span> HELP ME DECIDE</p>
-            <h2 id="help-title">Good decisions before the first call.<span class="legacy-anchor" id="faq-title" aria-hidden="true"></span></h2>
+            <h2 id="help-title">A little clarity.<br /><em>A better next step.</em><span class="legacy-anchor" id="faq-title" aria-hidden="true"></span></h2>
             <p>Short answers to the practical questions that shape a smoother project.</p>
           </div>
           <div class="shelf__controls" data-shelf-controls>
@@ -418,22 +387,22 @@
           </div>
         </div>
         <div class="shelf__track" tabindex="0" aria-label="Helpful answers. Use left and right arrow keys to browse." data-shelf-track>
-          <button class="shelf-card help-card" id="help-fit" type="button" data-detail="help-fit" data-search="who is blvck oak for fit founders teams">
+          <button data-future-card data-future-cursor="Details" class="shelf-card help-card" id="help-fit" type="button" data-detail="help-fit" data-search="who is blvck oak for fit founders teams">
             <span class="card-index">FIT / 01</span><div><h3>Is Blvck Oak the right fit?</h3><p>For founders and teams whose work has outgrown the template.</p><span class="card-action">Read answer <i>→</i></span></div>
           </button>
-          <button class="shelf-card help-card" id="help-ready" type="button" data-detail="help-ready" data-search="readiness feedback decision maker inputs start project">
+          <button data-future-card data-future-cursor="Details" class="shelf-card help-card" id="help-ready" type="button" data-detail="help-ready" data-search="readiness feedback decision maker inputs start project">
             <span class="card-index">READINESS / 02</span><div><h3>What helps a project move?</h3><p>Clear goals, accountable decisions and useful source material.</p><span class="card-action">Read answer <i>→</i></span></div>
           </button>
-          <button class="shelf-card help-card" id="help-upgrade" type="button" data-detail="help-upgrade" data-search="can existing site be upgraded rebuild">
+          <button data-future-card data-future-cursor="Details" class="shelf-card help-card" id="help-upgrade" type="button" data-detail="help-upgrade" data-search="can existing site be upgraded rebuild">
             <span class="card-index">UPGRADES / 03</span><div><h3>Can an existing site be upgraded?</h3><p>Yes—when the underlying platform still gives the work room to improve.</p><span class="card-action">Read answer <i>→</i></span></div>
           </button>
-          <button class="shelf-card help-card" id="help-services" type="button" data-detail="help-services" data-search="do i need every service choose scope">
+          <button data-future-card data-future-cursor="Details" class="shelf-card help-card" id="help-services" type="button" data-detail="help-services" data-search="do i need every service choose scope">
             <span class="card-index">SCOPE / 04</span><div><h3>Do I need every service?</h3><p>No. Use only the layers needed to reach the outcome.</p><span class="card-action">Read answer <i>→</i></span></div>
           </button>
-          <button class="shelf-card help-card" id="help-ai" type="button" data-detail="help-ai" data-search="is ai required automation optional">
+          <button data-future-card data-future-cursor="Details" class="shelf-card help-card" id="help-ai" type="button" data-detail="help-ai" data-search="is ai required automation optional">
             <span class="card-index">AI / 05</span><div><h3>Is AI required?</h3><p>No. It belongs only where it removes friction or creates an advantage.</p><span class="card-action">Read answer <i>→</i></span></div>
           </button>
-          <button class="shelf-card help-card help-card--start" id="help-start" type="button" data-detail="help-start" data-search="where should i begin estimate book call">
+          <button data-future-card data-future-cursor="Details" class="shelf-card help-card help-card--start" id="help-start" type="button" data-detail="help-start" data-search="where should i begin estimate book call">
             <span class="card-index">NEXT STEP / 06</span><div><h3>Where should I begin?</h3><p>Estimate when the need is clear. Book when the brief still needs shaping.</p><span class="card-action">Read answer <i>→</i></span></div>
           </button>
         </div>
@@ -441,7 +410,7 @@
       </section>
 
       <section class="shelf shelf--explore" id="explore" data-section-name="Explore more" aria-labelledby="discover-next">
-        <div class="shelf__head">
+        <div class="shelf__head" data-future-reveal>
           <div>
             <p class="eyebrow"><span>07</span> EXPLORE MORE</p>
             <h2 id="discover-next">The rest of the studio, one scroll away.</h2>
@@ -454,31 +423,31 @@
           </div>
         </div>
         <div class="shelf__track" tabindex="0" aria-label="More Black Oak destinations. Use left and right arrow keys to browse." data-shelf-track>
-          <a class="shelf-card resource-card resource-card--audit" href="audit.html" data-search="free website audit score recommendations">
+          <a data-future-card data-future-cursor="Explore" class="shelf-card resource-card resource-card--audit" href="audit.html" data-search="free website audit score recommendations">
             <span class="card-index">FREE TOOL / 01</span><div><h3>Website audit</h3><p>Get a practical snapshot of the fundamentals that may be holding your site back.</p><span class="card-action">Run the audit <i>↗</i></span></div>
           </a>
-          <a class="shelf-card resource-card resource-card--portfolio" href="portfolio.html" data-search="portfolio selected work projects concepts">
+          <a data-future-card data-future-cursor="Explore" class="shelf-card resource-card resource-card--portfolio" href="portfolio.html" data-search="portfolio selected work projects concepts">
             <span class="card-index">WORK / 02</span><div><h3>Selected work</h3><p>Browse live builds and concept directions across industries and formats.</p><span class="card-action">Open portfolio <i>↗</i></span></div>
           </a>
-          <a class="shelf-card resource-card resource-card--market" href="marketplace.html" data-search="website marketplace templates concepts shop">
+          <a data-future-card data-future-cursor="Explore" class="shelf-card resource-card resource-card--market" href="marketplace.html" data-search="website marketplace templates concepts shop">
             <span class="card-index">MARKETPLACE / 03</span><div><h3>Website marketplace</h3><p>Explore website directions that can become a sharper starting point for your own build.</p><span class="card-action">Browse the marketplace <i>↗</i></span></div>
           </a>
-          <a class="shelf-card resource-card resource-card--community" href="community.html" data-search="community 100 ai website concepts inspiration">
+          <a data-future-card data-future-cursor="Explore" class="shelf-card resource-card resource-card--community" href="community.html" data-search="community 100 ai website concepts inspiration">
             <span class="card-index">COMMUNITY / 04</span><div><h3>100 design worlds</h3><p>Discover a public collection of fictional AI concepts made to spark a direction.</p><span class="card-action">Enter the community <i>↗</i></span></div>
           </a>
-          <a class="shelf-card resource-card resource-card--generator" href="ai-generator.html" data-search="ai website generator coming soon">
+          <a data-future-card data-future-cursor="Explore" class="shelf-card resource-card resource-card--generator" href="ai-generator.html" data-search="ai website generator coming soon">
             <span class="card-index">LAB / 05</span><div><h3>AI generator</h3><p>See the experimental tools Black Oak is shaping around faster creative exploration.</p><span class="card-action">Visit the lab <i>↗</i></span></div>
           </a>
-          <a class="shelf-card resource-card resource-card--nearby" href="nearby.html" data-search="nearby business finder local discovery coming soon">
+          <a data-future-card data-future-cursor="Explore" class="shelf-card resource-card resource-card--nearby" href="nearby.html" data-search="nearby business finder local discovery coming soon">
             <span class="card-index">DISCOVERY / 06</span><div><h3>Nearby business finder</h3><p>Preview the local discovery experience currently being prepared by Black Oak.</p><span class="card-action">See what is next <i>↗</i></span></div>
           </a>
-          <a class="shelf-card resource-card resource-card--book" href="book.html" data-search="book consultation call discuss project">
+          <a data-future-card data-future-cursor="Explore" class="shelf-card resource-card resource-card--book" href="book.html" data-search="book consultation call discuss project">
             <span class="card-index">CONNECT / 07</span><div><h3>Book a conversation</h3><p>Use a focused call when the brief or the dependencies still need shaping.</p><span class="card-action">Choose a time <i>↗</i></span></div>
           </a>
-          <a class="shelf-card resource-card resource-card--partners" href="partners.html" data-search="partner workspace login referrals client projects">
+          <a data-future-card data-future-cursor="Explore" class="shelf-card resource-card resource-card--partners" href="partners.html" data-search="partner workspace login referrals client projects">
             <span class="card-index">WORKSPACE / 08</span><div><h3>Partner workspace</h3><p>Sign in to manage private referrals, quotes and active project information.</p><span class="card-action">Open workspace <i>↗</i></span></div>
           </a>
-          <a class="shelf-card resource-card resource-card--contact" href="contact.html" data-search="contact enquiry email project help">
+          <a data-future-card data-future-cursor="Explore" class="shelf-card resource-card resource-card--contact" href="contact.html" data-search="contact enquiry email project help">
             <span class="card-index">CONTACT / 09</span><div><h3>Send an enquiry</h3><p>Share the context in writing and point the conversation toward the right service.</p><span class="card-action">Contact Black Oak <i>↗</i></span></div>
           </a>
         </div>
@@ -486,9 +455,9 @@
       </section>
 
       <section class="closing" id="start-a-project" aria-labelledby="closing-title">
-        <div>
+        <div data-future-reveal>
           <p class="eyebrow">READY TO SHAPE THE WORK</p>
-          <h2 id="closing-title">Turn the browse into a brief.</h2>
+          <h2 id="closing-title">Make your next<br /><em>move count.</em></h2>
           <p>Choose a starting point and leave with a clearer shape for the work.</p>
         </div>
         <div class="closing__actions">

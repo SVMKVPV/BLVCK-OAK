@@ -23,7 +23,7 @@ const film = $("#hero-film");
 const filmToggle = $("[data-film-toggle]");
 const searchableCards = $$("[data-search]");
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-const scrollBehavior = () => reducedMotion.matches ? "auto" : "smooth";
+const scrollBehavior = () => reducedMotion.matches || document.body.dataset.motionPaused === "true" ? "auto" : "smooth";
 const menuBackground = [mainContent, $("body > footer"), $(".mobile-actions")].filter(Boolean);
 
 $$('[data-current-year]').forEach((year) => {
@@ -346,30 +346,48 @@ function setupShelf(shelf) {
 
 shelves.forEach(setupShelf);
 
+let activeCategory = null;
 function setActiveCategory(section) {
+  if (!section || activeCategory === section) return;
+  activeCategory = section;
   categoryLinks.forEach((link) => {
     const active = link.hash === "#" + section.id;
     link.classList.toggle("is-active", active);
     if (active) {
       link.setAttribute("aria-current", "location");
-      link.scrollIntoView({ behavior: scrollBehavior(), block: "nearest", inline: "center" });
+      // Keep the active label in the horizontal strip without moving the page.
+      const track = link.parentElement;
+      const bounds = link.getBoundingClientRect();
+      const viewport = track.getBoundingClientRect();
+      if (bounds.left < viewport.left + 12 || bounds.right > viewport.right - 12) {
+        track.scrollBy({ left: bounds.left + bounds.width / 2 - viewport.left - viewport.width / 2, behavior: scrollBehavior() });
+      }
     } else {
       link.removeAttribute("aria-current");
     }
   });
 }
 
-const categoryObserver = new IntersectionObserver(
-  (entries) => {
-    const active = entries
-      .filter((entry) => entry.isIntersecting)
-      .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-    if (active) setActiveCategory(active.target);
-  },
-  { threshold: [0.1, 0.25, 0.45], rootMargin: "-30% 0px -58% 0px" },
-);
-
-shelves.forEach((shelf) => categoryObserver.observe(shelf));
+let categoryFrame = 0;
+function updateActiveCategory() {
+  categoryFrame = 0;
+  const strip = $(".category-strip");
+  const readingLine = Math.min(innerHeight * .5, header.getBoundingClientRect().bottom + (strip?.offsetHeight || 0) + 24);
+  let active = shelves[0];
+  for (const shelf of shelves) {
+    if (shelf.getBoundingClientRect().top > readingLine) break;
+    active = shelf;
+  }
+  setActiveCategory(active);
+}
+function queueCategoryUpdate() {
+  if (!categoryFrame) categoryFrame = requestAnimationFrame(updateActiveCategory);
+}
+// Tall mobile shelves may never meet an intersection-ratio threshold. Track
+// their leading edge instead, with at most one layout read batch per frame.
+window.addEventListener("scroll", queueCategoryUpdate, { passive: true });
+window.addEventListener("resize", queueCategoryUpdate, { passive: true });
+updateActiveCategory();
 
 let detailOrigin = null;
 let detailDestination = null;

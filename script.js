@@ -319,7 +319,7 @@ document.querySelector('[data-dismiss-notice]')?.addEventListener('click', () =>
   if (paymentNotice) paymentNotice.hidden = true;
 });
 
-if (window.matchMedia('(pointer: fine)').matches) {
+if (!document.body.hasAttribute('data-future-ui') && window.matchMedia('(pointer: fine)').matches) {
   document.querySelectorAll('[data-package-preview]').forEach((packagePreview) => {
     const demoBrowser = packagePreview.querySelector('.demo-browser');
 
@@ -584,7 +584,7 @@ setScrolledHeader();
 window.addEventListener('scroll', setScrolledHeader, { passive: true });
 
 function attachDepthTilt(element, strength = 5, xProperty = '--card-rx', yProperty = '--card-ry') {
-  if (!element || reducedMotion.matches || !window.matchMedia('(pointer: fine)').matches) return;
+  if (!element || document.body.hasAttribute('data-future-ui') || reducedMotion.matches || !window.matchMedia('(pointer: fine)').matches) return;
   element.addEventListener('pointermove', (event) => {
     const rect = element.getBoundingClientRect();
     const x = (event.clientX - rect.left) / rect.width - 0.5;
