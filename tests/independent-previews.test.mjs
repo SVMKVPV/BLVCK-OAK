@@ -10,13 +10,19 @@ for (const [file, url] of [
     const html = await readFile(new URL(`../previews/${file}`, import.meta.url), 'utf8');
     assert.ok(html.includes(`src="${url}"`));
     assert.match(html, /<iframe title="[^"]+"/);
+    assert.equal((html.match(/<h1\b/g) || []).length, 1);
+    assert.match(html, /<h1 class="preview-document-title">/);
     assert.match(html, /<head>/i);
     assert.doesNotMatch(html, /(?:src|href)="preview\.(?:js|css)"|location\.(replace|assign)|localStorage/);
   });
 }
 
 test('build continues to install the existing access gate on preview wrappers', async () => {
-  const build = await readFile(new URL('../scripts/build.mjs', import.meta.url), 'utf8');
+  const [build, css] = await Promise.all([
+    readFile(new URL('../scripts/build.mjs', import.meta.url), 'utf8'),
+    readFile(new URL('../previews/independent-preview.css', import.meta.url), 'utf8'),
+  ]);
   assert.match(build, /installAccessGate\(output\)/);
   assert.match(build, /site-access\.js/);
+  assert.match(css, /\.preview-document-title/);
 });
