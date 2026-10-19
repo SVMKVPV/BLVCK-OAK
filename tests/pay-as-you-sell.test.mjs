@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createQuote, nextPayment, publicQuote } from '../netlify/lib/quotes.mjs';
-import { adjustConnectedSale, createSalesConnectionUrl, maintenanceCheckoutParameters, publicPaymentArrangement, recordConnectedSale, salesContributionCents, settleMaintenanceCheckout, stopCompletedSalesTracking, validatePaymentArrangement } from '../netlify/lib/pay-as-you-sell.mjs';
+import { adjustConnectedSale, createSalesConnectionUrl, maintenanceCheckoutParameters, publicPaymentArrangement, recordConnectedSale, releaseFailedMaintenanceCheckout, salesContributionCents, settleMaintenanceCheckout, stopCompletedSalesTracking, validatePaymentArrangement } from '../netlify/lib/pay-as-you-sell.mjs';
 
 class MemoryStore {
   map = new Map();
@@ -130,6 +130,7 @@ test('maintenance is a separately accepted monthly Stripe subscription', async (
     quote.maintenance = { ...quote.maintenance, status: 'checkout_pending', checkout: { id: 'maintenance-attempt', createdAt: Date.now(), sessionId: 'cs_maintenance' } };
     const params = maintenanceCheckoutParameters(quote, quote.maintenance.checkout);
     assert.equal(params.mode, 'subscription');
+    assert.equal(params.payment_method_types, undefined);
     assert.equal(params.line_items[0].price_data.recurring.interval, 'month');
     assert.equal(params.line_items[0].price_data.unit_amount, 9900);
     const store = new MemoryStore(); await store.setJSON(`quote/${quote.id}`, quote);
@@ -144,4 +145,18 @@ test('maintenance is a separately accepted monthly Stripe subscription', async (
   } finally {
     if (previous === undefined) delete process.env.SITE_URL; else process.env.SITE_URL = previous;
   }
+});
+
+test('a failed asynchronous maintenance payment releases the matching checkout only once', async () => {
+  const store = new MemoryStore();
+  const quote = payQuote({ maintenanceEnabled: 'on', maintenanceMonthly: '99' });
+  quote.status = 'paid';
+  quote.maintenance = { ...quote.maintenance, status: 'checkout_pending', checkout: { id: 'maintenance-attempt', createdAt: Date.now(), sessionId: 'cs_failed' } };
+  await store.setJSON(`quote/${quote.id}`, quote);
+  const failed = { id: 'cs_failed', payment_status: 'unpaid', metadata: { checkout_version: 'black_oak_maintenance_v1', quote_id: quote.id, attempt_id: 'maintenance-attempt' } };
+  const released = await releaseFailedMaintenanceCheckout(failed, store);
+  assert.equal(released.maintenance.status, 'offered');
+  assert.equal(released.maintenance.checkout, null);
+  const repeated = await releaseFailedMaintenanceCheckout(failed, store);
+  assert.equal(repeated.maintenance.status, 'offered');
 });

@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { PortalError } from './portal-auth.mjs';
+import { PortalError, portalStore } from './portal-auth.mjs';
 import { notifyQuotePayment } from './quote-notifications.mjs';
 import { CUSTOM_CHECKOUT_VERSION, audToCents, grossPaid, nextPayment, quoteLink, settleQuotePayment } from './quotes.mjs';
 import { stopCompletedSalesTracking } from './pay-as-you-sell.mjs';
@@ -18,13 +18,31 @@ export function checkoutParameters(quote, attempt) {
   }
   const extraLabel = attempt.extraAmountCents > 0 ? ` (includes A$${(attempt.extraAmountCents / 100).toFixed(2)} extra)` : '';
   return {
-    mode: 'payment', payment_method_types: ['card'], customer_email: quote.customerEmail,
+    mode: 'payment', customer_email: quote.customerEmail,
     integration_identifier: 'blvck_oak_custom_qndttcba',
     billing_address_collection: 'required', customer_creation: 'always',
     client_reference_id: quote.id, metadata, payment_intent_data: { metadata },
     success_url: link.toString(), cancel_url: cancel.toString(),
     line_items: [{ quantity: 1, price_data: { currency: 'aud', unit_amount: attempt.amountCents, product_data: { name: `${quote.service} — ${instalmentStageLabel(attempt.stage, attempt.instalmentEndNumber) || (attempt.stage === 'deposit' ? 'deposit' : attempt.stage === 'balance' ? 'remaining balance' : attempt.stage === 'sales_contribution' ? 'Pay as You Sell contribution' : 'full payment')}${extraLabel}`, description: quote.description.slice(0, 480) } } }],
   };
+}
+
+export async function releaseFailedQuoteCheckout(session, store = portalStore()) {
+  if (session?.metadata?.checkout_version !== CUSTOM_CHECKOUT_VERSION || session.payment_status !== 'unpaid') return null;
+  const quoteId = session.metadata.quote_id;
+  const attemptId = session.metadata.attempt_id;
+  if (!/^[a-f0-9]{32}$/.test(quoteId || '') || !attemptId || !session.id) return null;
+  for (let tries = 0; tries < 6; tries += 1) {
+    const entry = await store.getWithMetadata(`quote/${quoteId}`, { type: 'json' });
+    const quote = entry?.data;
+    if (!quote) return null;
+    if (!quote.checkout) return quote;
+    if (quote.checkout.id !== attemptId || quote.checkout.sessionId !== session.id) return quote;
+    const updated = { ...quote, checkout: null, updatedAt: new Date().toISOString() };
+    const saved = await store.setJSON(`quote/${quoteId}`, updated, { onlyIfMatch: entry.etag });
+    if (saved.modified) return updated;
+  }
+  throw new PortalError('Failed checkout recovery is busy. Retry safely.', 409);
 }
 
 export async function reconcileQuoteCheckout(quote, stripe, store, notify = notifyQuotePayment) {

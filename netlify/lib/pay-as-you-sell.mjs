@@ -304,6 +304,25 @@ export async function settleMaintenanceCheckout(session, store) {
   throw new PortalError('Maintenance confirmation is busy. Retry safely.', 409);
 }
 
+export async function releaseFailedMaintenanceCheckout(session, store) {
+  if (session?.metadata?.checkout_version !== MAINTENANCE_VERSION || session.payment_status !== 'unpaid') return null;
+  const quoteId = session.metadata.quote_id;
+  const attemptId = session.metadata.attempt_id;
+  if (!/^[a-f0-9]{32}$/.test(quoteId || '') || !attemptId || !session.id) return null;
+  for (let tries = 0; tries < 6; tries += 1) {
+    const entry = await store.getWithMetadata(`quote/${quoteId}`, { type: 'json' });
+    const quote = entry?.data;
+    if (!quote) return null;
+    const maintenance = readMaintenance(quote);
+    if (!maintenance.checkout) return quote;
+    if (maintenance.checkout.id !== attemptId || maintenance.checkout.sessionId !== session.id) return quote;
+    const updated = { ...quote, maintenance: { ...maintenance, status: 'offered', checkout: null }, updatedAt: new Date().toISOString() };
+    const saved = await store.setJSON(`quote/${quoteId}`, updated, { onlyIfMatch: entry.etag });
+    if (saved.modified) return updated;
+  }
+  throw new PortalError('Failed maintenance checkout recovery is busy. Retry safely.', 409);
+}
+
 export async function reconcileMaintenanceCheckout(quote, stripe, store) {
   const maintenance = readMaintenance(quote);
   if (!maintenance.checkout?.sessionId) return quote;

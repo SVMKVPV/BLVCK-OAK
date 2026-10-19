@@ -17,9 +17,10 @@ import {
 } from '../lib/referrals.mjs';
 import { emailShell, escapeHtml, formatAud, getOwnerEmail, sendEmail } from '../lib/email.mjs';
 import { CUSTOM_CHECKOUT_VERSION, markQuotePaymentReview, nextPayment, settleQuotePayment } from '../lib/quotes.mjs';
+import { releaseFailedQuoteCheckout } from '../lib/quote-checkout.mjs';
 import { portalStore } from '../lib/portal-auth.mjs';
 import { notifyQuotePayment } from '../lib/quote-notifications.mjs';
-import { MAINTENANCE_VERSION, adjustConnectedSale, disconnectSalesAccount, recordConnectedSale, settleMaintenanceCheckout, stopCompletedSalesTracking, updateMaintenanceSubscription } from '../lib/pay-as-you-sell.mjs';
+import { MAINTENANCE_VERSION, adjustConnectedSale, disconnectSalesAccount, recordConnectedSale, releaseFailedMaintenanceCheckout, settleMaintenanceCheckout, stopCompletedSalesTracking, updateMaintenanceSubscription } from '../lib/pay-as-you-sell.mjs';
 
 async function reviewCustomCharge(stripe, charge, reason) {
   const id = typeof charge.payment_intent === 'string' ? charge.payment_intent : charge.payment_intent?.id;
@@ -294,6 +295,12 @@ export default async function handler(request) {
       }
     } else if (event.account && event.type === 'account.application.deauthorized') {
       await disconnectSalesAccount(event.account, portalStore());
+    } else if (event.type === 'checkout.session.async_payment_failed') {
+      if (event.data.object.metadata?.checkout_version === MAINTENANCE_VERSION) {
+        await releaseFailedMaintenanceCheckout(event.data.object, portalStore());
+      } else if (event.data.object.metadata?.checkout_version === CUSTOM_CHECKOUT_VERSION) {
+        await releaseFailedQuoteCheckout(event.data.object, portalStore());
+      }
     } else if (event.type === 'checkout.session.completed' || event.type === 'checkout.session.async_payment_succeeded') {
       if (event.data.object.metadata?.checkout_version === MAINTENANCE_VERSION) {
         await settleMaintenanceCheckout(event.data.object, portalStore());

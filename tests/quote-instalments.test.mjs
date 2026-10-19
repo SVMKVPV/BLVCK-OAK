@@ -4,7 +4,7 @@ import { PortalError } from '../netlify/lib/portal-auth.mjs';
 import { INSTALMENT_COUNT, INSTALMENT_PLAN_TYPE, INSTALMENT_VERSION, instalmentAmounts, readInstalmentProgress } from '../netlify/lib/instalments.mjs';
 import { publicPaymentArrangement } from '../netlify/lib/pay-as-you-sell.mjs';
 import { applyPaidSession, createQuote, CUSTOM_CHECKOUT_VERSION, grossPaid, markQuotePaymentReview, nextPayment, publicQuote, settleQuotePayment } from '../netlify/lib/quotes.mjs';
-import { checkoutParameters, openQuoteCheckout, reconcileQuoteCheckout } from '../netlify/lib/quote-checkout.mjs';
+import { checkoutParameters, openQuoteCheckout, reconcileQuoteCheckout, releaseFailedQuoteCheckout } from '../netlify/lib/quote-checkout.mjs';
 
 const originalSiteUrl = process.env.SITE_URL;
 test.before(() => { process.env.SITE_URL = 'https://blackoak.example'; });
@@ -370,6 +370,7 @@ test('Stripe checkout labels each part clearly and uses one-time on-session paym
     assert.equal(price.unit_amount, expectedAmounts[index - 1]);
     assert.equal(price.currency, 'aud');
     assert.equal(params.mode, 'payment');
+    assert.equal(params.payment_method_types, undefined);
     assert.equal(params.customer_email, input.customerEmail);
     assert.equal(params.line_items[0].quantity, 1);
     assert.equal(price.recurring, undefined);
@@ -380,4 +381,18 @@ test('Stripe checkout labels each part clearly and uses one-time on-session paym
     assert.equal(params.discounts, undefined);
     quote = applyPaidSession(quote, paidSession(quote));
   }
+});
+
+test('a failed asynchronous quote payment releases the matching checkout only once', async () => {
+  const store = new MemoryStore();
+  const stripe = fakeStripe();
+  const original = instalmentQuote();
+  await store.setJSON(quoteKey(original), original);
+  await openQuoteCheckout(original.id, stripe, store);
+  const quote = await store.get(quoteKey(original));
+  const session = stripe.sessions.get(quote.checkout.sessionId);
+  const released = await releaseFailedQuoteCheckout(session, store);
+  assert.equal(released.checkout, null);
+  const repeated = await releaseFailedQuoteCheckout(session, store);
+  assert.equal(repeated.checkout, null);
 });
