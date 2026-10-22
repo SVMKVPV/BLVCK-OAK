@@ -3,6 +3,7 @@ import { publicFeatureAccess } from '../lib/feature-access.mjs';
 import { json } from '../lib/referrals.mjs';
 import { clientError, portalStore, readBody } from '../lib/portal-auth.mjs';
 import { enforcePublicQuota } from '../lib/public-rate-limit.mjs';
+import { ANALYTICS_EVENTS, coarseTechnology, publicAnalyticsPath } from '../lib/site-analytics.mjs';
 
 export default async function handler(request, context) {
   if (request.method !== 'POST') return json({error:'Method not allowed.'},405);
@@ -20,8 +21,11 @@ export default async function handler(request, context) {
   }
 
   try {
-    const path=String(body.path||'/').slice(0,160);
-    if (!path.startsWith('/') || path.includes('partners') || path.includes('login')) return json({ok:true});
+    const path = publicAnalyticsPath(body.path);
+    const event = String(body.event || 'page_view');
+    if (!path || !ANALYTICS_EVENTS.has(event)) return json({ok:true});
+    const technology = coarseTechnology(request.headers.get('user-agent') || '');
+    if (technology.bot || request.headers.get('dnt') === '1' || request.headers.get('sec-gpc') === '1') return json({ok:true});
     const raw=String(context?.ip||'').trim();
     const salt=String(process.env.ANALYTICS_SALT||process.env.SITE_URL||'black-oak');
     const visitor=raw?createHash('sha256').update(salt+':'+raw).digest('hex').slice(0,24):null;
@@ -36,14 +40,16 @@ export default async function handler(request, context) {
     } catch {}
     const campaign = {};
     for (const key of ['utm_source','utm_medium','utm_campaign','ref']) {
-      const value = String(body[key] || '').trim().replace(/[^a-zA-Z0-9 _.-]/g,'').slice(0,80);
+      const supplied = String(body[key] || '').trim();
+      if (/@|:\/\/|%40/i.test(supplied)) continue;
+      const value = supplied.replace(/[^a-zA-Z0-9 _.-]/g,'').slice(0,80);
       if (value) campaign[key] = value;
     }
     const geo = context?.geo || {};
     const country = String(geo.country?.name || geo.country?.code || 'Unknown').slice(0,80);
     const city = String(geo.city || 'Unknown').slice(0,80);
     const store=portalStore(); const at=Date.now(); const id=at+'-'+randomBytes(6).toString('hex');
-    await store.setJSON('analytics-visit/'+id,{at,path,visitor,source,campaign,country,city});
+    await store.setJSON('analytics-visit/'+id,{at,path,event,visitor,source,campaign,country,city,device:technology.device,browser:technology.browser});
     return json({ok:true},202);
   } catch { return json({ok:true},202); }
 }

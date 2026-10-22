@@ -44,6 +44,7 @@ test('guest homepage controls and package selection work without a login redirec
 test('customer-facing acquisition pages and previews are browsable by guests',async()=>{
   for (const path of [
     '/portfolio.html', '/marketplace', '/audit.html', '/quote',
+    '/websites-near-me-sydney', '/websites-near-me-sydney.html',
     '/ai-generator.html', '/contact.html?service=seo#contact-title', '/book',
     '/nearby.html', '/previews/wedding-invitation.html',
   ]) {

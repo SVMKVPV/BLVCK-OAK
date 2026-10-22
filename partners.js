@@ -361,6 +361,7 @@ async function loadDashboard() {
     $('[data-auth-panel]').hidden = true; $('[data-dashboard]').hidden = false; $('[data-signout]').hidden = false;
     $('[data-workspace-title]').textContent = dashboard.isOwner ? 'Your clients. Your control.' : 'Welcome, ' + dashboard.account.name.split(' ')[0] + '.';
     $('[data-role-tag]').textContent = dashboard.isOwner ? 'Owner workspace' : 'Partner workspace';
+    $('[data-owner-analytics-link]').hidden = !dashboard.isOwner;
     const referralCodeLink = $('[data-partner-code]');
     referralCodeLink.textContent = dashboard.referral.code;
     referralCodeLink.href = enterpriseReferralPath(dashboard.referral.code);
@@ -380,6 +381,7 @@ async function loadDashboard() {
   } catch (error) {
     if (error.status === 401) {
       dashboard = null; $('[data-auth-panel]').hidden = false; $('[data-dashboard]').hidden = true; $('[data-signout]').hidden = true;
+      $('[data-owner-analytics-link]').hidden = true;
       $('[data-auth-start]').hidden = false; $('[data-auth-verify]').hidden = true;
       status('[data-global-status]', 'Sign in or create your partner account to continue.');
     } else { status('[data-global-status]', error.message, true); }

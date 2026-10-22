@@ -526,6 +526,7 @@ contactForm?.addEventListener('submit', async (event) => {
     });
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || 'Your enquiry could not be sent.');
+    window.blvckOakAnalytics?.track('form_success');
     contactForm.reset();
     preselectContactService();
     contactStatus.textContent = result.message;
@@ -737,8 +738,5 @@ function initialiseHeroCanvas() {
 initialiseHeroCanvas();
 
 
-// Privacy-minimized first-party page-view analytics. No cookies, fingerprinting or marketing identifiers.
-if (location.protocol === 'https:' && !/\/(partners|login)(\.html)?$/i.test(location.pathname)) {
-  const sendView = () => fetch('/.netlify/functions/analytics-visit', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({path:location.pathname,referrer:document.referrer,...Object.fromEntries(['utm_source','utm_medium','utm_campaign','ref'].map(k=>[k,new URLSearchParams(location.search).get(k)||'']).filter(([,v])=>v))}),keepalive:true,credentials:'same-origin'}).catch(()=>{});
-  if (document.readyState === 'complete') sendView(); else window.addEventListener('load',sendView,{once:true});
-}
+// Shared first-party measurement is installed once by the build in
+// analytics-tracking.js, including public pages that do not load this file.

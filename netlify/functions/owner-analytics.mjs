@@ -33,7 +33,7 @@ async function accountRows(store) {
 async function visitSummary(store, since) {
   const { blobs } = await store.list({ prefix:'analytics-visit/' });
   const rows = (await Promise.all(blobs.slice(-5000).map(({key})=>store.get(key,{type:'json'})))).filter(Boolean);
-  const recent = rows.filter(v => Number(v.at || 0) >= since*1000);
+  const recent = rows.filter(v => Number(v.at || 0) >= since*1000 && (!v.event || v.event === 'page_view'));
   const group = (keyFn, labelKey, max = 12) => Object.entries(recent.reduce((totals, row) => {
     const key = String(keyFn(row) || 'Unknown').slice(0,120);
     totals[key] = (totals[key] || 0) + 1;

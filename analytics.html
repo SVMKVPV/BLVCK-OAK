@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080909"><meta name="robots" content="noindex,nofollow">
+  <meta name="description" content="Private BLVCK OAK owner analytics.">
+  <title>Analytics — BLVCK OAK Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/analytics.css?v=1">
+  <script type="module" src="/analytics.js?v=1"></script>
+</head>
+<body>
+  <a class="skip-link" href="#analytics-main">Skip to reports</a>
+  <header class="analytics-header"><a class="wordmark" href="/">BLVCK OAK<span>ADMIN / ANALYTICS</span></a><nav aria-label="Admin navigation"><a href="/partners.html">Partner workspace ↗</a><a href="/">View website ↗</a></nav></header>
+  <main id="analytics-main" class="analytics-main">
+    <section class="page-heading"><div><p class="eyebrow">Measure what moves.</p><h1>Your business.<br><span>In view.</span></h1></div><p>Understand the visits.<br>Find the next opportunity.</p></section>
+    <p class="status-banner" id="analytics-status" role="status" aria-live="polite">Checking your owner access…</p>
+    <section class="access-panel" id="access-panel" hidden><h2 id="access-title">Owner access required</h2><p id="access-message"></p><a class="button" href="/partners.html?next=%2Fanalytics.html">Sign in to continue ↗</a></section>
+    <section id="analytics-workspace" hidden aria-label="Private owner reports">
+      <div class="workspace-topline"><div class="source-selector" role="group" aria-label="Report data source"><button type="button" data-source="first_party" aria-pressed="true">Website records</button><button type="button" data-source="ga4" aria-pressed="false">Google Analytics</button></div><a class="text-link" id="open-ga4" href="https://analytics.google.com/" target="_blank" rel="noopener noreferrer">Open Google Analytics ↗</a></div>
+      <form class="report-filters" id="report-filters">
+        <label>Period<select name="period" id="period"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option><option value="365">Last 12 months</option><option value="custom">Custom dates</option></select></label>
+        <label>From<input type="date" name="start" id="start" required></label><label>To<input type="date" name="end" id="end" required></label>
+        <label>Country<input type="text" name="country" maxlength="80" placeholder="All countries" autocomplete="off"></label>
+        <label>Device<select name="device"><option value="">All devices</option><option value="desktop">Desktop</option><option value="mobile">Mobile</option><option value="tablet">Tablet</option></select></label>
+        <label>Page starts with<input type="text" name="page" maxlength="160" placeholder="/websites-near-me-sydney" autocomplete="off"></label>
+        <button class="button" type="submit" id="refresh-reports">Apply filters ↗</button>
+      </form>
+      <div class="report-context"><p id="report-description"></p><p id="report-updated"></p></div>
+      <nav class="report-tabs" aria-label="Report sections"><button type="button" data-view="overview" aria-pressed="true">Overview</button><button type="button" data-view="acquisition" aria-pressed="false">Acquisition</button><button type="button" data-view="engagement" aria-pressed="false">Pages &amp; events</button><button type="button" data-view="audience" aria-pressed="false">Audience</button><button type="button" data-view="revenue" aria-pressed="false">Revenue</button></nav>
+      <section id="connection-panel" class="connection-panel" hidden><p class="eyebrow">Google Analytics / connection</p><h2>Connect the source.<br>See the full picture.</h2><p id="connection-message">Website records are already available. Connect your GA4 property to add Google's acquisition, engagement, key event, ecommerce and realtime reports.</p><details><summary>Connection steps for your site administrator</summary><ol><li>Choose the BLVCK OAK GA4 property and enable the Google Analytics Data API in your Google Cloud project.</li><li>Authorize read-only Analytics access for an account with access to that property. Obtain an OAuth refresh token using <code>https://www.googleapis.com/auth/analytics.readonly</code>.</li><li>In Netlify, set <code>GA4_PROPERTY_ID</code>, <code>GA4_CLIENT_ID</code>, <code>GA4_CLIENT_SECRET</code> and <code>GA4_REFRESH_TOKEN</code> as server-side variables with Functions access, then redeploy.</li><li>Use the numeric property ID, not the <code>G-</code> measurement ID. Keep secrets out of frontend code and chat.</li></ol><p id="missing-config"></p><p>Connecting reports does not install a Google tag or import past visits. The GA4 property must already collect the events you want to report.</p></details></section>
+      <div id="report-content"><section class="metrics-grid" id="metrics" aria-label="Period summary"></section><section class="chart-card" id="chart-card"><div class="card-heading"><div><p class="eyebrow">The daily picture</p><h2 id="chart-title">Website views</h2></div><button class="export-button" id="export-timeline" type="button">Export CSV ↓</button></div><div id="chart" class="chart" role="img" aria-label="Daily website views"></div><p class="chart-caption">Daily counts for the selected period. Detailed values are available in the table below and CSV export.</p><details class="chart-details"><summary>View daily data table</summary><div id="timeline-table"></div></details></section><div class="report-grid" id="reports"></div></div>
+      <aside class="report-notes"><h2>Read the numbers clearly.</h2><ul id="report-notes"></ul><p>For Google Analytics Explorations, Advertising, audiences, retention cohorts, DebugView and property settings, <a href="https://analytics.google.com/" target="_blank" rel="noopener noreferrer">open Google Analytics ↗</a>.</p><p>For client payments, Stripe fees and account revenue, <a href="/partners.html#owner-analytics-title">open your business workspace ↗</a>.</p></aside>
+    </section>
+    <noscript><p class="status-banner">JavaScript is required to sign in and load private analytics. No private report data is included in this page.</p></noscript>
+  </main>
+  <footer class="analytics-footer"><span>BLVCK OAK · Independent digital studio</span><span>Owner access · Private reports</span></footer>
+</body>
+</html>

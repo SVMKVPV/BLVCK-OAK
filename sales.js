@@ -24,6 +24,7 @@ if (bookingForm) {
     try {
       const data = Object.fromEntries(new FormData(bookingForm));
       const result = await submitSalesForm('/api/book', { ...data, acceptedPrivacy: data.privacy === 'on', requestId: salesRequestId() });
+      window.blvckOakAnalytics?.track('form_success');
       bookingForm.reset(); date.min = local; date.max = maximum; status.textContent = result.message;
     } catch (error) { status.classList.add('error'); status.textContent = error.message; }
     finally { button.disabled = false; }
@@ -38,6 +39,7 @@ if (auditForm) auditForm.addEventListener('submit', async (event) => {
   try {
     const data = Object.fromEntries(new FormData(auditForm));
     const result = await submitSalesForm('/api/website-audit', { ...data, acceptedPrivacy: data.privacy === 'on', requestId: salesRequestId() });
+    window.blvckOakAnalytics?.track('form_success');
     document.querySelector('[data-audit-score]').textContent = result.score;
     document.querySelector('[data-audit-heading]').textContent = result.score >= 80 ? 'Strong foundation. Here are the refinements.' : result.score >= 55 ? 'Good start. These fixes can lift it.' : 'These are the highest-impact fixes.';
     const checks = document.querySelector('[data-audit-checks]'); checks.replaceChildren(...result.checks.map((check) => {

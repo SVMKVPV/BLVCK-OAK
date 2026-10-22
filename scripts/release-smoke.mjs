@@ -58,7 +58,12 @@ async function allHtml(directory) {
   for (const entry of await readdir(directory,{withFileTypes:true})) {
     const path=resolve(directory,entry.name);
     if(entry.isDirectory()) list.push(...await allHtml(path));
-    else if(entry.name.endsWith('.html')) list.push(await readFile(path,'utf8'));
+    else if(entry.name.endsWith('.html')) {
+      const html = await readFile(path,'utf8');
+      // Private workspaces legitimately link to authenticated third-party tools.
+      // Only publicly indexable content belongs in the public external-link audit.
+      if (!/<meta\b[^>]*name=["']robots["'][^>]*content=["'][^"']*noindex/i.test(html)) list.push(html);
+    }
   }
   return list;
 }
@@ -102,6 +107,11 @@ try {
   await check(base,'/community/profiles.json',[200],/ai-100/);
   await check(base,'/partners.html',[200],/data-lead-search[^>]+hidden/);
   await check(base,'/portfolio.html',[200],/Cinematic Wedding Invitation/);
+  await check(base,'/websites-near-me-sydney',[200],/Website Designer Near You in Sydney/);
+  await check(base,'/contact.html',[200],/4 Powlett Glade/);
+  await check(base,'/analytics.html',[200],/noindex/);
+  await check(base,'/.netlify/functions/owner-traffic',[401,403]);
+  await check(base,'/.netlify/functions/owner-ga4',[401,403]);
   await check(base,'/previews/wedding-invitation.html',[200],/wedding-invitation\.css/);
   await check(base,'/previews/wedding-invitation.css',[200],/w-frame/);
   await check(base,'/previews/wedding-invitation.js',[200],/DOMContentLoaded/);
