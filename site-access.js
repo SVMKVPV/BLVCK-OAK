@@ -3,6 +3,7 @@
   const acquisitionPaths = new Set([
     '/', '/index.html',
     '/portfolio', '/portfolio.html',
+    '/websites-near-me-sydney', '/websites-near-me-sydney.html',
     '/marketplace', '/marketplace.html',
     '/audit', '/audit.html',
     '/quote', '/quote.html',

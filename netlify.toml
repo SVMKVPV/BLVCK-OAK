@@ -12,6 +12,18 @@
   directory = "netlify/functions"
   node_bundler = "esbuild"
 
+# One canonical public URL for the Sydney service page.
+[[redirects]]
+  from = "/websites-near-me-sydney.html"
+  to = "/websites-near-me-sydney"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/websites-near-me-sydney"
+  to = "/websites-near-me-sydney.html"
+  status = 200
+
 [functions."weekly-referral-payouts"]
   schedule = "0 22 * * 4"
 
@@ -152,7 +164,7 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(), microphone=(), geolocation=(self)"
     Strict-Transport-Security = "max-age=31536000; includeSubDomains"
-    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; media-src 'self'; connect-src 'self'; frame-src 'self' https://*.netlify.app https://*.chatgpt.site; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests"
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://raw.githubusercontent.com/SVMKVPV/CAUTION-CO/ https://glow-with-xia.higgsfield.app/assets/; media-src 'self'; connect-src 'self'; frame-src 'self' https://*.netlify.app https://*.chatgpt.site; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests"
 
 [[headers]]
   for = "/site.webmanifest"

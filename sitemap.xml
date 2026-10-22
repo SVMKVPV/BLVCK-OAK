@@ -26,11 +26,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://blvckoak.com.au/ai-generator.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://blvckoak.com.au/contact.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -44,5 +39,8 @@
     <loc>https://blvckoak.com.au/referrals.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://blvckoak.com.au/websites-near-me-sydney</loc>
   </url>
 </urlset>

@@ -16,6 +16,8 @@ for (const file of [
   'community.js','community.css','site-access.js','site-access.css','index.html','referrals.html','contact.html','privacy.html','terms.html','refunds.html',
   'portfolio.html','marketplace.html','marketplace.css','marketplace.js','quote.html','style.css','studio.css','studio-intro.css','studio-noscript.css','og.png','cinematic-intro.js','liquid-oak.js','script.js','studio.js',
   'partners.html','partners.js','portal.css','pay.html','pay.js','progress.html','progress.js','future-ui.css','future-ui.js','future-scene.js',
+  'analytics.html','analytics.js','analytics.css','analytics-utils.js','analytics-tracking.js',
+  'websites-near-me-sydney.html','local-seo.css',
   'portfolio.js','quote-builder.js','audit.html','book.html','ai-generator.html','ai-generator.css','ai-generator.js','sales-config.js','sales.js',
   'oakpay.html','oakpay-app.html','oakpay.css','oakpay-app.js',
   'robots.txt','sitemap.xml','favicon.ico','favicon.svg','apple-touch-icon.png','android-chrome-192x192.png','android-chrome-512x512.png','site.webmanifest'
@@ -55,7 +57,7 @@ async function installAccessGate(directory) {
     if (entry.isDirectory()) await installAccessGate(path);
     else if (entry.name.endsWith('.html')) {
       const html = await readFile(path, 'utf8');
-      await writeFile(path, html.replace(/<head([^>]*)>/i, '<head$1><link rel="stylesheet" href="/site-access.css"><script src="/site-access.js"></script>'));
+      await writeFile(path, html.replace(/<head([^>]*)>/i, '<head$1><link rel="stylesheet" href="/site-access.css"><script src="/site-access.js"></script><script src="/analytics-tracking.js" defer></script>'));
     }
   }
 }

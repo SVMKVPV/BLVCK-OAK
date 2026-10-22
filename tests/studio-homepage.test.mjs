@@ -9,7 +9,7 @@ test('studio homepage preserves production SEO, routes and commercial journeys',
 
   assert.match(html, /<link rel="canonical" href="https:\/\/blvckoak\.com\.au\/"/);
   assert.match(html, /<meta name="robots" content="index,follow,max-image-preview:large"/);
-  assert.match(html, /"@type": "Organization"/);
+  assert.match(html, /"@type": "LocalBusiness"/);
   assert.match(html, /"@type": "WebSite"/);
   assert.match(html, /"@type": "WebPage"/);
   assert.equal((html.match(/<h1\b/g) || []).length, 1);
