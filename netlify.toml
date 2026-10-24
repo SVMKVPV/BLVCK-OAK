@@ -3,7 +3,7 @@
   publish = "dist"
 
 [build.environment]
-  NODE_VERSION = "22"
+  NODE_VERSION = "22.23.4"
 
 [context.production]
   command = "pnpm run check && pnpm run preflight:live && pnpm run build"
