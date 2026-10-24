@@ -8,6 +8,18 @@
   },
   "sites": [
     {
+      "id": "blvck-oak-automate",
+      "name": "BLVCK OAK Automate",
+      "currentPreview": "https://blvck-oak-automate.netlify.app/",
+      "previewStatus": "public_pilot",
+      "deploymentUrl": "https://blvck-oak-automate.netlify.app/",
+      "currentSource": "SVMKVPV/BLVCK-OAK-AUTOMATE",
+      "targetRepo": "SVMKVPV/BLVCK-OAK-AUTOMATE",
+      "repoVisibility": "private",
+      "repoStatus": "active",
+      "notes": "Public pilot preview. Live AI, email, trials and billing require separate launch setup; automate.blvckoak.com.au is the planned domain."
+    },
+    {
       "id": "aurelis-spatial-studio",
       "name": "AURELIS — Spatial Design Studio",
       "currentPreview": "https://aurelis-spatial-studio.samkapa3.chatgpt.site/",
