@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1234" height="712" viewBox="0 0 1234 712" role="img" aria-labelledby="title desc">
+<title>BLVCK OAK Automate — illustrative product graphic</title>
+<desc>Concept artwork of a dark AI-assisted website chat and email dashboard. This is not a screenshot of a live account.</desc>
+<defs>
+  <radialGradient id="glow"><stop offset="0" stop-color="#5f327b" stop-opacity=".52"/><stop offset="1" stop-color="#080b0c" stop-opacity="0"/></radialGradient>
+  <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#13151c"/><stop offset=".55" stop-color="#0b1011"/><stop offset="1" stop-color="#191125"/></linearGradient>
+  <linearGradient id="accent"><stop stop-color="#e2ffb3"/><stop offset="1" stop-color="#b5ffdb"/></linearGradient>
+  <linearGradient id="panel" x2=".95" y2="1"><stop stop-color="#242331"/><stop offset="1" stop-color="#12191d"/></linearGradient>
+  <filter id="soft"><feGaussianBlur stdDeviation="36"/></filter>
+</defs>
+<rect width="1234" height="712" fill="url(#bg)"/>
+<circle cx="700" cy="176" r="405" fill="url(#glow)"/>
+<ellipse cx="1106" cy="672" rx="338" ry="182" fill="#5b4085" opacity=".19" filter="url(#soft)"/>
+<g stroke="#bd82e7" fill="none" opacity=".20" stroke-width="1.1">
+  <path d="M66 128 151 181 273 137 343 216 449 142 583 185 680 115 786 194 873 92 1037 154 1166 118"/>
+  <path d="M39 384 179 315 281 367 434 292 552 334 647 262 763 345 857 282 984 324 1167 235"/>
+  <path d="M135 554 277 466 405 543 564 457 712 541 866 465 1037 550 1198 460"/>
+  <path d="M151 181 179 315 277 466M343 216 434 292 405 543M583 185 647 262 712 541M873 92 857 282 866 465M1037 154 984 324 1037 550"/>
+</g>
+<g fill="#cf95ff" opacity=".78">
+  <circle cx="151" cy="181" r="3"/><circle cx="343" cy="216" r="4"/><circle cx="583" cy="185" r="3"/><circle cx="873" cy="92" r="3"/><circle cx="1037" cy="154" r="4"/><circle cx="179" cy="315" r="3"/><circle cx="434" cy="292" r="4"/><circle cx="647" cy="262" r="3"/><circle cx="857" cy="282" r="4"/><circle cx="984" cy="324" r="3"/><circle cx="277" cy="466" r="3"/><circle cx="405" cy="543" r="4"/><circle cx="712" cy="541" r="3"/><circle cx="866" cy="465" r="4"/><circle cx="1037" cy="550" r="3"/>
+</g>
+<g font-family="Arial, Helvetica, sans-serif">
+  <g transform="translate(72 54)">
+    <rect width="48" height="48" rx="12" fill="#d4f7ab"/>
+    <path d="M15 31 24 13 34 31M19 25H30" fill="none" stroke="#18241a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="64" y="22" fill="#f9fbfa" font-size="20" font-weight="800" letter-spacing="3">BLVCK OAK</text>
+    <text x="64" y="43" fill="#d5f7ab" font-size="14" font-weight="700" letter-spacing="5">AUTOMATE</text>
+  </g>
+  <text x="72" y="213" fill="#d4f7ab" font-size="14" font-weight="700" letter-spacing="4">AI-ASSISTED CUSTOMER ENQUIRIES</text>
+  <text x="70" y="282" fill="#f3f3f7" font-size="60" font-weight="700" letter-spacing="-2">More conversations.</text>
+  <text x="70" y="353" fill="#d9baff" font-size="60" font-weight="700" letter-spacing="-2">Less busywork.</text>
+  <text x="73" y="410" fill="#b8c0bd" font-size="22">Website chat · Email drafts · Lead capture</text>
+  <g transform="translate(72 490)">
+    <rect width="365" height="122" rx="22" fill="#151b1c" stroke="#535061"/>
+    <circle cx="42" cy="38" r="13" fill="#d8fca1"/>
+    <path d="M35 37h14M35 44h9" stroke="#0e1611" stroke-width="2.2" stroke-linecap="round"/>
+    <text x="70" y="41" fill="#ecf5ed" font-size="24" font-weight="700">Website chat</text>
+    <text x="27" y="83" fill="#9aa7a3" font-size="18">Never miss an enquiry.</text>
+  </g>
+  <g transform="translate(459 456)">
+    <rect width="336" height="157" rx="22" fill="url(#panel)" stroke="#826c9c"/>
+    <rect x="25" y="29" width="42" height="34" rx="8" fill="#d9baff" opacity=".95"/>
+    <path d="m33 40 13 10 13-10" fill="none" stroke="#372742" stroke-width="2.4"/>
+    <text x="85" y="51" fill="#f2eef7" font-size="23" font-weight="700">Email drafts</text>
+    <text x="27" y="96" fill="#bcc0cf" font-size="18">Review before sending.</text>
+    <rect x="27" y="118" width="139" height="23" rx="11.5" fill="#603d7f"/>
+    <text x="43" y="135" fill="#f1d5ff" font-size="12" font-weight="700">HUMAN APPROVAL</text>
+  </g>
+  <g transform="translate(817 410)">
+    <rect width="346" height="200" rx="22" fill="#17201f" stroke="#647c73"/>
+    <circle cx="46" cy="50" r="19" fill="#d8fca1"/>
+    <path d="M35 50h22M46 39v22" stroke="#172a1e" stroke-width="3" stroke-linecap="round"/>
+    <text x="82" y="57" fill="#f1f6f2" font-size="26" font-weight="700">Capture leads</text>
+    <path d="M31 105h278M31 148h232" stroke="#50605d" stroke-width="13" stroke-linecap="round" opacity=".52"/>
+    <text x="30" y="184" fill="#aeb6b3" font-size="16">Your team stays in control.</text>
+  </g>
+  <text x="74" y="672" fill="#aeb5b0" font-size="13" letter-spacing="2">ILLUSTRATIVE CONCEPT · PUBLIC PILOT</text>
+</g>
+</svg>

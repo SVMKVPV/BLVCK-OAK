@@ -18,13 +18,15 @@ const externalThumbnails = new Map([
 ]);
 
 test('every marketplace item has a local or approved thumbnail without a live iframe', () => {
-  assert.equal(products.length, 26);
+  assert.equal(products.length, 27);
   // Explicitly labelled concept artwork may be reused; website previews remain distinct.
   const previews = products.filter(product => product.thumbnailKind !== 'concept');
   assert.equal(new Set(previews.map(product => product.thumbnail)).size, previews.length);
   for (const product of products) {
     if (externalThumbnails.has(product.id)) {
       assert.equal(product.thumbnail, externalThumbnails.get(product.id));
+    } else if (product.thumbnail.endsWith('.svg') && product.thumbnailKind === 'concept') {
+      assert.match(product.thumbnail, /^assets\/marketplace\/[a-z0-9-]+\.svg$/);
     } else {
       assert.match(product.thumbnail, /^assets\/marketplace\/[a-z0-9-]+\.jpg$/);
     }
@@ -38,14 +40,20 @@ test('every marketplace item has a local or approved thumbnail without a live if
   }
 });
 
-test('marketplace image assets contain nonempty JPEG images', async () => {
+test('marketplace image assets contain nonempty JPEGs or labelled SVG concept art', async () => {
   for (const product of products) {
-    if (externalThumbnails.has(product.id)) continue; // Explicit external assets, not local JPEGs.
+    if (externalThumbnails.has(product.id)) continue;
     const image = await readFile(new URL(`../${product.thumbnail}`, import.meta.url));
     assert.ok(image.length > 1024, `${product.name} has image data`);
-    assert.equal(image[0], 0xff, product.thumbnail);
-    assert.equal(image[1], 0xd8, product.thumbnail);
-    assert.equal(image[2], 0xff, product.thumbnail);
+    if (product.thumbnail.endsWith('.svg')) {
+      assert.equal(product.thumbnailKind, 'concept');
+      assert.match(image.toString('utf8'), /^<svg\b/);
+      assert.match(image.toString('utf8'), /<title>/);
+    } else {
+      assert.equal(image[0], 0xff, product.thumbnail);
+      assert.equal(image[1], 0xd8, product.thumbnail);
+      assert.equal(image[2], 0xff, product.thumbnail);
+    }
   }
 });
 
@@ -94,4 +102,17 @@ test('failed images are hidden in favour of the accessible monogram fallback', (
   assert.match(css, /\.site-preview-fallback\[hidden\],\.site-preview-image\[hidden\]\{display:none\}/);
   assert.match(css, /\.site-preview-image\{[^}]*object-position:top/);
   assert.ok(source.includes('bindPreviewImages(grid)'));
+});
+
+test('BLVCK OAK Automate is listed as a public pilot, without claiming live billing', () => {
+  const automate = products.filter(product => product.id === 'blvck-oak-automate');
+  assert.equal(automate.length, 1);
+  assert.equal(automate[0].category, 'AI automation');
+  assert.equal(automate[0].preview, 'https://blvck-oak-automate.netlify.app/');
+  assert.equal(automate[0].price, null);
+  assert.equal(automate[0].badge, 'Public pilot');
+  const rendered = card(automate[0]);
+  assert.match(rendered, /Concept image/);
+  assert.match(rendered, /Live integrations, trials and billing are not yet launched/);
+  assert.match(rendered, /href="https:\/\/blvck-oak-automate.netlify.app\/"/);
 });
