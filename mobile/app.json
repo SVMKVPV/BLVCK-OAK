@@ -1,0 +1,17 @@
+{
+  "expo": {
+    "name": "BLVCK OAK",
+    "slug": "blvck-oak",
+    "scheme": "blvckoak",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "au.com.blvckoak.app"
+    },
+    "plugins": [
+      "expo-router"
+    ]
+  }
+}
