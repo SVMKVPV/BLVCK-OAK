@@ -109,6 +109,9 @@ try {
   await check(base,'/portfolio.html',[200],/Cinematic Wedding Invitation/);
   await check(base,'/websites-near-me-sydney',[200],/Website Designer Near You in Sydney/);
   await check(base,'/contact.html',[200],/4 Powlett Glade/);
+  await check(base,'/automation.html',[200],/data-service-card=/);
+  await check(base,'/automation.js',[200],/calculateAutomationEstimate/);
+  await check(base,'/api/automation-quote',[405]);
   await check(base,'/analytics.html',[200],/noindex/);
   await check(base,'/.netlify/functions/owner-traffic',[401,403]);
   await check(base,'/.netlify/functions/owner-ga4',[401,403]);

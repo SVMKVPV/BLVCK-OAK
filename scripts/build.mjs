@@ -5,6 +5,7 @@ import { buildCommunity } from './build-community.mjs';
 import { prepareRelease } from './prepare-release.mjs';
 import { markUnavailableLinks } from './unavailable-links.mjs';
 import { installFutureUi } from './install-future-ui.mjs';
+import { buildAutomation } from './build-automation.mjs';
 
 const root = resolve(import.meta.dirname, '..');
 const output = resolve(root, 'dist');
@@ -20,6 +21,7 @@ for (const file of [
   'websites-near-me-sydney.html','local-seo.css',
   'portfolio.js','quote-builder.js','audit.html','book.html','ai-generator.html','ai-generator.css','ai-generator.js','sales-config.js','sales.js',
   'oakpay.html','oakpay-app.html','oakpay.css','oakpay-app.js',
+  'automation.html','automation.css','automation.js','automation-catalog.js','automation-estimate.js','automation-render.js',
   'robots.txt','sitemap.xml','favicon.ico','favicon.svg','apple-touch-icon.png','android-chrome-192x192.png','android-chrome-512x512.png','site.webmanifest'
 ]) {
   await cp(resolve(root, file), resolve(output, file));
@@ -43,6 +45,7 @@ for (const [source, target] of [
   await writeFile(resolve(output, 'vendor', target), module);
 }
 await buildCommunity(output);
+await buildAutomation(output);
 const sitemapPath = resolve(output, 'sitemap.xml');
 const communityUrls = ['/community.html', ...profiles.map(p => `/community/${p.slug}/`)];
 await writeFile(sitemapPath, (await readFile(sitemapPath, 'utf8')).replace('</urlset>', communityUrls.map(path => `<url><loc>https://blvckoak.com.au${path}</loc></url>`).join('\n') + '\n</urlset>'));

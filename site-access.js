@@ -7,6 +7,7 @@
     '/marketplace', '/marketplace.html',
     '/audit', '/audit.html',
     '/quote', '/quote.html',
+    '/automation', '/automation.html',
     '/ai-generator', '/ai-generator.html',
     '/contact', '/contact.html',
     '/book', '/book.html',

@@ -86,6 +86,16 @@
   status = 200
 
 [[redirects]]
+  from = "/automation"
+  to = "/automation.html"
+  status = 301
+
+[[redirects]]
+  from = "/api/automation-quote"
+  to = "/.netlify/functions/automation-quote"
+  status = 200
+
+[[redirects]]
   from = "/api/contact"
   to = "/.netlify/functions/contact-submit"
   status = 200

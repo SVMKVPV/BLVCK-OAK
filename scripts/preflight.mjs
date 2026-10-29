@@ -5,6 +5,7 @@ import { NEARBY_BUSINESSES_ENABLED, SHOPS_ENABLED } from '../netlify/lib/launch-
 const root = resolve(import.meta.dirname, '..');
 const failures = [];
 const requiredFiles = [
+  'automation.html', 'automation.css', 'automation.js', 'automation-catalog.js', 'automation-estimate.js', 'automation-render.js', 'netlify/functions/automation-quote.mjs',
   'partners.html',
   'partners.js',
   'portal.css',
