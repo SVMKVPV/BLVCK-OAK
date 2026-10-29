@@ -116,6 +116,9 @@ try {
   await check(base,'/operations.html',[200],/id="lead-dialog"/);
   await check(base,'/operations.js',[200],/owner-operations/);
   await check(base,'/api/owner-operations',[401,403]);
+  await check(base,'/business-tools.html',[200],/id="record-form"/);
+  await check(base,'/business-tools.js',[200],/api\/business-tools/);
+  await check(base,'/api/business-tools',[401,403]);
   await check(base,'/.netlify/functions/owner-traffic',[401,403]);
   await check(base,'/.netlify/functions/owner-ga4',[401,403]);
   await check(base,'/previews/wedding-invitation.html',[200],/wedding-invitation\.css/);

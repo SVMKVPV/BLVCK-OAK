@@ -171,7 +171,7 @@ test('every exported platform rate-limit rule has a path and a supported window'
     assert.ok(windows.length > 0, file);
     assert.ok(windows.every((seconds) => seconds > 0 && seconds <= 180), file);
   }
-  assert.deepEqual(configured.sort(), ['package-checkout.mjs', 'website-audit.mjs']);
+  assert.deepEqual(configured.sort(), ['business-tools.mjs', 'package-checkout.mjs', 'website-audit.mjs']);
 });
 
 test('handlers check method and origin before quota, then quota before parsing', async () => {

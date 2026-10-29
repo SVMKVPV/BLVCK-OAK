@@ -48,7 +48,7 @@ function requestPage(target) {
   });
 }
 
-async function fetchPublicPage(initial) {
+export async function fetchPublicPage(initial) {
   let target = await safeUrl(initial);
   for (let redirects = 0; redirects < 4; redirects += 1) {
     const response = await requestPage(target);

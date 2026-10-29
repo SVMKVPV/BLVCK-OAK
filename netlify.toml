@@ -30,6 +30,19 @@
 [functions."sales-followups"]
   schedule = "15 * * * *"
 
+[functions."business-tool-rules"]
+  schedule = "35 * * * *"
+
+[[redirects]]
+  from = "/business-tools"
+  to = "/business-tools.html"
+  status = 301
+
+[[redirects]]
+  from = "/api/business-tools"
+  to = "/.netlify/functions/business-tools"
+  status = 200
+
 [[redirects]]
   from = "/api/partners/auth"
   to = "/.netlify/functions/partner-auth"
