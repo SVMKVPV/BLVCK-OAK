@@ -12,7 +12,7 @@
     path = new URL(encodeURI(path), location.origin).pathname;
     if (path.length > 160) return;
   } catch { return; }
-  const privatePath = /^\/(?:partners|login|analytics|pay|progress|oakpay-app)(?:\.html)?(?:\/|$)/i;
+  const privatePath = /^\/(?:partners|login|analytics|operations|pay|progress|oakpay-app)(?:\.html)?(?:\/|$)/i;
   const excluded = privatePath.test(path) || /^\/(?:api|\.netlify)(?:\/|$)/i.test(path)
     || navigator.globalPrivacyControl === true || navigator.doNotTrack === '1';
   if (excluded) return;

@@ -362,6 +362,7 @@ async function loadDashboard() {
     $('[data-workspace-title]').textContent = dashboard.isOwner ? 'Your clients. Your control.' : 'Welcome, ' + dashboard.account.name.split(' ')[0] + '.';
     $('[data-role-tag]').textContent = dashboard.isOwner ? 'Owner workspace' : 'Partner workspace';
     $('[data-owner-analytics-link]').hidden = !dashboard.isOwner;
+    $('[data-owner-operations-link]').hidden = !dashboard.isOwner;
     const referralCodeLink = $('[data-partner-code]');
     referralCodeLink.textContent = dashboard.referral.code;
     referralCodeLink.href = enterpriseReferralPath(dashboard.referral.code);
@@ -376,16 +377,39 @@ async function loadDashboard() {
     if (portfolioQuote) closePortfolioEditor();
     renderQuotes();
     renderSalesPipeline();
+    await prefillLeadQuote();
     await loadOwnerAnalytics();
     status('[data-global-status]', dashboard.isOwner ? 'You can manage leads, review quotes, see payments and publish live client progress.' : 'Create a quote below. Approved payment and progress links can be shared with your client.');
   } catch (error) {
     if (error.status === 401) {
       dashboard = null; $('[data-auth-panel]').hidden = false; $('[data-dashboard]').hidden = true; $('[data-signout]').hidden = true;
       $('[data-owner-analytics-link]').hidden = true;
+      $('[data-owner-operations-link]').hidden = true;
       $('[data-auth-start]').hidden = false; $('[data-auth-verify]').hidden = true;
       status('[data-global-status]', 'Sign in or create your partner account to continue.');
     } else { status('[data-global-status]', error.message, true); }
   }
+}
+
+async function prefillLeadQuote() {
+  const url = new URL(location.href);
+  const id = url.searchParams.get('lead');
+  if (!dashboard?.isOwner || !/^[a-f0-9]{32}$/.test(id || '')) return;
+  try {
+    const { lead } = await api('/api/owner-operations?lead=' + encodeURIComponent(id));
+    if (!dashboard?.isOwner) return;
+    const form = $('[data-quote-form]');
+    form.elements.customerName.value = lead.name;
+    form.elements.customerEmail.value = lead.email;
+    form.elements.service.value = lead.service || 'Custom project';
+    form.elements.description.value = (lead.message || '').slice(0, 3000);
+    form.elements.total.value = '';
+    $('[data-editor-note]').textContent = 'Enquiry details copied from your Automation Desk. Review the scope and enter the agreed final price and payment terms before creating a payable link. Nothing has been sent to the client.';
+    url.searchParams.delete('lead');
+    history.replaceState(null, '', url.pathname + url.search + url.hash);
+    updateQuotePreview();
+    form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch (error) { status('[data-quote-status]', 'Could not load the enquiry: ' + error.message, true); }
 }
 
 function calculatePreview() {

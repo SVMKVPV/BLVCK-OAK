@@ -1,6 +1,7 @@
 import { createHash, randomBytes } from 'node:crypto';
 import { getStore } from '@netlify/blobs';
 import { scopedStoreName } from './referrals.mjs';
+import { readAutomation } from '../../operations-model.js';
 
 export const salesStore = () => getStore({ name: scopedStoreName('black-oak-sales'), consistency: 'strong' });
 export const leadIdPattern = /^[a-f0-9]{32}$/;
@@ -29,6 +30,8 @@ export function publicLead(lead) {
     createdAt: lead.createdAt,
     updatedAt: lead.updatedAt || lead.createdAt,
     followUpSentAt: lead.followUpSentAt || null,
+    statusChangedAt: lead.statusChangedAt || lead.createdAt,
+    automation: readAutomation(lead),
   };
 }
 
@@ -45,7 +48,7 @@ export async function createSalesLead(input, store = salesStore(), now = new Dat
   const id = randomBytes(16).toString('hex');
   const lead = {
     id,
-    type: ['contact', 'booking', 'audit'].includes(input.type) ? input.type : 'contact',
+    type: ['contact', 'booking', 'audit', 'manual'].includes(input.type) ? input.type : 'contact',
     name: clean(input.name, 100),
     email: clean(input.email, 160).toLowerCase(),
     company: clean(input.company, 120),
@@ -62,6 +65,8 @@ export async function createSalesLead(input, store = salesStore(), now = new Dat
     createdAt: now,
     updatedAt: now,
     followUpSentAt: null,
+    statusChangedAt: now,
+    automation: { revision: 0, followUpPaused: input.type === 'manual' },
   };
 
   const reserved = await store.set(requestKey, id, { onlyIfNew: true });
@@ -92,7 +97,8 @@ export async function updateSalesLead(id, input, accountId, store = salesStore()
   if (!leadStatuses.includes(input.status)) throw new Error('Choose a valid lead status.');
   const entry = await store.getWithMetadata(`lead/${id}`, { type: 'json' });
   if (!entry?.data) throw new Error('Lead not found.');
-  const updated = { ...entry.data, status: input.status, ownerNote: clean(input.ownerNote, 1000), updatedAt: now, updatedBy: accountId };
+  const automation = readAutomation(entry.data);
+  const updated = { ...entry.data, status: input.status, ownerNote: clean(input.ownerNote, 1000), updatedAt: now, updatedBy: accountId, automation: { ...automation, revision: automation.revision + 1 }, ...(input.status !== entry.data.status ? { statusChangedAt: now } : {}) };
   const saved = await store.setJSON(`lead/${id}`, updated, { onlyIfMatch: entry.etag });
   if (!saved.modified) throw new Error('This lead changed. Refresh and try again.');
   return publicLead(updated);

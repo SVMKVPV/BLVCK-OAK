@@ -113,6 +113,9 @@ try {
   await check(base,'/automation.js',[200],/calculateAutomationEstimate/);
   await check(base,'/api/automation-quote',[405]);
   await check(base,'/analytics.html',[200],/noindex/);
+  await check(base,'/operations.html',[200],/id="lead-dialog"/);
+  await check(base,'/operations.js',[200],/owner-operations/);
+  await check(base,'/api/owner-operations',[401,403]);
   await check(base,'/.netlify/functions/owner-traffic',[401,403]);
   await check(base,'/.netlify/functions/owner-ga4',[401,403]);
   await check(base,'/previews/wedding-invitation.html',[200],/wedding-invitation\.css/);

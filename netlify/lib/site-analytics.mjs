@@ -50,7 +50,7 @@ export function publicAnalyticsPath(value) {
   }
   if (/%[0-9a-f]{2}/i.test(path) || !path.startsWith('/') || path.startsWith('//') || /[\x00-\x1f\x7f\\]/.test(path)) return null;
   try { path = new URL(encodeURI(path), 'https://blvckoak.com.au').pathname; } catch { return null; }
-  if (/^\/(?:partners|analytics|login|pay|progress|oakpay-app)(?:\.html)?(?:\/|$)/i.test(path)) return null;
+  if (/^\/(?:partners|analytics|operations|login|pay|progress|oakpay-app)(?:\.html)?(?:\/|$)/i.test(path)) return null;
   if (/^\/(?:api|\.netlify)(?:\/|$)/i.test(path)) return null;
   return path.length <= 160 ? path : null;
 }

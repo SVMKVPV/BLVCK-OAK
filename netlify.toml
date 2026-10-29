@@ -91,6 +91,16 @@
   status = 301
 
 [[redirects]]
+  from = "/operations"
+  to = "/operations.html"
+  status = 301
+
+[[redirects]]
+  from = "/api/owner-operations"
+  to = "/.netlify/functions/owner-operations"
+  status = 200
+
+[[redirects]]
   from = "/api/automation-quote"
   to = "/.netlify/functions/automation-quote"
   status = 200

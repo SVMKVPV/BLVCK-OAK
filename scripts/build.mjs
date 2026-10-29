@@ -18,6 +18,7 @@ for (const file of [
   'portfolio.html','marketplace.html','marketplace.css','marketplace.js','quote.html','style.css','studio.css','studio-intro.css','studio-noscript.css','og.png','cinematic-intro.js','liquid-oak.js','script.js','studio.js',
   'partners.html','partners.js','portal.css','pay.html','pay.js','progress.html','progress.js','future-ui.css','future-ui.js','future-scene.js',
   'analytics.html','analytics.js','analytics.css','analytics-utils.js','analytics-tracking.js',
+  'operations.html','operations.js','operations.css','operations-model.js',
   'websites-near-me-sydney.html','local-seo.css',
   'portfolio.js','quote-builder.js','audit.html','book.html','ai-generator.html','ai-generator.css','ai-generator.js','sales-config.js','sales.js',
   'oakpay.html','oakpay-app.html','oakpay.css','oakpay-app.js',

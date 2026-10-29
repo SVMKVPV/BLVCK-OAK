@@ -1,6 +1,7 @@
 import { emailShell, escapeHtml, getOwnerEmail, sendEmail } from '../lib/email.mjs';
 import { json } from '../lib/referrals.mjs';
 import { listSalesLeads, salesStore } from '../lib/sales-leads.mjs';
+import { followUpEligible } from '../../operations-model.js';
 
 export const config = { schedule: '15 * * * *' };
 
@@ -8,11 +9,11 @@ export default async function handler() {
   const store = salesStore();
   const now = Date.now();
   const leads = await listSalesLeads(250, store);
-  const due = leads.filter((lead) => lead.status === 'new' && !lead.followUpSentAt && now - new Date(lead.createdAt).getTime() >= 24 * 3600000 && now - new Date(lead.createdAt).getTime() <= 7 * 86400000).slice(0, 25);
+  const due = leads.filter((lead) => followUpEligible(lead, now)).slice(0, 25);
   let sent = 0;
   for (const lead of due) {
     const entry = await store.getWithMetadata(`lead/${lead.id}`, { type: 'json' });
-    if (!entry?.data || entry.data.followUpSentAt || entry.data.status !== 'new') continue;
+    if (!entry?.data || !followUpEligible(entry.data, now)) continue;
     const bookingLink = `${String(process.env.SITE_URL || '').replace(/\/$/, '')}/book.html`;
     await sendEmail({
       to: lead.email,

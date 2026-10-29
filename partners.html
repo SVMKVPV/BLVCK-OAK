@@ -13,7 +13,7 @@
 <body class="workspace-body">
   <header class="workspace-header">
     <a class="brand" href="index.html"><span>Black</span> Oak</a>
-    <nav aria-label="Workspace navigation"><a href="/analytics.html" data-owner-analytics-link hidden>Analytics</a><a href="portfolio.html">Portfolio</a><a href="index.html#packages">Packages</a><a href="referrals.html">Referral rules</a><a href="contact.html">Support</a><button type="button" data-signout hidden>Sign out</button></nav>
+    <nav aria-label="Workspace navigation"><a href="/operations.html" data-owner-operations-link hidden>Automation desk</a><a href="/analytics.html" data-owner-analytics-link hidden>Analytics</a><a href="portfolio.html">Portfolio</a><a href="index.html#packages">Packages</a><a href="referrals.html">Referral rules</a><a href="contact.html">Support</a><button type="button" data-signout hidden>Sign out</button></nav>
   </header>
   <main class="workspace">
     <div class="workspace-heading"><div><p class="section-label">Black Oak / Partner workspace</p><h1 data-workspace-title>Your clients. One clear view.</h1></div><span class="workspace-tag" data-role-tag>Email-verified access</span></div>
@@ -61,7 +61,7 @@
       </section>
       <section class="workspace-card sales-pipeline" data-owner-sales hidden aria-labelledby="sales-pipeline-title">
         <div class="card-heading"><div><p class="section-label">Owner / Sales pipeline</p><h2 id="sales-pipeline-title">Every enquiry in one place.</h2></div><label class="filter-label">Show<select data-lead-filter><option value="all">All leads</option><option value="new">New</option><option value="contacted">Contacted</option><option value="qualified">Qualified</option><option value="booked">Booked</option><option value="won">Won</option><option value="lost">Lost</option></select></label></div>
-        <p class="small-muted">Contact forms, consultation requests and free audits appear here. New leads receive one automatic follow-up after 24 hours unless you change their status.</p>
+        <p class="small-muted">Contact forms, consultation requests and free audits appear here. Eligible new web enquiries can receive one automatic follow-up after 24 hours. <a href="/operations.html">Open your Automation Desk</a> to manage next actions, pause follow-up, prepare replies and track onboarding.</p>
         <div class="sales-lead-list" data-sales-lead-list><p class="muted">New enquiries will appear here.</p></div>
       </section>
       <section class="workspace-card lead-finder" aria-labelledby="lead-finder-title">
@@ -105,7 +105,7 @@
         </form>
       </section>
       <div class="workspace-columns">
-        <section class="workspace-card quote-editor">
+        <section class="workspace-card quote-editor" id="quote-editor">
           <div class="card-heading"><h2 data-editor-title>Create a client quote</h2><button class="quiet-button" type="button" data-new-quote hidden>New quote</button></div>
           <p class="small-muted" data-editor-note>Draft the scope and pricing. Black Oak must approve it before the client can pay.</p>
           <form data-quote-form>
