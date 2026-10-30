@@ -16,6 +16,14 @@ The public collector keeps only an allowlist of event names, clean public page p
 
 Reports read at most the latest 10,000 records, with bounded storage concurrency, and explicitly display a coverage warning when capped. First-party results are cached privately in the function instance for 30 seconds. Old records are not silently fabricated or backfilled.
 
+## Google Analytics collection
+
+The shared `analytics-tracking.js` installs Google tag `G-TFPKJ0JBG9` for the **Main blvckoak** web stream (stream ID `16235018647`). The build includes this collector in the head of every published HTML page, including generated community and preview pages. The Google tag only loads on `https://blvckoak.com.au` and `https://www.blvckoak.com.au`, so deploy previews and local testing do not enter production GA4 reports.
+
+The existing private-path, HTTPS, Do Not Track and Global Privacy Control exclusions also apply to Google Analytics. Configuration supplies clean page URLs, referring origins and sanitised campaign labels; Google signals and advertising personalisation are disabled. GA4 sends its initial page view automatically; the separate first-party collector does not forward another page view to Google. The Content Security Policy allows the Google Analytics endpoints without enabling inline scripts or evaluation. The privacy policy describes Google's additional cookie-based measurement.
+
+Open a public page and check the **Realtime** report for this web stream in Google Analytics to confirm property-side receipt. Browser privacy settings and content blockers may prevent collection. The tag begins collecting new visits; historical first-party records are not imported.
+
 ## Connect a collecting GA4 property
 
 The report integration is implemented but live Google access is unverified until configured. Connecting the reports does not install a Google tag, create a property, mark key events, enable ecommerce or import historical first-party visits.

@@ -1,7 +1,7 @@
 (() => {
   'use strict';
-  // First-party measurement only. No cookies, persistent browser identifier,
-  // form values, full referring URLs or private workspace paths are collected.
+  // Public-page measurement. The first-party collector does not use cookies;
+  // Google Analytics runs only on production and shares the exclusions below.
   if (window.blvckOakAnalytics || location.protocol !== 'https:') return;
   let path = location.pathname;
   try {
@@ -32,6 +32,36 @@
     const parsed = new URL(document.referrer);
     if (/^https?:$/.test(parsed.protocol)) referrer = parsed.origin;
   } catch { /* A missing referrer is valid direct traffic. */ }
+
+  // The build includes this file once in every page's head. Configure GA4 once;
+  // its automatic page_view is separate from our first-party visit record.
+  const measurementId = 'G-TFPKJ0JBG9';
+  const startGoogleAnalytics = () => {
+    if (!['https://blvckoak.com.au', 'https://www.blvckoak.com.au'].includes(location.origin)
+      || window['ga-disable-' + measurementId] === true) return;
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
+    window.gtag('consent', 'default', {
+      ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied',
+    });
+    window.gtag('js', new Date());
+    window.gtag('config', measurementId, {
+      page_location: location.origin + path,
+      page_referrer: referrer,
+      ...(campaign.utm_source ? { campaign_source: campaign.utm_source } : {}),
+      ...(campaign.utm_medium ? { campaign_medium: campaign.utm_medium } : {}),
+      ...(campaign.utm_campaign ? { campaign_name: campaign.utm_campaign } : {}),
+      allow_google_signals: false,
+      allow_ad_personalization_signals: false,
+      cookie_flags: 'SameSite=Lax;Secure',
+    });
+    const tag = document.createElement('script');
+    tag.async = true;
+    tag.src = 'https://www.googletagmanager.com/gtag/js?id=' + measurementId;
+    document.head.appendChild(tag);
+  };
+  if (document.prerendering) document.addEventListener('prerenderingchange', startGoogleAnalytics, { once: true });
+  else startGoogleAnalytics();
 
   let sent = 0;
   const track = (event) => {
