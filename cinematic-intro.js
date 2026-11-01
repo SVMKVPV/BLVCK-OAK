@@ -36,6 +36,8 @@
   const REEL_LOOP_SECONDS = 8;
   const REEL_BEAT_SECONDS = 3;
   const VIDEO_END_SECONDS = 9.4;
+  const VIDEO_FRAME_SECONDS = 1 / 24;
+  const VIDEO_SCRUB_INTERVAL_MS = 1000 / 24;
   const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
   const mix = (start, end, amount) => start + (end - start) * amount;
   const smoothstep = (start, end, value) => {
@@ -54,6 +56,10 @@
   let previousVideoReelTime = 0;
   let videoReady = false;
   let videoDuration = VIDEO_END_SECONDS;
+  let pendingVideoTime = Number.NaN;
+  let requestedVideoTime = Number.NaN;
+  let lastVideoSeekAt = 0;
+  let videoSeekTimer = 0;
   let threeStarted = false;
   let rendererCleanup = () => {};
   let rendererSyncMotion = () => {};
@@ -72,21 +78,45 @@
     });
   }
 
-  function queueVideoScrub(force = false) {
+  function flushVideoScrub(force = false) {
     if (!(video instanceof HTMLVideoElement) || !videoReady) return;
     if (document.hidden || (!force && (motionPaused || !introVisible))) return;
-    // Only one seek is allowed at a time. If progress changes while a seek is
-    // active, the seeked listener calls this again using the latest progress.
+    if (videoSeekTimer && !force) return;
+    const target = pendingVideoTime;
+    if (!Number.isFinite(target)) return;
+    // Compare against the requested frame instead of currentTime. Browsers may
+    // resolve a seek to a nearby decoded frame; comparing currentTime can then
+    // create an endless seek -> seeked -> seek loop.
+    if (Number.isFinite(requestedVideoTime) && Math.abs(requestedVideoTime - target) < VIDEO_FRAME_SECONDS / 2) return;
     if (video.seeking && !force) return;
-    const target = clamp(storyProgress) * videoDuration;
-    if (Math.abs(video.currentTime - target) < 1 / 48) return;
+    const now = performance.now();
+    const wait = VIDEO_SCRUB_INTERVAL_MS - (now - lastVideoSeekAt);
+    if (!force && wait > 1) {
+      videoSeekTimer = window.setTimeout(() => {
+        videoSeekTimer = 0;
+        flushVideoScrub();
+      }, wait);
+      return;
+    }
+    requestedVideoTime = target;
+    lastVideoSeekAt = now;
     try {
-      // currentTime requests the exact decoded frame. fastSeek deliberately is
-      // not used because it may stop on an earlier keyframe.
       video.currentTime = target;
     } catch (error) {
       startProceduralFallback(error);
     }
+  }
+
+  function queueVideoScrub(force = false) {
+    if (!(video instanceof HTMLVideoElement) || !videoReady) return;
+    if (document.hidden || (!force && (motionPaused || !introVisible))) return;
+    const rawTarget = clamp(storyProgress) * videoDuration;
+    pendingVideoTime = Math.min(videoDuration, Math.round(rawTarget / VIDEO_FRAME_SECONDS) * VIDEO_FRAME_SECONDS);
+    if (force && videoSeekTimer) {
+      clearTimeout(videoSeekTimer);
+      videoSeekTimer = 0;
+    }
+    flushVideoScrub(force);
   }
 
   function animateVideoReel(now) {
@@ -216,7 +246,12 @@
   if (video instanceof HTMLVideoElement) {
     video.addEventListener('loadedmetadata', activateVideo, { once: true });
     video.addEventListener('loadeddata', activateVideo, { once: true });
-    video.addEventListener('seeked', () => { revealDecodedVideo(); queueVideoScrub(); });
+    video.addEventListener('seeked', () => {
+      revealDecodedVideo();
+      if (!Number.isFinite(requestedVideoTime) || Math.abs(pendingVideoTime - requestedVideoTime) >= VIDEO_FRAME_SECONDS / 2) {
+        queueVideoScrub();
+      }
+    });
     // Source failures do not bubble, so capture them as well as video errors.
     video.addEventListener('error', () => startProceduralFallback(video.error || new Error('The cinematic MP4 could not be decoded.')), { once: true, capture: true });
     if (video.readyState >= HTMLMediaElement.HAVE_METADATA) activateVideo();
@@ -990,6 +1025,8 @@
   function startProceduralFallback(error) {
     if (threeStarted) return;
     threeStarted = true;
+    clearTimeout(videoSeekTimer);
+    videoSeekTimer = 0;
     cancelAnimationFrame(videoReelFrame);
     videoReelFrame = 0;
     videoReady = false;
@@ -1011,6 +1048,8 @@
     videoReelFrame = 0;
     cancelAnimationFrame(scrollFrame);
     scrollFrame = 0;
+    clearTimeout(videoSeekTimer);
+    videoSeekTimer = 0;
     if (event.persisted) return;
     rendererCleanup();
     visibilityObserver.disconnect();

@@ -5,7 +5,9 @@ import test from 'node:test';
 const read = (file) => readFile(new URL(`../${file}`, import.meta.url), 'utf8');
 
 test('studio homepage preserves production SEO, routes and commercial journeys', async () => {
-  const [html, build] = await Promise.all([read('index.html'), read('scripts/build.mjs')]);
+  const [html, build, netlify] = await Promise.all([
+    read('index.html'), read('scripts/build.mjs'), read('netlify.toml'),
+  ]);
 
   assert.match(html, /<link rel="canonical" href="https:\/\/blvckoak\.com\.au\/"/);
   assert.match(html, /<meta name="robots" content="index,follow,max-image-preview:large"/);
@@ -25,7 +27,8 @@ test('studio homepage preserves production SEO, routes and commercial journeys',
   for (const id of [
     'approach', 'seo-search', 'workflow-ai', 'digital-marketing', 'digital-branding',
     'consulting-coaching', 'website-upgrades', 'essential-demo', 'professional-demo',
-    'enterprise-demo', 'brand-film', 'referrals', 'referral-signup', 'faq-title',
+    'enterprise-demo', 'brand-film', 'portfolio', 'referrals', 'referral',
+    'referral-signup', 'faq-title',
   ]) {
     assert.ok(html.includes(`id="${id}"`), `legacy fragment #${id} remains valid`);
   }
@@ -34,6 +37,7 @@ test('studio homepage preserves production SEO, routes and commercial journeys',
     assert.ok(html.includes(`data-package="${packageId}"`), `${packageId} remains connected to checkout`);
   }
   assert.match(html, /data-payment-notice/);
+  assert.match(netlify, /from = "\/free-preview\.html"[\s\S]*?to = "\/contact\.html\?service=website-preview"[\s\S]*?status = 301/);
   assert.match(html, /data-modal-backdrop/);
   assert.match(html, /data-checkout-action/);
   assert.match(html, /data-enterprise-referral/);

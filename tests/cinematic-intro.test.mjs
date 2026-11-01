@@ -19,6 +19,9 @@ test('restored cinematic assets preserve the original oak renderer, video timing
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
   assert.match(client, /THREE\.REVISION !== '160'/);
   assert.match(client, /VIDEO_END_SECONDS = 9\.4/);
+  assert.match(client, /VIDEO_FRAME_SECONDS = 1 \/ 24/);
+  assert.match(client, /VIDEO_SCRUB_INTERVAL_MS = 1000 \/ 24/);
+  assert.match(client, /requestedVideoTime/);
   assert.match(client, /video\.currentTime = target/);
   assert.match(client, /startProceduralFallback/);
   assert.match(client, /new THREE\.WebGLRenderer/);

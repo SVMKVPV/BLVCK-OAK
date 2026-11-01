@@ -27,8 +27,13 @@ test('liquid oak stays decorative, scroll-linked and motion-safe', async () => {
   assert.match(client, /document\.hidden/);
   assert.match(client, /cancelAnimationFrame/);
   assert.match(client, /pagehide/);
-  assert.match(client, /width < 700 \? 760/);
-  assert.match(client, /Math\.min\(window\.devicePixelRatio \|\| 1, width < 700 \? 1\.15 : 1\.5\)/);
+  assert.match(client, /targetFrameRate = coarsePointer\.matches \? 24 : 30/);
+  assert.match(client, /if \(elapsed < frameInterval\) return/);
+  assert.match(client, /lastRender = elapsed > frameInterval \* 2 \? now : lastRender \+ frameInterval/);
+  assert.match(client, /width < 700 \? 420 : width < 1100 \? 620 : 900/);
+  assert.match(client, /Math\.min\(window\.devicePixelRatio \|\| 1, width < 700 \? 1 : 1\.25\)/);
+  assert.match(client, /particleGroups/);
+  assert.doesNotMatch(client, /context\.shadowBlur/);
   assert.match(cinematic, /new CustomEvent\('blvckoak:origin-progress'/);
   assert.match(css, /\.oak-origin-liquid\s*\{[^}]*pointer-events:\s*none/);
   assert.match(css, /\.oak-origin-stage\s*\{[^}]*touch-action:\s*pan-y/);
