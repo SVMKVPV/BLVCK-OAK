@@ -83,7 +83,6 @@
   opacity: calc(0.96 - var(--oak-exit) * 0.84);
   mix-blend-mode: screen;
   pointer-events: none;
-  filter: saturate(1.08) contrast(1.04);
 }
 
 .oak-origin.is-motion-paused .oak-origin-liquid,

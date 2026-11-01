@@ -25,11 +25,23 @@
   const coarsePointer = window.matchMedia('(pointer: coarse)');
   const TAU = Math.PI * 2;
   const palette = ['#d4ae58', '#f1d48c', '#9a6332'];
+  const targetFrameRate = coarsePointer.matches ? 24 : 30;
+  const frameInterval = 1000 / targetFrameRate;
   const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
   const smoothstep = (start, end, value) => {
     const amount = clamp((value - start) / Math.max(0.00001, end - start));
     return amount * amount * (3 - 2 * amount);
   };
+
+  function nextRenderFrame(now, previous, interval) {
+    const elapsed = now - previous;
+    if (elapsed < interval) return null;
+    const completedIntervals = Math.floor(elapsed / interval);
+    return {
+      elapsed: Math.min(completedIntervals, 2) * interval,
+      lastRender: now - (elapsed % interval),
+    };
+  }
 
   function seededRandom(seed) {
     let value = seed >>> 0;
@@ -63,6 +75,7 @@
   let sourceAspect = 720 / 1280;
   let samples = [];
   let particles = [];
+  let particleGroups = palette.map(() => []);
   let progress = 0;
   let targetProgress = 0;
   let previousProgress = 0;
@@ -71,8 +84,8 @@
   let motionPaused = false;
   let frame = 0;
   let resizeFrame = 0;
-  let lastFrame = performance.now();
-  let startTime = lastFrame;
+  let lastRender = performance.now() - frameInterval;
+  let startTime = performance.now();
   let destroyed = false;
 
   function readProgress() {
@@ -124,7 +137,7 @@
     source.width = sampleWidth;
     source.height = sampleHeight;
     const sourceContext = source.getContext('2d', { willReadFrequently: true });
-    if (!sourceContext) return proceduralSamples(width < 700 ? 720 : 1700);
+    if (!sourceContext) return proceduralSamples(width < 700 ? 420 : 900);
 
     try {
       sourceContext.drawImage(poster, 0, 0, sampleWidth, sampleHeight);
@@ -150,7 +163,7 @@
         }
       }
 
-      const targetCount = width < 700 ? 760 : width < 1100 ? 1280 : 1900;
+      const targetCount = width < 700 ? 420 : width < 1100 ? 620 : 900;
       for (let index = candidates.length - 1; index > 0; index -= 1) {
         const swap = Math.floor(random() * (index + 1));
         [candidates[index], candidates[swap]] = [candidates[swap], candidates[index]];
@@ -159,7 +172,7 @@
       return candidates.slice(0, targetCount);
     } catch {
       intro.classList.add('is-liquid-fallback');
-      return proceduralSamples(width < 700 ? 720 : 1700);
+      return proceduralSamples(width < 700 ? 420 : 900);
     }
   }
 
@@ -216,6 +229,7 @@
         index,
       };
     }).sort((a, b) => a.tone - b.tone);
+    particleGroups = palette.map((_, tone) => particles.filter((particle) => particle.tone === tone));
     startTime = performance.now();
   }
 
@@ -223,7 +237,7 @@
     const rect = stage.getBoundingClientRect();
     width = Math.max(1, Math.round(rect.width));
     height = Math.max(1, Math.round(rect.height));
-    pixelRatio = Math.min(window.devicePixelRatio || 1, width < 700 ? 1.15 : 1.5);
+    pixelRatio = Math.min(window.devicePixelRatio || 1, width < 700 ? 1 : 1.25);
     canvas.width = Math.round(width * pixelRatio);
     canvas.height = Math.round(height * pixelRatio);
     canvas.style.width = `${width}px`;
@@ -325,13 +339,13 @@
     context.globalCompositeOperation = 'lighter';
     drawPointerGlow(alpha);
 
-    if (!staticFrame) {
+    const hasActiveTrails = pointer.presence > 0.02 || Math.abs(scrollVelocity) > 0.00005;
+    if (!staticFrame && hasActiveTrails) {
       context.lineWidth = 0.72;
       for (let tone = 0; tone < palette.length; tone += 1) {
         context.beginPath();
         let strokes = 0;
-        for (const particle of particles) {
-          if (particle.tone !== tone) continue;
+        for (const particle of particleGroups[tone]) {
           const speed = Math.hypot(particle.velocityX, particle.velocityY);
           if (speed < 1.1) continue;
           const length = Math.min(7, speed * 0.9);
@@ -352,11 +366,8 @@
 
     for (let tone = 0; tone < palette.length; tone += 1) {
       context.fillStyle = palette[tone];
-      context.shadowColor = palette[tone];
-      context.shadowBlur = tone === 1 ? 4 : 2.5;
       context.globalAlpha = alpha * (tone === 1 ? 0.92 : tone === 0 ? 0.72 : 0.44);
-      for (const particle of particles) {
-        if (particle.tone !== tone) continue;
+      for (const particle of particleGroups[tone]) {
         const shimmer = staticFrame ? 1 : 0.78 + Math.sin(time * 0.002 + particle.phase) * 0.22;
         const size = Math.max(0.55, particle.size * shimmer * (0.78 + bloom * 0.28));
         context.fillRect(particle.x - size / 2, particle.y - size / 2, size, size);
@@ -384,8 +395,11 @@
   function animate(now) {
     frame = 0;
     if (destroyed || motionPaused || reducedMotion.matches || document.hidden || !visible) return;
-    const delta = clamp((now - lastFrame) / (1000 / 60), 0.35, 1.8);
-    lastFrame = now;
+    schedule();
+    const renderFrame = nextRenderFrame(now, lastRender, frameInterval);
+    if (!renderFrame) return;
+    lastRender = renderFrame.lastRender;
+    const delta = clamp(renderFrame.elapsed / (1000 / 60), 0.35, 3);
     progress += (targetProgress - progress) * (1 - Math.pow(0.73, delta));
     const progressDelta = progress - previousProgress;
     scrollVelocity = scrollVelocity * Math.pow(0.78, delta) + progressDelta * 0.22;
@@ -393,12 +407,10 @@
     updatePointer(delta);
     for (const particle of particles) updateParticle(particle, now, delta);
     drawParticles(now);
-    schedule();
   }
 
   function schedule() {
     if (frame || destroyed || motionPaused || reducedMotion.matches || document.hidden || !visible || !particles.length) return;
-    lastFrame = performance.now();
     frame = requestAnimationFrame(animate);
   }
 
