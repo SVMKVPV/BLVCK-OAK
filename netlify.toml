@@ -179,7 +179,7 @@
 # Keep the legacy free-preview CTA used by the public Link in Bio page useful.
 [[redirects]]
   from = "/free-preview.html"
-  to = "/contact.html?service=website-preview"
+  to = "/contact.html?service=website-packages"
   status = 301
   force = true
 

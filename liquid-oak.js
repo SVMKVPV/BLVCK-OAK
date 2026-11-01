@@ -33,6 +33,16 @@
     return amount * amount * (3 - 2 * amount);
   };
 
+  function nextRenderFrame(now, previous, interval) {
+    const elapsed = now - previous;
+    if (elapsed < interval) return null;
+    const completedIntervals = Math.floor(elapsed / interval);
+    return {
+      elapsed: Math.min(completedIntervals, 2) * interval,
+      lastRender: now - (elapsed % interval),
+    };
+  }
+
   function seededRandom(seed) {
     let value = seed >>> 0;
     return () => {
@@ -386,10 +396,10 @@
     frame = 0;
     if (destroyed || motionPaused || reducedMotion.matches || document.hidden || !visible) return;
     schedule();
-    const elapsed = now - lastRender;
-    if (elapsed < frameInterval) return;
-    lastRender = elapsed > frameInterval * 2 ? now : lastRender + frameInterval;
-    const delta = clamp(elapsed / (1000 / 60), 0.35, 2.4);
+    const renderFrame = nextRenderFrame(now, lastRender, frameInterval);
+    if (!renderFrame) return;
+    lastRender = renderFrame.lastRender;
+    const delta = clamp(renderFrame.elapsed / (1000 / 60), 0.35, 3);
     progress += (targetProgress - progress) * (1 - Math.pow(0.73, delta));
     const progressDelta = progress - previousProgress;
     scrollVelocity = scrollVelocity * Math.pow(0.78, delta) + progressDelta * 0.22;

@@ -37,7 +37,7 @@ test('studio homepage preserves production SEO, routes and commercial journeys',
     assert.ok(html.includes(`data-package="${packageId}"`), `${packageId} remains connected to checkout`);
   }
   assert.match(html, /data-payment-notice/);
-  assert.match(netlify, /from = "\/free-preview\.html"[\s\S]*?to = "\/contact\.html\?service=website-preview"[\s\S]*?status = 301/);
+  assert.match(netlify, /from = "\/free-preview\.html"[\s\S]*?to = "\/contact\.html\?service=website-packages"[\s\S]*?status = 301/);
   assert.match(html, /data-modal-backdrop/);
   assert.match(html, /data-checkout-action/);
   assert.match(html, /data-enterprise-referral/);

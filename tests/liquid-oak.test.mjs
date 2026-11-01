@@ -28,8 +28,26 @@ test('liquid oak stays decorative, scroll-linked and motion-safe', async () => {
   assert.match(client, /cancelAnimationFrame/);
   assert.match(client, /pagehide/);
   assert.match(client, /targetFrameRate = coarsePointer\.matches \? 24 : 30/);
-  assert.match(client, /if \(elapsed < frameInterval\) return/);
-  assert.match(client, /lastRender = elapsed > frameInterval \* 2 \? now : lastRender \+ frameInterval/);
+  const clockSource = client.match(/function nextRenderFrame\(now, previous, interval\) \{[\s\S]*?\n  \}/)?.[0];
+  assert.ok(clockSource, 'the frame clock remains independently testable');
+  const nextRenderFrame = Function(`"use strict"; return (${clockSource});`)();
+  for (const fps of [24, 30]) {
+    const interval = 1000 / fps;
+    let previous = 0;
+    let simulatedElapsed = 0;
+    let renderCount = 0;
+    for (let frameNumber = 1; frameNumber <= 60; frameNumber += 1) {
+      const result = nextRenderFrame(frameNumber * (1000 / 60), previous, interval);
+      if (!result) continue;
+      previous = result.lastRender;
+      simulatedElapsed += result.elapsed;
+      renderCount += 1;
+      assert.ok(result.elapsed <= interval * 2);
+    }
+    assert.ok(Math.abs(renderCount - fps) <= 1, `${fps} fps cadence stays bounded`);
+    assert.ok(Math.abs(simulatedElapsed - 1000) <= interval, `${fps} fps clock does not double-count time`);
+  }
+  assert.match(client, /renderFrame\.elapsed \/ \(1000 \/ 60\), 0\.35, 3/);
   assert.match(client, /width < 700 \? 420 : width < 1100 \? 620 : 900/);
   assert.match(client, /Math\.min\(window\.devicePixelRatio \|\| 1, width < 700 \? 1 : 1\.25\)/);
   assert.match(client, /particleGroups/);
