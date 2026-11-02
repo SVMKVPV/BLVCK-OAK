@@ -18,7 +18,7 @@ const externalThumbnails = new Map([
 ]);
 
 test('every marketplace item has a local or approved thumbnail without a live iframe', () => {
-  assert.equal(products.length, 27);
+  assert.equal(products.length, 28);
   // Explicitly labelled concept artwork may be reused; website previews remain distinct.
   const previews = products.filter(product => product.thumbnailKind !== 'concept');
   assert.equal(new Set(previews.map(product => product.thumbnail)).size, previews.length);
@@ -115,4 +115,20 @@ test('BLVCK OAK Automate is listed as a public pilot, without claiming live bill
   assert.match(rendered, /Concept image/);
   assert.match(rendered, /Live integrations, trials and billing are not yet launched/);
   assert.match(rendered, /href="https:\/\/blvck-oak-automate.netlify.app\/"/);
+});
+
+test('RedFlags is listed as a live Pacific-first store without claiming card checkout', () => {
+  const matches = products.filter(product => product.id === 'redflags-pacific');
+  assert.equal(matches.length, 1);
+  const redflags = matches[0];
+  assert.equal(redflags.category, 'Ecommerce');
+  assert.equal(redflags.preview, 'https://redflags-pacific.netlify.app/');
+  assert.equal(redflags.price, null);
+  assert.equal(redflags.badge, 'Netlify live');
+  assert.equal(redflags.thumbnail, 'assets/marketplace/redflags-pacific-preview.jpg');
+  assert.equal(directory.some(product => product.id === 'biz-redflags-pacific'), false);
+  const rendered = card(redflags);
+  assert.match(rendered, /Samoa &amp; Tonga first|Samoa & Tonga first/);
+  assert.match(rendered, /Online card payments are not yet enabled/);
+  assert.match(rendered, /href="https:\/\/redflags-pacific.netlify.app\/"/);
 });
