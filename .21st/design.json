@@ -1,0 +1,100 @@
+{
+  "version": 1,
+  "project": {
+    "name": "black-oak-referral-program",
+    "productType": "digital studio marketing and operations website",
+    "stack": [
+      "static-html",
+      "css",
+      "vanilla-js",
+      "netlify"
+    ]
+  },
+  "sources": {
+    "tokens": [
+      "future-ui.css",
+      "studio.css"
+    ],
+    "components": [
+      "future-ui.js",
+      "index.html"
+    ],
+    "assets": [
+      "assets"
+    ],
+    "instructions": [
+      "docs/UI-DESIGN-TOOLS-SETUP.md"
+    ]
+  },
+  "design": {
+    "colorMode": "dark",
+    "colors": {
+      "--future-bg": {
+        "value": "#080909",
+        "source": "future-ui.css"
+      },
+      "--future-paper": {
+        "value": "#f0ede5",
+        "source": "future-ui.css"
+      },
+      "--future-accent": {
+        "value": "#d4ae58",
+        "source": "future-ui.css"
+      },
+      "--gold-light": {
+        "value": "#f1d48c",
+        "source": "future-ui.css"
+      }
+    },
+    "typography": {
+      "--display": {
+        "value": "'Plus Jakarta Sans', system-ui, sans-serif",
+        "source": "future-ui.css"
+      }
+    },
+    "spacing": {},
+    "radius": {},
+    "shadows": {},
+    "motion": {},
+    "density": "spacious"
+  },
+  "components": {
+    "installed": [],
+    "preferredPrimitives": [],
+    "patterns": []
+  },
+  "constraints": {
+    "must": [
+      "Preserve the black and gold BLVCK OAK identity",
+      "Preserve existing responsive shelves, navigation, forms and tree animation",
+      "Keep decorative motion optional and compatible with reduced motion, touch and forced colours"
+    ],
+    "avoid": [
+      "Introducing a framework runtime for a single decorative effect",
+      "Per-card document pointer listeners",
+      "Non-brand glow colours or effects that reduce text contrast"
+    ]
+  },
+  "decisions": [
+    {
+      "name": "Gold spotlight card treatment",
+      "decision": "Adapt the supplied GlowCard interaction to the homepage package cards through the existing future-ui card layer, using a soft gold interior light and a brighter one-pixel border trace.",
+      "rationale": "The native implementation reuses BLVCK OAK's frame-throttled pointer system, brand tokens and accessibility controls without adding React, Tailwind or duplicate listeners."
+    }
+  ],
+  "evidence": [
+    {
+      "fact": "project.stack:static-html-css-vanilla-js-netlify",
+      "source": "package.json and scripts/build.mjs"
+    },
+    {
+      "fact": "design.tokens:black-paper-gold",
+      "source": "future-ui.css and studio.css"
+    },
+    {
+      "fact": "project.instructions:preserve-brand-motion-responsive-layout",
+      "source": "docs/UI-DESIGN-TOOLS-SETUP.md"
+    }
+  ],
+  "generatedAt": "2026-11-05T17:49:52.688Z"
+}

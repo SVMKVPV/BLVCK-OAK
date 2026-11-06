@@ -36,6 +36,16 @@ test('studio homepage preserves production SEO, routes and commercial journeys',
   for (const packageId of ['link-in-bio', 'essential', 'professional', 'enterprise']) {
     assert.ok(html.includes(`data-package="${packageId}"`), `${packageId} remains connected to checkout`);
   }
+  const spotlightPackageIds = [
+    'package-essential', 'package-professional', 'package-enterprise',
+    'package-custom', 'package-link-in-bio',
+  ];
+  assert.equal((html.match(/data-future-spotlight="gold"/g) || []).length, spotlightPackageIds.length);
+  for (const id of spotlightPackageIds) {
+    const card = html.match(new RegExp(`<(?:a|button)\\b[^>]*\\bid="${id}"[^>]*>`))?.[0];
+    assert.ok(card?.includes('data-future-card'), `${id} remains registered with the shared card interaction`);
+    assert.ok(card?.includes('data-future-spotlight="gold"'), `${id} receives the branded package spotlight`);
+  }
   assert.match(html, /data-payment-notice/);
   assert.match(netlify, /from = "\/free-preview\.html"[\s\S]*?to = "\/contact\.html\?service=website-packages"[\s\S]*?status = 301/);
   assert.match(html, /data-modal-backdrop/);

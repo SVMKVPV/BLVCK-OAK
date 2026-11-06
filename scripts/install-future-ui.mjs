@@ -18,7 +18,7 @@ export async function installFutureUi(directory) {
     html = html.replace(/<body\b([^>]*)>/i, (tag, attributes) => /\bdata-future-ui(?:\s|=|$)/i.test(attributes) ? tag : `<body${attributes} data-future-ui>`);
     html = html.replace(/(<meta\b[^>]*name=["']theme-color["'][^>]*content=["'])[^"']*(["'])/i, '$1#080909$2');
     const additions = [];
-    if (!/<link\b[^>]*href=["'][^"']*\bfuture-ui\.css(?:[?"'])/i.test(html)) additions.push('<link rel="stylesheet" href="/future-ui.css?v=2">');
+    if (!/<link\b[^>]*href=["'][^"']*\bfuture-ui\.css(?:[?"'])/i.test(html)) additions.push('<link rel="stylesheet" href="/future-ui.css?v=3">');
     if (!/<script\b[^>]*src=["'][^"']*\bfuture-ui\.js(?:[?"'])/i.test(html)) additions.push('<script src="/future-ui.js?v=1" defer></script>');
     if (additions.length) html = html.replace(/<\/head>/i, additions.join('\n') + '\n</head>');
     await writeFile(path, html);

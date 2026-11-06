@@ -194,8 +194,25 @@ body[data-future-ui]:not(.future-home) .process-grid article { border-color: #c9
 body[data-future-ui]:not(.future-home) .how { color: #171511; background: #f0ede5; }
 body[data-future-ui]:not(.future-home) .how :is(.section-label, .step span, .step p) { color: #645638; }
 
-/* Decorative effects compose with existing card layouts via individual rotate. */
-body[data-future-ui] [data-future-card] { position: relative; isolation: isolate; }
+/* Decorative effects compose with existing card layouts via individual rotate.
+   The glow reuses the single, frame-throttled pointer tracker in future-ui.js;
+   cards never create their own document listeners. */
+body[data-future-ui] [data-future-card] {
+  position: relative;
+  isolation: isolate;
+}
+body[data-future-ui] [data-future-card][data-future-spotlight='gold'] {
+  --future-card-glow: color-mix(in srgb, var(--future-accent) 10%, transparent);
+  --future-card-border-glow: color-mix(in srgb, var(--gold-light) 95%, transparent);
+  --future-card-glow-size: 220px;
+  --future-card-border-size: 165px;
+}
+body[data-future-ui] [data-future-card][data-future-spotlight='gold'].price-card--featured {
+  --future-card-glow: color-mix(in srgb, var(--gold-light) 14%, transparent);
+  --future-card-border-glow: var(--gold-light);
+  --future-card-glow-size: 260px;
+  --future-card-border-size: 190px;
+}
 body[data-future-ui] .future-card-light {
   position: absolute;
   z-index: 2;
@@ -206,6 +223,34 @@ body[data-future-ui] .future-card-light {
   opacity: 0;
   pointer-events: none;
   transition: opacity .3s ease;
+}
+body[data-future-ui] [data-future-card][data-future-spotlight='gold'] > .future-card-light {
+  background: radial-gradient(
+    var(--future-card-glow-size) circle at var(--future-pointer-x, 50%) var(--future-pointer-y, 50%),
+    var(--future-card-glow),
+    transparent 72%
+  );
+}
+/* Mask the stronger spotlight down to a one-pixel border trace. Browsers
+   without composite-mask support retain the softer inner light above. */
+@supports ((-webkit-mask-composite: xor) or (mask-composite: exclude)) {
+  body[data-future-ui] [data-future-card][data-future-spotlight='gold'] > .future-card-light::before {
+    position: absolute;
+    inset: 0;
+    box-sizing: border-box;
+    padding: 1px;
+    border-radius: inherit;
+    background: radial-gradient(
+      var(--future-card-border-size) circle at var(--future-pointer-x, 50%) var(--future-pointer-y, 50%),
+      var(--future-card-border-glow),
+      transparent 72%
+    );
+    -webkit-mask: linear-gradient(black 0 0) content-box, linear-gradient(black 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(black 0 0) content-box, linear-gradient(black 0 0);
+    mask-composite: exclude;
+    content: '';
+  }
 }
 body[data-future-ui] [data-future-card].future-card-hover > .future-card-light { opacity: 1; }
 body[data-future-ui] [data-future-parallax] { translate: 0 var(--future-parallax-y, 0px); }
