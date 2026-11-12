@@ -1,6 +1,6 @@
-# Black Oak Digital
+# Blvck Oak Digital
 
-Production website, passwordless partner portal, custom quote workflow, Stripe Checkout and Stripe Connect integrations for Black Oak Digital.
+Production website, passwordless partner portal, custom quote workflow, Stripe Checkout and Stripe Connect integrations for Blvck Oak Digital.
 
 - [Production setup](SETUP.md)
 - [Authentication architecture](AUTHENTICATION.md)
