@@ -94,7 +94,7 @@ if (!stylesheet.trimStart().startsWith(':root') || stylesheet.includes('\uFFFD')
 for (const selector of ['.site-header', '.pricing-grid', '.side-menu', '.oak-origin']) {
   if (!stylesheet.includes(selector)) failures.push(`style.css is missing required selector: ${selector}`);
 }
-if (!/data-oak-origin/.test(index) || !/obsidian-oak-scroll-ccw\.mp4/.test(index) || !/obsidian-oak-scroll-poster\.webp/.test(index) || !/cinematic-intro\.js/.test(index)) {
+if (!/data-oak-origin/.test(index) || !/(?:obsidian-oak-scroll-ccw|blvckoak-intro)\.mp4/.test(index) || !/obsidian-oak-scroll-poster\.webp/.test(index) || !/cinematic-intro\.js/.test(index)) {
   failures.push('Homepage tree animation or its static fallback is not connected.');
 }
 if (!/data-oak-liquid/.test(index) || !/liquid-oak\.js/.test(index)) {
