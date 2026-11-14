@@ -55,7 +55,7 @@ test('studio homepage preserves production SEO, routes and commercial journeys',
   assert.match(html, /<section[^>]*id="top"[^>]*>/);
   assert.match(html, /data-oak-origin/);
   assert.match(html, /data-oak-video/);
-  assert.match(html, /<source[^>]*src="assets\/obsidian-oak-scroll-ccw\.mp4"[^>]*type="video\/mp4"/);
+  assert.match(html, /<source[^>]*src="assets\/(?:obsidian-oak-scroll-ccw|blvckoak-intro)\.mp4"[^>]*type="video\/mp4"/);
   assert.doesNotMatch(html, /data-future-scene|data-future-canvas/);
   assert.doesNotMatch(html, /<script[^>]*src="future-scene\.js/);
   assert.doesNotMatch(html, /href="https:\/\/blvckoak\.com\.au\/(?:quote|book|portfolio)\.html"/);
