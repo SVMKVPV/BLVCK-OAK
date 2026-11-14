@@ -138,7 +138,7 @@
   function activateVideo() {
     if (!(video instanceof HTMLVideoElement) || threeStarted) return;
     const availableDuration = Number.isFinite(video.duration) ? video.duration : VIDEO_END_SECONDS;
-    videoDuration = Math.max(0, Math.min(VIDEO_END_SECONDS, availableDuration - 1 / 48));
+    videoDuration = Math.max(0, availableDuration - 1 / 48);
     video.pause();
     videoReady = true;
     queueVideoScrub(true);
