@@ -29,7 +29,7 @@ export function emailShell(title, content) {
   return `<!doctype html>
 <html lang="en"><body style="margin:0;background:#080909;color:#f0ede5;font-family:Arial,sans-serif">
   <div style="max-width:620px;margin:0 auto;padding:40px 22px">
-    <p style="margin:0 0 28px;color:#d4ae58;font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase">Black Oak Digital</p>
+    <p style="margin:0 0 28px;color:#d4ae58;font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase">BLVCK OAK</p>
     <div style="padding:30px;border:1px solid #32332f;background:#111212">
       <h1 style="margin:0 0 18px;color:#f1d48c;font-family:Georgia,serif;font-size:30px;font-weight:500">${escapeHtml(title)}</h1>
       ${content}

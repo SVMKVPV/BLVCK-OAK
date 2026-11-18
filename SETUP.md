@@ -88,7 +88,7 @@ STRIPE_CONNECT_WEBHOOK_SECRET=whsec_YOUR_CONNECTED_ACCOUNT_WEBHOOK_SECRET
 GOOGLE_MAPS_API_KEY=YOUR_SERVER_SIDE_PLACES_KEY
 STRIPE_ENTERPRISE_REFERRAL_COUPON_ID=bo-ent-60-first-1000
 RESEND_API_KEY=re_YOUR_KEY
-EMAIL_FROM=Black Oak Digital <partners@YOUR-VERIFIED-DOMAIN>
+EMAIL_FROM=BLVCK OAK <partners@YOUR-VERIFIED-DOMAIN>
 OWNER_AUTH_EMAIL=YOUR-PRIVATE-OWNER-ACCOUNT
 OWNER_NOTIFICATION_EMAIL=YOUR-BUSINESS-NOTIFICATION-INBOX
 SUPPORT_EMAIL=support@YOUR-VERIFIED-DOMAIN
@@ -162,3 +162,24 @@ Partners and the owner sign in at `/partners.html` with a six-digit email code. 
 The owner is determined only by the verified account email matching `OWNER_AUTH_EMAIL` (with `OWNER_EMAIL` retained only as a temporary backwards-compatible fallback). Owner notifications use `OWNER_NOTIFICATION_EMAIL`. Do not place an owner role, email allowlist or secret in browser JavaScript.
 
 Approved projects use a high-entropy private token for client payment and progress pages. If a link is exposed, sign in as the owner and choose **Reset private links** on the quote. Send the newly generated links to the client; the old Black Oak payment and progress links stop working immediately. A Stripe-hosted Checkout URL that was already opened is controlled separately in Stripe.
+
+## Security hardening summary
+
+- Routes Link in Bio, Essential, Professional and Enterprise through one server-priced Stripe Checkout function; Link in Bio uses Stripe subscription mode at A$13.13 per month.
+- Removes all public test Payment Links and rejects browser-supplied prices.
+- Uses one strict referral format: `BO-` plus ten hexadecimal characters.
+- Verifies email ownership with a six-digit, time-limited, single-use email code before creating a partner session or Stripe payout account.
+- Uses a new private email code for every sign-in and never exposes Stripe onboarding links to unauthenticated visitors.
+- Requires completed Stripe identity, transfer and payout verification before a code can be used.
+- Blocks exact-email self-referrals and rechecks after payment.
+- Accepts rewards only from signed Stripe events with trusted metadata and exact AUD totals.
+- Deduplicates webhook events, Stripe Checkout creation and reward records.
+- Hard-caps the Enterprise discount at 1,000 Stripe coupon redemptions.
+- Holds rewards for at least 14 days, then processes them in the weekly scheduled payout function.
+- Reduces rewards for partial refunds, cancels full refunds and reverses transferred amounts where possible.
+- Suspends or reverses rewards when a dispute opens.
+- Adds owner/customer payment alerts and a rate-limited contact endpoint through a verified email provider.
+- Adds privacy, terms and refund pages, strict browser headers, repeatable tests and a live-configuration preflight.
+- Adds owner-controlled rotation for private client payment and progress links so exposed Black Oak links can be revoked.
+
+No software can eliminate alternate-email self-referrals, identity theft, account compromise, chargebacks after payout, tax/legal risk or unrecoverable transfers. Keep Stripe Radar enabled, manually review suspicious activity, keep sufficient reserves and complete the external checklist before live launch.

@@ -8,6 +8,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: write
+  pull-requests: write
 jobs:
   capture:
     runs-on: ubuntu-latest
@@ -25,11 +26,13 @@ jobs:
         env:
           PLAYWRIGHT_MODULE: /tmp/portfolio-capture/node_modules/playwright
         run: node scripts/capture-portfolio.cjs
-      - name: Publish captured thumbnails
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add assets/portfolio/screenshots portfolio.html
-          if git diff --cached --quiet; then exit 0; fi
-          git commit -m "Show actual homepage screenshots in portfolio cards"
-          git push origin HEAD:main
+      - name: Open a pull request with captured thumbnails
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: automation/portfolio-screenshots
+          commit-message: Show actual homepage screenshots in portfolio cards
+          title: Refresh portfolio homepage screenshots
+          body: Captured by the portfolio screenshot workflow. Merge after the Verify check passes.
+          add-paths: |
+            assets/portfolio/screenshots
+            portfolio.html

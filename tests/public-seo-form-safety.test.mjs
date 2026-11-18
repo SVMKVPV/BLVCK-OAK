@@ -25,7 +25,7 @@ test('public pages use self-canonicals and production Open Graph URLs', async ()
     const pageUrl = `https://blvckoak.com.au/${file}`;
     assert.ok(html.includes(`<link rel="canonical" href="${pageUrl}">`), `${file} should self-canonicalize`);
     assert.ok(html.includes(`<meta property="og:url" content="${pageUrl}">`), `${file} should publish its canonical Open Graph URL`);
-    assert.ok(html.includes('<meta property="og:image" content="https://blvckoak.com.au/og.png">'), `${file} should use the production social image`);
+    assert.ok(html.includes('<meta property="og:image" content="https://blvckoak.com.au/og.jpg">'), `${file} should use the production social image`);
     assert.doesNotMatch(html, /https:\/\/blvckoak\.netlify\.app\/og\.png/i, `${file} should not advertise the legacy social image origin`);
   }
 });

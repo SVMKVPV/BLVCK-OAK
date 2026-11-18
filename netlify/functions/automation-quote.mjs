@@ -17,7 +17,7 @@ export function prepareAutomationContact(body) {
  if(message.length>3000) throw new Error('Please shorten your notes before sending this quote request.');
  // Bind idempotency to the actual enquiry so edits cannot reuse a previous lead.
  const requestId=createHash('sha256').update(JSON.stringify([body.requestId,body.name,body.email,body.company,message])).digest('hex');
- return {name:body.name,email:body.email,company:body.company,website:body.website,acceptedPrivacy:body.acceptedPrivacy,requestId,service:'workflow-ai',message};
+ return {name:body.name,email:body.email,company:body.company,website:body.website,acceptedPrivacy:body.acceptedPrivacy,requestId,service:'workflow-ai',message,turnstileToken:body.turnstileToken||body['cf-turnstile-response']};
 }
 export default async function handler(request,context) {
  if(request.method!=='POST') return json({error:'Method not allowed.'},405);

@@ -112,7 +112,7 @@ $('#download-brief').addEventListener('click',()=>{
 });
 enquiry.addEventListener('submit',async event=>{
  event.preventDefault();if(sending||!snapshot||!enquiry.reportValidity())return;
- const data=new FormData(enquiry),status=$('#enquiry-status'),payload={...snapshot,name:data.get('name'),email:data.get('email'),company:data.get('company'),website:data.get('website'),acceptedPrivacy:data.get('privacy')==='on'};
+ const data=new FormData(enquiry),status=$('#enquiry-status'),payload={...snapshot,name:data.get('name'),email:data.get('email'),company:data.get('company'),website:data.get('website'),turnstileToken:data.get('cf-turnstile-response'),acceptedPrivacy:data.get('privacy')==='on'};
  delete payload.estimate;
  sending=true;$('#enquiry-fields').disabled=true;estimateForm.querySelectorAll('fieldset,button[type=submit]').forEach(control=>{control.disabled=true;});finder.querySelectorAll('input,select,button').forEach(control=>{control.disabled=true;});
  setStatus(status,'Sending your quote request…');

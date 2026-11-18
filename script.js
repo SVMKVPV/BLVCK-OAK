@@ -520,6 +520,7 @@ contactForm?.addEventListener('submit', async (event) => {
         service: formData.get('service'),
         message: formData.get('message'),
         website: formData.get('website'),
+        turnstileToken: formData.get('cf-turnstile-response'),
         acceptedPrivacy: formData.get('privacy') === 'on',
         requestId,
       }),
