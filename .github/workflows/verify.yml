@@ -59,10 +59,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm run build
       - run: npm install --prefix /tmp/e2e @playwright/test@1.58.2 @lhci/cli@0.14.0
+      - run: ln -s /tmp/e2e/node_modules/@playwright node_modules/@playwright
       - run: /tmp/e2e/node_modules/.bin/playwright install --with-deps chromium
       - name: Browser smoke tests
         run: /tmp/e2e/node_modules/.bin/playwright test --config e2e/playwright.config.mjs
-        env:
-          NODE_PATH: /tmp/e2e/node_modules
       - name: Lighthouse budgets
         run: /tmp/e2e/node_modules/.bin/lhci autorun --config=lighthouserc.json
