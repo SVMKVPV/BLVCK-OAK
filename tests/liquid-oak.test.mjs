@@ -58,6 +58,7 @@ test('liquid oak stays decorative, scroll-linked and motion-safe', async () => {
   assert.match(css, /\.oak-origin\.is-motion-paused \.oak-origin-liquid/);
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
   assert.match(build, /'liquid-oak\.js'/);
-  assert.match(packageJson, /node --check liquid-oak\.js/);
+  assert.match(packageJson, /"check": "node scripts\/check\.mjs"/);
+  assert.match(await read('scripts/check.mjs'), /readdirSync\(root\)\.filter\(\(name\) => name\.endsWith\('\.js'\)\)/);
   assert.doesNotMatch(client, /cdn\.21st\.dev/);
 });

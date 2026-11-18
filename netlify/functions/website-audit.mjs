@@ -5,6 +5,7 @@ import https from 'node:https';
 import { emailShell, escapeHtml, getOwnerEmail, sendEmail } from '../lib/email.mjs';
 import { PortalError, readBody } from '../lib/portal-auth.mjs';
 import { enforcePublicQuota } from '../lib/public-rate-limit.mjs';
+import { verifyTurnstile } from '../lib/turnstile.mjs';
 import { json } from '../lib/referrals.mjs';
 import { createSalesLead } from '../lib/sales-leads.mjs';
 import { isPrivateAddress, scoreWebsiteAudit } from '../lib/website-audit.mjs';
@@ -72,6 +73,8 @@ export default async function handler(request, context) {
   if (limited) return limited;
   try {
     const body = await readBody(request, 8192);
+    const spam = await verifyTurnstile(body, context);
+    if (spam) return spam;
     if (body.companyWebsite) return json({ error: 'Audit could not be completed.' }, 400);
     const name = String(body.name || '').trim().slice(0, 100);
     const email = String(body.email || '').trim().toLowerCase().slice(0, 160);

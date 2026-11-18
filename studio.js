@@ -159,7 +159,7 @@ const detailContent = {
   "help-fit": {
     number: "01",
     category: "Help me decide",
-    title: "Is Blvck Oak the right fit?",
+    title: "Is BLVCK OAK the right fit?",
     body: "The studio is designed for founders and teams whose work has outgrown a template and who want a sharper digital presence without coordinating five separate suppliers.",
     points: ["You value distinct visual direction", "You want the website and surrounding systems considered together", "You can make clear, accountable decisions"],
   },

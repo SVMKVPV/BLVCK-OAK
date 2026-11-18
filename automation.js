@@ -112,7 +112,7 @@ $('#download-brief').addEventListener('click',()=>{
 });
 enquiry.addEventListener('submit',async event=>{
  event.preventDefault();if(sending||!snapshot||!enquiry.reportValidity())return;
- const data=new FormData(enquiry),status=$('#enquiry-status'),payload={...snapshot,name:data.get('name'),email:data.get('email'),company:data.get('company'),website:data.get('website'),acceptedPrivacy:data.get('privacy')==='on'};
+ const data=new FormData(enquiry),status=$('#enquiry-status'),payload={...snapshot,name:data.get('name'),email:data.get('email'),company:data.get('company'),website:data.get('website'),turnstileToken:data.get('cf-turnstile-response'),acceptedPrivacy:data.get('privacy')==='on'};
  delete payload.estimate;
  sending=true;$('#enquiry-fields').disabled=true;estimateForm.querySelectorAll('fieldset,button[type=submit]').forEach(control=>{control.disabled=true;});finder.querySelectorAll('input,select,button').forEach(control=>{control.disabled=true;});
  setStatus(status,'Sending your quote request…');
@@ -122,7 +122,7 @@ enquiry.addEventListener('submit',async event=>{
   if(!response.ok||!result?.message)throw new Error(result?.error||'Your request could not be confirmed. Please try again. Your estimate is still available to download.');
   setStatus(status,`Your quote request has been sent. Reference ${snapshot.reference}. We aim to reply within two business days. You can keep a copy using Download brief.`);
  }catch(error){$('#enquiry-fields').disabled=false;setStatus(status,error.name==='TimeoutError'?'Sending took longer than expected. Delivery is not confirmed. Please retry; the same request reference will be reused.':error.message||'Unable to confirm delivery. Please retry or download your brief.',true);}
- finally{sending=false;estimateForm.querySelectorAll('fieldset,button[type=submit]').forEach(control=>{control.disabled=false;});finder.querySelectorAll('input,select,button').forEach(control=>{control.disabled=false;});}
+ finally{sending=false;window.turnstile?.reset();estimateForm.querySelectorAll('fieldset,button[type=submit]').forEach(control=>{control.disabled=false;});finder.querySelectorAll('input,select,button').forEach(control=>{control.disabled=false;});}
 });
 renderCatalogue();updateShortlist();
 const requested=new URLSearchParams(location.search).get('service');

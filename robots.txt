@@ -1,4 +1,13 @@
 User-agent: *
 Allow: /
+Disallow: /analytics.html
+Disallow: /operations.html
+Disallow: /business-tools.html
+Disallow: /oakpay-app.html
+Disallow: /partners.html
+Disallow: /pay.html
+Disallow: /progress.html
+Disallow: /api/
+Disallow: /.netlify/
 
 Sitemap: https://blvckoak.com.au/sitemap.xml

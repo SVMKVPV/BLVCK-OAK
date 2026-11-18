@@ -44,3 +44,24 @@ jobs:
             dist/
             release-smoke-results.json
           retention-days: 7
+
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.23.4
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build
+      - run: npm install --prefix /tmp/e2e @playwright/test@1.58.2 @lhci/cli@0.14.0
+      - run: ln -s /tmp/e2e/node_modules/@playwright node_modules/@playwright
+      - run: /tmp/e2e/node_modules/.bin/playwright install --with-deps chromium
+      - name: Browser smoke tests
+        run: /tmp/e2e/node_modules/.bin/playwright test --config e2e/playwright.config.mjs
+      - name: Lighthouse budgets
+        run: /tmp/e2e/node_modules/.bin/lhci autorun --config=lighthouserc.json
