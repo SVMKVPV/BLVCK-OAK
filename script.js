@@ -536,6 +536,7 @@ contactForm?.addEventListener('submit', async (event) => {
     contactStatus.textContent = error.message;
   } finally {
     submitButton.disabled = false;
+    window.turnstile?.reset();
   }
 });
 
