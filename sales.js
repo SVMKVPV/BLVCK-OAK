@@ -27,7 +27,7 @@ if (bookingForm) {
       window.blvckOakAnalytics?.track('form_success');
       bookingForm.reset(); date.min = local; date.max = maximum; status.textContent = result.message;
     } catch (error) { status.classList.add('error'); status.textContent = error.message; }
-    finally { button.disabled = false; }
+    finally { button.disabled = false; window.turnstile?.reset(); }
   });
 }
 
@@ -51,7 +51,7 @@ if (auditForm) auditForm.addEventListener('submit', async (event) => {
     }));
     resultPanel.hidden = false; resultPanel.scrollIntoView({ behavior: 'smooth', block: 'start' }); status.textContent = 'Audit complete.';
   } catch (error) { status.classList.add('error'); status.textContent = error.message; }
-  finally { button.disabled = false; }
+  finally { button.disabled = false; window.turnstile?.reset(); }
 });
 
 async function loadClientProof() {
