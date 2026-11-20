@@ -3,9 +3,11 @@ import { json } from '../lib/referrals.mjs';
 import { listSalesLeads, salesStore } from '../lib/sales-leads.mjs';
 import { followUpEligible } from '../../operations-model.js';
 
-export const config = { schedule: '15 * * * *' };
+export const config = {};
 
 export default async function handler() {
+  // DEFAULT-DENY PREVIEW ONLY. No customer messages without per-message signed approval.
+  return json({ status: 'owner_review_required', processed: 0, sent: 0 });
   const store = salesStore();
   const now = Date.now();
   const leads = await listSalesLeads(250, store);

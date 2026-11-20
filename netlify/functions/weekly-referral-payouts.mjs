@@ -12,6 +12,8 @@ import {
 const PAYOUT_BATCH_LIMIT = 100;
 
 export default async function handler() {
+  // DEFAULT-DENY PREVIEW ONLY. No transfers without per-transfer signed approval.
+  return json({ status: 'owner_review_required', transferred: 0, deferred: 0, failed: 0 });
   const summary = { transferred: 0, deferred: 0, failed: 0 };
 
   try {
