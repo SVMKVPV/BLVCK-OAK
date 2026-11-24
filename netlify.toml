@@ -24,12 +24,6 @@
   to = "/websites-near-me-sydney.html"
   status = 200
 
-[functions."weekly-referral-payouts"]
-  schedule = "0 22 * * 4"
-
-[functions."sales-followups"]
-  schedule = "15 * * * *"
-
 [functions."business-tool-rules"]
   schedule = "35 * * * *"
 
