@@ -276,10 +276,23 @@
     <script src="future-ui.js?v=1" defer></script>
     <link rel="stylesheet" href="studio-intro.css?v=4" />
     <script src="cinematic-intro.js?v=10" defer></script>
+    <script src="oak-fire-scroll.js?v=1" defer></script>
     <script src="liquid-oak.js?v=2" defer></script>
     <script src="studio.js?v=2" defer></script>
     <script src="script.js?v=13" defer></script>
-  <style>.oak-fire-film{width:100%;background:#050505;overflow:hidden}.oak-fire-film-video{display:block;width:100%;max-height:78vh;aspect-ratio:16/9;object-fit:cover;background:#050505}@media(max-width:700px){.oak-fire-film-video{aspect-ratio:9/16;max-height:78svh}}</style>
+  <style>
+.oak-fire-film{position:relative;width:100%;background:#050505;color:#f4f0e8;overflow:clip}
+.oak-fire-film__track{position:relative;height:230vh;min-height:1200px}
+.oak-fire-film__stage{position:sticky;top:0;height:100vh;height:100svh;min-height:480px;display:grid;place-items:center;overflow:hidden;background:#050505}
+.oak-fire-film-video{display:block;width:100%;height:100%;object-fit:cover;background:#050505}
+.oak-fire-film__shade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.12),transparent 30%,transparent 65%,rgba(0,0,0,.55))}
+.oak-fire-film__instruction{position:absolute;left:clamp(20px,5vw,72px);bottom:clamp(66px,10vh,100px);font:600 11px/1.4 'Plus Jakarta Sans',sans-serif;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.82)}
+.oak-fire-film__readout{position:absolute;right:clamp(20px,5vw,72px);bottom:clamp(66px,10vh,100px);font:500 10px/1.4 'Plus Jakarta Sans',sans-serif;letter-spacing:.14em;color:rgba(255,255,255,.7);font-variant-numeric:tabular-nums}
+.oak-fire-film__progress{position:absolute;left:0;right:0;bottom:0;height:2px;background:rgba(255,255,255,.18)}
+.oak-fire-film__progress span{display:block;width:0;height:100%;background:#c5a56a;transform-origin:left center}
+@media(max-width:700px){.oak-fire-film__track{height:190vh;min-height:1000px}.oak-fire-film__stage{min-height:420px}.oak-fire-film-video{object-fit:cover}.oak-fire-film__instruction{bottom:54px;max-width:58%;font-size:9px}.oak-fire-film__readout{bottom:54px;font-size:9px}}
+@media(prefers-reduced-motion:reduce){.oak-fire-film__track{height:auto;min-height:0}.oak-fire-film__stage{position:relative;top:auto;height:auto;min-height:0;aspect-ratio:16/9}.oak-fire-film-video{height:auto;aspect-ratio:16/9;object-fit:contain;controls:true}}
+</style>
 </head>
   <body class="future-home" data-future-ui>
     <noscript><link rel="stylesheet" href="studio-noscript.css?v=3" /></noscript>
@@ -336,11 +349,19 @@
       </div>
     </section>
 
-<section class='oak-fire-film' aria-label='BLVCK OAK cinematic film'>
-<video class='oak-fire-film-video' muted playsinline preload='metadata' controls poster='assets/blvckoak-fire-poster.jpg'>
-<source src='assets/blvckoak-intro.mp4' type='video/mp4'>
-Your browser cannot play this video.
-</video>
+<section class="oak-fire-film" data-scroll-film aria-label="BLVCK OAK cinematic film controlled by scrolling">
+  <div class="oak-fire-film__track" data-scroll-film-track>
+    <div class="oak-fire-film__stage">
+      <video class="oak-fire-film-video" data-scroll-film-video muted playsinline preload="auto" poster="assets/blvckoak-fire-poster.jpg" aria-label="Cinematic BLVCK OAK tree and fire film. Scroll to move through the footage frame by frame.">
+        <source src="assets/blvckoak-intro.mp4" type="video/mp4">
+        Your browser cannot play this video.
+      </video>
+      <div class="oak-fire-film__shade" aria-hidden="true"></div>
+      <p class="oak-fire-film__instruction">Scroll to move through the film</p>
+      <p class="oak-fire-film__readout" data-scroll-film-readout aria-live="off">00:00 / 00:10</p>
+      <div class="oak-fire-film__progress" aria-hidden="true"><span data-scroll-film-progress></span></div>
+    </div>
+  </div>
 </section>
     <header class="site-header" id="site-header">
       <a class="wordmark" href="#top" aria-label="BLVCK OAK home">
