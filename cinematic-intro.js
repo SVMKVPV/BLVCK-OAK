@@ -1031,11 +1031,11 @@
     videoReelFrame = 0;
     videoReady = false;
     intro.classList.remove('is-video-ready');
-    intro.classList.add('is-video-fallback');
+    intro.classList.add('is-video-fallback', 'is-webgl-fallback');
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
       console.warn('BLVCK OAK video intro fallback:', error);
     }
-    loadThree().then(initThree).catch(showFallback);
+    // Keep the supplied cinematic poster visible; do not resurrect the old procedural oak.
   }
 
   if (!(video instanceof HTMLVideoElement)) {
