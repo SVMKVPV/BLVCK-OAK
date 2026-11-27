@@ -599,7 +599,7 @@ dialog::backdrop { background: rgba(8,9,9,.82); backdrop-filter: blur(15px); }
 @keyframes agent-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 @keyframes agent-pulse { 50% { opacity: .35; } }
 @media (max-width: 960px) {
-  .agent-feature { grid-template-columns: 1fr; }
+  .agent-feature { grid-template-columns: minmax(0, 1fr); }
   .agent-feature__demo { max-width: 560px; }
 }
 @media (max-width: 600px) {
@@ -611,7 +611,7 @@ dialog::backdrop { background: rgba(8,9,9,.82); backdrop-filter: blur(15px); }
 }
 
 /* Animated workflow flowchart */
-.agent-flow { grid-column: 1 / -1; margin-top: clamp(20px, 4vw, 48px); padding-top: clamp(48px, 6vw, 80px); border-top: 1px solid var(--line); }
+.agent-flow { grid-column: 1 / -1; min-width: 0; margin-top: clamp(20px, 4vw, 48px); padding-top: clamp(48px, 6vw, 80px); border-top: 1px solid var(--line); }
 .agent-flow__head { max-width: 720px; }
 .agent-flow h3 { margin: 20px 0 0; color: var(--paper); font-size: clamp(28px, 3.4vw, 48px); font-weight: 400; letter-spacing: -.05em; line-height: 1.1; }
 .agent-flow h3 em { color: var(--gold-light); font-style: normal; }
