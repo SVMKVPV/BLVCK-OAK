@@ -609,3 +609,30 @@ dialog::backdrop { background: rgba(8,9,9,.82); backdrop-filter: blur(15px); }
   .agent-chat__msg, .agent-chat__steps { opacity: 1; animation: none; }
   .agent-chat__dot, .agent-chat__steps .is-waiting i { animation: none; }
 }
+
+/* Animated workflow flowchart */
+.agent-flow { grid-column: 1 / -1; margin-top: clamp(20px, 4vw, 48px); padding-top: clamp(48px, 6vw, 80px); border-top: 1px solid var(--line); }
+.agent-flow__head { max-width: 720px; }
+.agent-flow h3 { margin: 20px 0 0; color: var(--paper); font-size: clamp(28px, 3.4vw, 48px); font-weight: 400; letter-spacing: -.05em; line-height: 1.1; }
+.agent-flow h3 em { color: var(--gold-light); font-style: normal; }
+.agent-flow__head > p:last-child { margin: 18px 0 0; color: #a6a49d; font-size: 14px; line-height: 1.8; }
+.agent-flow__scroll { margin-top: 36px; padding: 18px; border: 1px solid var(--line); border-radius: 14px; background: radial-gradient(ellipse at 30% 50%, rgba(212,174,88,.07), transparent 55%), #0a0b0b; overflow-x: auto; }
+.agent-flow__svg { width: 100%; min-width: 960px; height: auto; font-family: var(--sans); }
+.agent-flow__col { fill: #77766f; font-size: 11px; font-weight: 600; letter-spacing: .18em; }
+.agent-flow__edge { fill: none; stroke: url(#agentFlowEdge); stroke-width: 1.6; stroke-dasharray: 6 8; animation: agent-flow-dash 1.2s linear infinite; }
+.agent-flow__pulse { fill: var(--gold-light); filter: drop-shadow(0 0 6px rgba(241,212,140,.9)); }
+.agent-flow__node rect { fill: #121313; stroke: rgba(212,174,88,.35); stroke-width: 1; animation: agent-flow-node 2.8s ease-in-out infinite; animation-delay: calc(var(--l) * .7s); }
+.agent-flow__node text { fill: #dedbd3; font-size: 13px; font-weight: 500; }
+.agent-flow__led { fill: var(--gold); animation: agent-pulse 1.4s ease-in-out infinite; animation-delay: calc(var(--l) * .7s); }
+.agent-flow__node--hub rect { fill: #1a170f; stroke: var(--gold); stroke-width: 1.6; }
+.agent-flow__node--hub text { fill: var(--gold-light); font-size: 15px; font-weight: 700; }
+.agent-flow__node--team .agent-flow__led { fill: #8fd49b; }
+.agent-flow__node--out rect { fill: #13180f; stroke: #8fd49b; }
+.agent-flow__node--out text { fill: #cfeccf; font-weight: 600; }
+.agent-flow__note { margin: 14px 0 0; color: #77766f; font-size: 11px; }
+@keyframes agent-flow-dash { to { stroke-dashoffset: -14; } }
+@keyframes agent-flow-node { 0%, 100% { stroke-opacity: .5; } 25% { stroke-opacity: 1; filter: drop-shadow(0 0 8px rgba(212,174,88,.55)); } }
+@media (prefers-reduced-motion: reduce) {
+  .agent-flow__edge, .agent-flow__node rect, .agent-flow__led { animation: none; }
+  .agent-flow__pulses { display: none; }
+}
