@@ -1,0 +1,102 @@
+/* BLVCK OAK holographic voice HUD. No inline styles are used anywhere (the site CSP forbids them). */
+.vhud-launch,
+.vhud {
+  --vhud-gold: #d4af37;
+  --vhud-champagne: #f3e5ab;
+  --vhud-ink: #07080b;
+  --vhud-text: #f8f9fa;
+  position: fixed;
+  right: max(12px, env(safe-area-inset-right, 0px));
+  bottom: max(12px, env(safe-area-inset-bottom, 0px));
+  z-index: 8000;
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+}
+
+.vhud-launch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  border-radius: 999px;
+  background: rgba(11, 12, 16, 0.92);
+  color: var(--vhud-champagne);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  box-shadow: 0 0 24px rgba(212, 175, 55, 0.2);
+}
+.vhud-launch:hover { border-color: var(--vhud-gold); }
+.vhud-launch:focus-visible,
+.vhud button:focus-visible,
+.vhud textarea:focus-visible { outline: 2px solid var(--vhud-champagne); outline-offset: 2px; }
+
+.vhud {
+  width: min(340px, calc(100vw - 24px));
+  max-height: calc(100vh - 24px);
+  overflow-y: auto;
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: 6px;
+  background: rgba(7, 8, 11, 0.94);
+  color: var(--vhud-text);
+  box-shadow: 0 0 40px rgba(212, 175, 55, 0.18);
+  animation: vhud-flicker 6s steps(1) infinite;
+}
+.vhud[hidden], .vhud-launch[hidden] { display: none; }
+
+.vhud-corner { position: absolute; width: 12px; height: 12px; border: 0 solid rgba(243, 229, 171, 0.7); pointer-events: none; z-index: 5; }
+.vhud-corner.tl { top: 6px; left: 6px; border-top-width: 1px; border-left-width: 1px; }
+.vhud-corner.tr { top: 6px; right: 6px; border-top-width: 1px; border-right-width: 1px; }
+.vhud-corner.bl { bottom: 6px; left: 6px; border-bottom-width: 1px; border-left-width: 1px; }
+.vhud-corner.br { bottom: 6px; right: 6px; border-bottom-width: 1px; border-right-width: 1px; }
+
+.vhud-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px 0; }
+.vhud-title { font-size: 10px; letter-spacing: 0.2em; color: var(--vhud-gold); }
+.vhud-close { background: none; border: 0; color: rgba(243, 229, 171, 0.75); font-size: 18px; line-height: 1; cursor: pointer; padding: 2px 6px; }
+.vhud-close:hover { color: var(--vhud-champagne); }
+
+.vhud-orb { position: relative; width: 78%; aspect-ratio: 1; margin: 8px auto 0; }
+.vhud-orb svg { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 3; }
+.vhud-canvas { position: absolute; inset: 6%; border-radius: 50%; overflow: hidden; z-index: 1; }
+.vhud-canvas canvas { display: block; width: 100%; height: 100%; }
+.vhud-scan { position: absolute; inset: 6%; border-radius: 50%; z-index: 2; pointer-events: none; overflow: hidden;
+  background: repeating-linear-gradient(to bottom, rgba(243, 229, 171, 0.05) 0, rgba(243, 229, 171, 0.05) 1px, transparent 1px, transparent 3px); }
+.vhud-scan::after { content: ''; position: absolute; left: 0; right: 0; height: 50%;
+  background: linear-gradient(to bottom, transparent, rgba(243, 229, 171, 0.12), transparent); animation: vhud-sweep 4.5s linear infinite; }
+.vhud-ring-a { transform-origin: 50px 50px; animation: vhud-spin 24s linear infinite; }
+.vhud-ring-b { transform-origin: 50px 50px; animation: vhud-spin 38s linear infinite reverse; }
+
+.vhud-body { padding: 4px 16px 16px; }
+.vhud-bars { display: flex; align-items: flex-end; justify-content: center; gap: 3px; height: 46px; }
+.vhud-bars span { width: 3px; height: 8px; border-radius: 1px; background: rgba(212, 175, 55, 0.8); }
+.vhud-state { margin: 8px 0 0; text-align: center; font-size: 12px; letter-spacing: 0.25em; color: var(--vhud-champagne); }
+
+.vhud-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+.vhud-btn { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; margin-top: 8px; padding: 8px 10px;
+  border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 4px; background: none; color: var(--vhud-champagne); font: inherit; font-size: 12px; cursor: pointer; }
+.vhud-row .vhud-btn { margin-top: 0; }
+.vhud-btn:hover { background: rgba(212, 175, 55, 0.1); }
+.vhud-btn[aria-pressed='true'] { background: rgba(212, 175, 55, 0.2); }
+.vhud-btn:disabled { opacity: 0.4; cursor: default; }
+
+.vhud-log { margin-top: 8px; max-height: 96px; overflow-y: auto; padding: 8px; border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 4px; background: rgba(0, 0, 0, 0.4); font-size: 11px; line-height: 1.45; }
+.vhud-log p { margin: 0; color: rgba(248, 249, 250, 0.9); }
+.vhud-log p.interim { font-style: italic; color: rgba(243, 229, 171, 0.7); }
+.vhud-log p.reply { color: var(--vhud-champagne); }
+.vhud-log .mark { color: var(--vhud-gold); }
+
+.vhud-notice { margin: 8px 0 0; padding: 8px; border: 1px solid rgba(251, 191, 36, 0.4); border-radius: 4px; background: rgba(245, 158, 11, 0.1); color: #fde68a; font-size: 11px; line-height: 1.4; }
+.vhud-error { margin: 8px 0 0; font-size: 11px; line-height: 1.4; color: #fda4af; }
+.vhud-fine { margin: 8px 0 0; font-size: 10px; line-height: 1.4; color: rgba(248, 249, 250, 0.45); }
+
+.vhud-owner { margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(212, 175, 55, 0.2); }
+.vhud-owner label { display: block; font-size: 10px; letter-spacing: 0.15em; color: var(--vhud-gold); }
+.vhud-owner textarea { display: block; width: 100%; margin-top: 6px; min-height: 52px; resize: vertical; padding: 8px; border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 4px; background: rgba(0, 0, 0, 0.5); color: var(--vhud-text); font: inherit; font-size: 12px; }
+
+@keyframes vhud-spin { to { transform: rotate(360deg); } }
+@keyframes vhud-sweep { from { transform: translateY(-100%); } to { transform: translateY(200%); } }
+@keyframes vhud-flicker { 0%, 100% { opacity: 1; } 47% { opacity: 1; } 50% { opacity: 0.84; } 53% { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .vhud, .vhud-ring-a, .vhud-ring-b, .vhud-scan::after { animation: none; }
+}
