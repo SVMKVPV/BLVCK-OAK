@@ -5,6 +5,7 @@ import { NEARBY_BUSINESSES_ENABLED, SHOPS_ENABLED } from '../netlify/lib/launch-
 const root = resolve(import.meta.dirname, '..');
 const failures = [];
 const requiredFiles = [
+  'voice-hud.js', 'voice-hud-core.js', 'voice-hud.css', 'netlify/functions/voice-hud-session.mjs',
   'operations.html', 'operations.js', 'operations.css', 'operations-model.js', 'netlify/functions/owner-operations.mjs', 'netlify/lib/owner-operations.mjs',
   'business-tools.html', 'business-tools.js', 'business-tools.css', 'business-tools-model.js', 'business-tools-render.js', 'netlify/functions/business-tools.mjs', 'netlify/functions/business-tool-rules.mjs', 'netlify/lib/business-tools.mjs',
   'automation.html', 'automation.css', 'automation.js', 'automation-catalog.js', 'automation-estimate.js', 'automation-render.js', 'netlify/functions/automation-quote.mjs',

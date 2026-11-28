@@ -183,3 +183,18 @@ Approved projects use a high-entropy private token for client payment and progre
 - Adds owner-controlled rotation for private client payment and progress links so exposed Black Oak links can be revoked.
 
 No software can eliminate alternate-email self-referrals, identity theft, account compromise, chargebacks after payout, tax/legal risk or unrecoverable transfers. Keep Stripe Radar enabled, manually review suspicious activity, keep sufficient reserves and complete the external checklist before live launch.
+
+## Voice HUD (home page) and local Ollama
+
+The holographic voice HUD is on the home page only. Visitors get the visuals, a microphone level meter and live captions. Nothing they say is sent to the site, stored, or treated as an instruction.
+
+The "Ask Hermes" box appears only when the server confirms the signed-in owner (`OWNER_AUTH_EMAIL`). It sends text, only when the owner presses a button, to Ollama on the owner's own computer at `http://127.0.0.1:11434`. Ollama is never exposed to the internet.
+
+To allow it, start Ollama with this site as an allowed origin, then pull the model:
+
+```
+OLLAMA_ORIGINS=https://blvckoak.com.au ollama serve
+ollama pull qwen2.5-coder:3b
+```
+
+Chrome may ask the owner to allow this site to connect to devices on the local network. Allow it once. Replies are shown and spoken as plain text and are never run.
