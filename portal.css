@@ -225,3 +225,13 @@
 
 
 .owner-analytics{margin-bottom:24px}.analytics-metrics{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin:22px 0}.analytics-columns{display:grid;grid-template-columns:1fr 1.4fr;gap:24px}.analytics-list{display:grid;gap:8px;margin-top:12px;max-height:420px;overflow:auto}.analytics-list p{display:flex;justify-content:space-between;gap:16px;margin:0;padding:12px;border:1px solid rgba(255,255,255,.08);border-radius:10px}.analytics-list span{color:var(--muted,#aaa);text-align:right}@media(max-width:760px){.analytics-columns{grid-template-columns:1fr}.analytics-list p{display:block}.analytics-list span{display:block;text-align:left;margin-top:5px}}
+/* Custom subscription agreements */
+.subscription-fields { margin: 4px 0 20px; padding: 18px; border: 1px solid #655734; background: #0b100e; }
+.subscription-agreement { margin: 28px 0; padding: 22px; border: 1px solid #655734; background: #0b100e; }
+.subscription-agreement .section-label { margin: 0 0 9px; }
+.subscription-agreement h3 { margin: 0 0 12px; color: #ddd8ba; font-size: 18px; }
+.subscription-agreement > p:not(.section-label) { color: #aab3a2; font-size: 12px; line-height: 1.8; }
+.agreement-text { max-height: 420px; overflow: auto; margin: 18px 0; padding: 18px; border: 1px solid #30382d; background: #070908; color: #d8d8c3; font: 12px/1.8 'Plus Jakarta Sans',system-ui,sans-serif; white-space: pre-wrap; overflow-wrap: anywhere; }
+.agreement-text:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.agreement-form { display: grid; gap: 14px; }
+.agreement-form [hidden] { display: none; }

@@ -7,7 +7,7 @@
   <title>Your Private Quote — Black Oak</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=8"><link rel="stylesheet" href="portal.css?v=9"><script src="pay.js?v=5" defer></script>
+  <link rel="stylesheet" href="style.css?v=8"><link rel="stylesheet" href="portal.css?v=10"><script src="pay.js?v=6" defer></script>
 </head>
 <body class="workspace-body">
   <header class="workspace-header"><a class="brand" href="index.html"><span>Black</span> Oak</a><nav aria-label="Quote navigation"><a href="contact.html">Questions? Contact Black Oak</a></nav></header>
@@ -15,7 +15,7 @@
     <div class="workspace-heading"><div><p class="section-label">Private client proposal</p><h1 data-quote-title>Your Black Oak quote.</h1></div><span class="workspace-tag">Secure Stripe checkout</span></div>
     <p class="workspace-status" data-payment-status role="status">Loading your approved quote…</p>
     <section data-client-quote hidden class="client-quote-grid">
-      <article class="workspace-card client-scope"><p class="section-label" data-client-name></p><h2>What we’re building.</h2><p data-client-description class="scope-description"></p><div class="workspace-policy" data-payment-policy>Only the scope and total shown here are approved. There are no recurring charges. The remaining balance uses this same private link, with timing agreed with Black Oak.</div><section class="instalment-plan" data-instalment-plan hidden aria-labelledby="instalment-plan-title">
+      <article class="workspace-card client-scope"><p class="section-label" data-client-name></p><h2 data-scope-heading>What we’re building.</h2><p data-client-description class="scope-description"></p><div class="workspace-policy" data-payment-policy>Only the scope and total shown here are approved. There are no recurring charges. The remaining balance uses this same private link, with timing agreed with Black Oak.</div><section class="instalment-plan" data-instalment-plan hidden aria-labelledby="instalment-plan-title">
         <p class="section-label">15-part payment plan</p>
         <h3 id="instalment-plan-title">Fifteen parts. Finish sooner.</h3>
         <p data-instalment-count></p>
@@ -23,8 +23,22 @@
         <progress class="instalment-progress" data-instalment-progress max="15" value="0" aria-label="Confirmed instalments"></progress>
         <p>Pay manually at the time agreed with Black Oak. Add extra to cover later parts or pay the remaining balance early. No additional deposit, interest or payment-plan fees. Monthly maintenance, if offered, is separate.</p>
         <ol class="instalment-schedule" data-instalment-schedule aria-label="All 15 scheduled project parts"></ol>
-      </section><section class="sales-plan" data-sales-plan hidden><p class="section-label">Pay as You Sell</p><h3>Sales-linked payment plan</h3><p data-sales-method></p><dl><div><dt>Stripe connection</dt><dd data-sales-connected></dd></div><div><dt>Successful sales recorded</dt><dd data-sales-count></dd></div><div><dt>Recorded Stripe sales</dt><dd data-sales-gross></dd></div><div><dt>Website cost accrued</dt><dd data-sales-accrued></dd></div></dl><button type="button" class="button button-gold" data-connect-sales>Connect Stripe sales <span>↗</span></button><p class="small-muted">Black Oak requests read-only access to record successful AUD sales. Connecting Stripe does not let Black Oak withdraw money from your sales account. You pay only the accrued amount through this private quote page.</p></section><section class="maintenance-plan" data-maintenance-plan hidden><p class="section-label">Separate maintenance option</p><h3 data-maintenance-title>Monthly website maintenance</h3><p data-maintenance-copy></p><button type="button" class="button button-gold" data-maintenance-button hidden>Accept monthly maintenance <span>↗</span></button><p class="small-muted" data-maintenance-note></p></section><h3>Payment record</h3><div data-payment-history></div></article>
-      <aside class="workspace-card client-totals"><span class="status-pill" data-client-state></span><dl><div><dt>Agreed total</dt><dd data-client-total></dd></div><div><dt>Paid so far</dt><dd data-client-paid></dd></div><div data-refund-row hidden><dt>Refunded</dt><dd data-client-refunded></dd></div><div><dt>Remaining balance</dt><dd data-client-balance></dd></div></dl><div class="client-due"><span data-due-label>Due now</span><strong data-client-due></strong></div>
+      </section><section class="sales-plan" data-sales-plan hidden><p class="section-label">Pay as You Sell</p><h3>Sales-linked payment plan</h3><p data-sales-method></p><dl><div><dt>Stripe connection</dt><dd data-sales-connected></dd></div><div><dt>Successful sales recorded</dt><dd data-sales-count></dd></div><div><dt>Recorded Stripe sales</dt><dd data-sales-gross></dd></div><div><dt>Website cost accrued</dt><dd data-sales-accrued></dd></div></dl><button type="button" class="button button-gold" data-connect-sales>Connect Stripe sales <span>↗</span></button><p class="small-muted">Black Oak requests read-only access to record successful AUD sales. Connecting Stripe does not let Black Oak withdraw money from your sales account. You pay only the accrued amount through this private quote page.</p></section><section class="maintenance-plan" data-maintenance-plan hidden><p class="section-label">Separate maintenance option</p><h3 data-maintenance-title>Monthly website maintenance</h3><p data-maintenance-copy></p><button type="button" class="button button-gold" data-maintenance-button hidden>Accept monthly maintenance <span>↗</span></button><p class="small-muted" data-maintenance-note></p></section><section class="subscription-agreement" data-subscription-agreement hidden aria-labelledby="subscription-agreement-title">
+        <p class="section-label">Subscription agreement</p>
+        <h3 id="subscription-agreement-title">Read it. Sign it. Start.</h3>
+        <p data-subscription-summary></p>
+        <pre class="agreement-text" data-agreement-text tabindex="0" aria-label="Full subscription agreement"></pre>
+        <form class="agreement-form" data-agreement-form>
+          <div data-agreement-fields>
+            <label>Type your full name to sign<input name="acceptedName" type="text" autocomplete="name" minlength="2" maxlength="100" required></label>
+            <label class="portal-consent"><input name="accepted" type="checkbox" required><span>I have read and accept this subscription agreement, and I authorise the recurring charges shown above until the subscription is cancelled.</span></label>
+          </div>
+          <button class="button button-gold" type="submit" data-agreement-submit>Sign &amp; start subscription <span>↗</span></button>
+        </form>
+        <p class="small-muted" data-agreement-signed></p>
+      </section>
+      <h3 data-payment-record-heading>Payment record</h3><div data-payment-history></div></article>
+      <aside class="workspace-card client-totals"><span class="status-pill" data-client-state></span><dl data-subscription-totals hidden><div><dt>Price</dt><dd data-subscription-price></dd></div><div><dt>Billed</dt><dd data-subscription-interval></dd></div><div><dt>Setup fee</dt><dd data-subscription-setup></dd></div><div><dt>Payments collected</dt><dd data-subscription-collected></dd></div></dl><dl data-project-totals><div><dt>Agreed total</dt><dd data-client-total></dd></div><div><dt>Paid so far</dt><dd data-client-paid></dd></div><div data-refund-row hidden><dt>Refunded</dt><dd data-client-refunded></dd></div><div><dt>Remaining balance</dt><dd data-client-balance></dd></div></dl><div class="client-due" data-client-due-box><span data-due-label>Due now</span><strong data-client-due></strong></div>
         <section class="extra-payment" data-extra-payment hidden aria-label="Optional extra payment">
           <label for="extra-payment-amount">Pay extra (AUD, optional)</label>
           <input id="extra-payment-amount" name="extraAmount" type="text" inputmode="decimal" autocomplete="off" placeholder="0.00" data-extra-amount aria-describedby="extra-payment-limit extra-payment-error">
