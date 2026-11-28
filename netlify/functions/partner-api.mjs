@@ -8,6 +8,9 @@ import { applyPortfolio, readPortfolio } from '../lib/portfolio.mjs';
 import { listSalesLeads, updateSalesLead } from '../lib/sales-leads.mjs';
 import { enforcePublicQuota } from '../lib/public-rate-limit.mjs';
 import { readInstalmentProgress } from '../lib/instalments.mjs';
+import { billingSummary, expireOpenSubscriptionCheckout, readSubscriptionPlan } from '../lib/subscriptions.mjs';
+
+const ACTIVE_PROJECT_STATUSES = ['approved', 'deposit_paid', 'paid', 'payment_review', 'subscribed'];
 
 async function notifyQuote(quote, approved = false) {
   const ownerEmail = getOwnerEmail();
@@ -16,12 +19,15 @@ async function notifyQuote(quote, approved = false) {
   const title = approved ? 'Your client quote is approved' : 'New custom quote to review';
   const url = approved ? quoteLink(quote) : `${siteOrigin()}/partners.html`;
   const instalments = readInstalmentProgress(quote);
+  const subscription = readSubscriptionPlan(quote);
   const groups = new Map();
   instalments?.schedule.forEach(({ amountCents }) => groups.set(amountCents, (groups.get(amountCents) || 0) + 1));
-  const paymentTerms = instalments
+  const paymentTerms = subscription
+    ? `Subscription agreement: ${billingSummary(subscription)}. ${subscription.minimumTermCycles ? `Minimum term ${subscription.minimumTermCycles} billing periods. ` : 'No minimum term. '}${subscription.noticeDays ? `${subscription.noticeDays} days' cancellation notice. ` : ''}The client reviews and signs the agreement on the private link before Stripe starts billing.`
+    : instalments
     ? `15-part payment plan: ${[...groups].map(([amount, count]) => `${count} × ${formatAud(amount)}`).join(' + ')}. No additional deposit. Pay through the private quote link at the agreed times. Optional extra payments credit later parts and can settle the balance early.`
     : `Deposit: ${formatAud(quote.depositCents)}`;
-  await sendEmail({ to, subject: `${title} — ${quote.service}`, text: `${quote.service}\n${quote.description}\nClient: ${quote.customerName} (${quote.customerEmail})\nTotal: ${formatAud(quote.totalCents)}\n${paymentTerms}\n${url}`, html: emailShell(title, `<p style="color:#b6b5ae;line-height:1.8"><strong>${escapeHtml(quote.service)}</strong><br>Client: ${escapeHtml(quote.customerName)}<br>Total: ${formatAud(quote.totalCents)}<br>${escapeHtml(paymentTerms)}</p><p style="color:#b6b5ae;white-space:pre-wrap">${escapeHtml(quote.description)}</p><p><a style="color:#f1d48c" href="${escapeHtml(url)}">${approved ? 'Open the client payment page' : 'Review in the owner dashboard'}</a></p>`), idempotencyKey: `quote-${approved ? 'approved' : 'submitted'}-${quote.id}-${quote.revision}` }).catch((error) => console.error('Quote notification failed:', error.name));
+  await sendEmail({ to, subject: `${title} — ${quote.service}`, text: `${quote.service}\n${quote.description}\nClient: ${quote.customerName} (${quote.customerEmail})\n${subscription ? '' : `Total: ${formatAud(quote.totalCents)}\n`}${paymentTerms}\n${url}`, html: emailShell(title, `<p style="color:#b6b5ae;line-height:1.8"><strong>${escapeHtml(quote.service)}</strong><br>Client: ${escapeHtml(quote.customerName)}<br>${subscription ? '' : `Total: ${formatAud(quote.totalCents)}<br>`}${escapeHtml(paymentTerms)}</p><p style="color:#b6b5ae;white-space:pre-wrap">${escapeHtml(quote.description)}</p><p><a style="color:#f1d48c" href="${escapeHtml(url)}">${approved ? (subscription ? 'Open the client agreement page' : 'Open the client payment page') : 'Review in the owner dashboard'}</a></p>`), idempotencyKey: `quote-${approved ? 'approved' : 'submitted'}-${quote.id}-${quote.revision}` }).catch((error) => console.error('Quote notification failed:', error.name));
 }
 
 function dashboardQuote(quote, isOwner = false) {
@@ -34,7 +40,7 @@ function dashboardQuote(quote, isOwner = false) {
     progress: readProjectProgress(quote),
     ...publicPaymentArrangement(quote, paidCents),
     ...(isOwner ? { portfolio: readPortfolio(quote) } : {}),
-    paymentLink: ['approved', 'deposit_paid', 'paid'].includes(quote.status) ? quoteLink(quote) : null,
+    paymentLink: ['approved', 'deposit_paid', 'paid', 'subscribed'].includes(quote.status) ? quoteLink(quote) : null,
     progressLink: clientReady ? projectProgressLink(quote) : null,
   };
 }
@@ -87,7 +93,7 @@ export default async function handler(request, context) {
       if (!quoteIdPattern.test(body.id || '')) throw new PortalError('Invalid project.');
       const entry = await store.getWithMetadata(`quote/${body.id}`, { type: 'json' });
       const quote = entry?.data;
-      if (!quote || !['approved', 'deposit_paid', 'paid', 'payment_review'].includes(quote.status)) throw new PortalError('Only an approved project can have its private links reset.', 409);
+      if (!quote || !ACTIVE_PROJECT_STATUSES.includes(quote.status)) throw new PortalError('Only an approved project can have its private links reset.', 409);
       const updated = rotatePublicToken(quote, auth.account.id);
       const saved = await store.setJSON(`quote/${quote.id}`, updated, { onlyIfMatch: entry.etag });
       if (!saved.modified) throw new PortalError('This project changed. Refresh before resetting its links.', 409);
@@ -139,6 +145,7 @@ export default async function handler(request, context) {
       const entry = await store.getWithMetadata(`quote/${body.id}`, { type: 'json' });
       const quote = entry?.data;
       if (!quote || quote.status !== 'approved' || grossPaid(quote) > 0) throw new PortalError('Only an approved, unpaid quote can be cancelled here.', 409);
+      if (readSubscriptionPlan(quote)?.checkout) await expireOpenSubscriptionCheckout(quote, getStripe());
       if (quote.checkout) {
         if (!quote.checkout.sessionId) throw new PortalError('Checkout is in progress or uncertain. Reconcile it before cancellation.', 409);
         const stripe = getStripe();
@@ -158,7 +165,7 @@ export default async function handler(request, context) {
       if (!quoteIdPattern.test(body.id || '')) throw new PortalError('Invalid project.');
       const entry = await store.getWithMetadata(`quote/${body.id}`, { type: 'json' });
       const quote = entry?.data;
-      if (!quote || !['approved', 'deposit_paid', 'paid', 'payment_review'].includes(quote.status)) throw new PortalError('Only an approved project can receive progress updates.', 409);
+      if (!quote || !ACTIVE_PROJECT_STATUSES.includes(quote.status)) throw new PortalError('Only an approved project can receive progress updates.', 409);
       const updated = applyProjectProgress(quote, body, auth.account.id);
       const saved = await store.setJSON(`quote/${quote.id}`, updated, { onlyIfMatch: entry.etag });
       if (!saved.modified) throw new PortalError('This project changed. Refresh before saving progress.', 409);
@@ -169,7 +176,7 @@ export default async function handler(request, context) {
       if (!quoteIdPattern.test(body.id || '')) throw new PortalError('Invalid project.');
       const entry = await store.getWithMetadata(`quote/${body.id}`, { type: 'json' });
       const quote = entry?.data;
-      if (!quote || !['approved', 'deposit_paid', 'paid', 'payment_review'].includes(quote.status)) throw new PortalError('Only an approved project can be added to the portfolio.', 409);
+      if (!quote || !ACTIVE_PROJECT_STATUSES.includes(quote.status)) throw new PortalError('Only an approved project can be added to the portfolio.', 409);
       const updated = applyPortfolio(quote, body, auth.account.id);
       if (updated.portfolio.published) {
         const indexKey = `portfolio-index/${updated.portfolio.id}`;

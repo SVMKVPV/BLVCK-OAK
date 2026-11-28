@@ -2,6 +2,7 @@ import { randomBytes } from 'node:crypto';
 import { PortalError, portalStore, secretToken, siteOrigin, validEmail } from './portal-auth.mjs';
 import { payAsYouSellAccruedCents, publicPaymentArrangement, readPaymentPlan, validatePaymentArrangement } from './pay-as-you-sell.mjs';
 import { INSTALMENT_PLAN_TYPE, nextInstalmentPayment, readInstalmentProgress, validateInstalmentAttempt } from './instalments.mjs';
+import { SUBSCRIPTION_PLAN_TYPE } from './subscriptions.mjs';
 
 export const CUSTOM_CHECKOUT_VERSION = 'black_oak_custom_v1';
 
@@ -18,6 +19,20 @@ function cleanText(value, label, min, max) {
 }
 
 export function validateQuoteInput(body) {
+  const customerEmail = String(body.customerEmail || '').trim().toLowerCase();
+  const details = () => {
+    if (!validEmail(customerEmail)) throw new PortalError('Enter the client’s email address.');
+    return {
+      service: cleanText(body.service, 'Service name', 3, 120),
+      description: cleanText(body.description, 'Description', 20, 3000),
+      customerName: cleanText(body.customerName, 'Client name', 2, 100), customerEmail,
+    };
+  };
+  if (String(body.paymentPlan || '') === SUBSCRIPTION_PLAN_TYPE) {
+    // Recurring agreements have no one-off project total or deposit; every
+    // charge is made by the Stripe subscription the client signs up to.
+    return { ...details(), totalCents: 0, depositCents: 0, ...validatePaymentArrangement(body) };
+  }
   const totalCents = audToCents(body.total);
   const depositCents = audToCents(body.deposit || '0');
   const arrangement = validatePaymentArrangement(body);
@@ -26,14 +41,7 @@ export function validateQuoteInput(body) {
   if (depositCents > totalCents) throw new PortalError('The deposit cannot exceed the total.');
   if (depositCents > 0 && depositCents < 5000) throw new PortalError('The minimum deposit is A$50.');
   if (depositCents < totalCents && depositCents > 0 && totalCents - depositCents < 5000) throw new PortalError('The remaining balance must be at least A$50.');
-  const customerEmail = String(body.customerEmail || '').trim().toLowerCase();
-  if (!validEmail(customerEmail)) throw new PortalError('Enter the client’s email address.');
-  return {
-    service: cleanText(body.service, 'Service name', 3, 120),
-    description: cleanText(body.description, 'Description', 20, 3000),
-    customerName: cleanText(body.customerName, 'Client name', 2, 100), customerEmail,
-    totalCents, depositCents, ...arrangement,
-  };
+  return { ...details(), totalCents, depositCents, ...arrangement };
 }
 
 export function createQuote(input, account, referralCode, isOwner = false) {
@@ -63,6 +71,7 @@ export const refunded = (quote) => quote.payments.reduce((sum, payment) => sum +
 export function nextPayment(quote, now = Date.now()) {
   if (!['approved', 'deposit_paid'].includes(quote.status)) return null;
   const plan = readPaymentPlan(quote);
+  if (plan.type === SUBSCRIPTION_PLAN_TYPE) return null;
   const instalments = plan.type === INSTALMENT_PLAN_TYPE ? readInstalmentProgress(quote) : null;
   const paid = grossPaid(quote);
   if (plan.type !== 'pay_as_you_sell' && !paid && Date.parse(quote.expiresAt) <= now) return null;

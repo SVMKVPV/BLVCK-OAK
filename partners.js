@@ -2,7 +2,16 @@
 const $ = (selector) => document.querySelector(selector);
 const money = (cents) => new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' }).format((Number(cents) || 0) / 100);
 const escape = (value) => String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const labels = { pending_approval: 'Awaiting approval', approved: 'Approved', deposit_paid: 'Deposit paid', paid: 'Paid in full', declined: 'Declined', cancelled: 'Cancelled', payment_review: 'Owner review required' };
+const labels = { pending_approval: 'Awaiting approval', approved: 'Approved', deposit_paid: 'Deposit paid', paid: 'Paid in full', declined: 'Declined', cancelled: 'Cancelled', payment_review: 'Owner review required', subscribed: 'Subscribed' };
+const subscriptionLabels = { offered: 'Waiting for client signature', checkout_pending: 'Client signed · finishing Stripe checkout', active: 'Active', past_due: 'Payment overdue', cancelled: 'Subscription ended' };
+const intervalWords = { week: 'week', fortnight: 'fortnight', month: 'month', quarter: 'quarter', year: 'year' };
+
+function subscriptionRecord(plan) {
+  const signed = plan.acceptedBy ? '<br>Signed by ' + escape(plan.acceptedBy) + ' · ' + escape(new Date(plan.acceptedAt).toLocaleDateString('en-AU')) : '';
+  const collected = plan.invoicesPaid ? '<br>' + escape(plan.invoicesPaid) + ' ' + (plan.invoicesPaid === 1 ? 'payment' : 'payments') + ' collected · ' + money(plan.collectedCents) : '';
+  const term = plan.minimumTermCycles ? ' · minimum ' + escape(plan.minimumTermCycles) + ' ' + escape(plan.intervalLabel) + (plan.minimumTermCycles === 1 ? '' : 's') : ' · no minimum term';
+  return '<p class="record-plan"><strong>Subscription agreement</strong> · ' + escape(subscriptionLabels[plan.status] || plan.status) + '<br>' + escape(plan.summary) + term + signed + collected + '</p>';
+}
 const leadLabels = { new: 'New', contacted: 'Contacted', qualified: 'Qualified', booked: 'Booked', won: 'Won', lost: 'Lost' };
 let authMode = 'login';
 let challenge = '';
@@ -101,7 +110,8 @@ function renderQuotes() {
   }
   quotes.forEach((quote) => {
     const instalments = quote.paymentPlan.type === 'instalments_15';
-    const stateLabel = instalments && quote.status === 'deposit_paid' ? 'Part paid' : labels[quote.status] || quote.status;
+    const subscription = quote.paymentPlan.type === 'subscription' && !quote.paymentPlan.invalid;
+    const stateLabel = subscription && quote.status === 'subscribed' ? subscriptionLabels[quote.paymentPlan.status] || 'Subscribed' : instalments && quote.status === 'deposit_paid' ? 'Part paid' : labels[quote.status] || quote.status;
     const article = document.createElement('article');
     article.className = 'quote-record';
     article.innerHTML = '<header><h3>' + escape(quote.service) + '</h3><span class="status-pill ' + escape(quote.status) + '">' + escape(stateLabel) + '</span></header>' +
@@ -109,8 +119,11 @@ function renderQuotes() {
       '<details><summary>Service description</summary><p>' + escape(quote.description) + '</p></details>' +
       (quote.paymentPlan.type === 'pay_as_you_sell' ? '<p class="record-plan"><strong>Pay as You Sell</strong> · ' + escape(quote.paymentPlan.method.label) + '<br>' + (quote.paymentPlan.connected || quote.paymentPlan.trackingComplete ? escape(quote.paymentPlan.salesCount) + ' Stripe sales recorded · ' + money(quote.paymentPlan.contributionCents) + ' accrued' + (quote.paymentPlan.trackingComplete ? ' · tracking ended when paid' : '') : 'Waiting for the client to connect Stripe') + '</p>' : '') +
       (instalments ? '<p class="record-plan"><strong>15-part payment plan</strong> · ' + escape(quote.paymentPlan.paidInstalments) + ' of 15 parts fully paid · ' + escape(quote.paymentPlan.remainingInstalments) + ' remaining<br>' + escape(quote.payments.length) + ' confirmed ' + (quote.payments.length === 1 ? 'payment' : 'payments') + '. Extra payments cover later parts and can finish the plan sooner.</p>' : '') +
+      (subscription ? subscriptionRecord(quote.paymentPlan) : '') +
       (quote.maintenance.enabled ? '<p class="record-plan"><strong>Maintenance offered</strong> · ' + money(quote.maintenance.monthlyCents) + ' per month · ' + escape(quote.maintenance.status.replaceAll('_', ' ')) + '</p>' : '') +
-      '<div class="record-numbers"><span>Total<strong>' + money(quote.totalCents) + '</strong></span><span>' + (instalments ? 'Balance<strong>' + money(quote.paymentPlan.balanceCents) : 'Deposit<strong>' + money(quote.depositCents)) + '</strong></span><span>Paid<strong>' + money(quote.paidCents) + '</strong></span>' + (quote.progressLink ? '<span>Project progress<strong>' + escape(quote.progress.percentage) + '%</strong></span>' : '') + '</div>' +
+      (subscription
+        ? '<div class="record-numbers"><span>Per ' + escape(quote.paymentPlan.intervalLabel) + '<strong>' + money(quote.paymentPlan.amountCents) + '</strong></span><span>First charge<strong>' + money(quote.paymentPlan.firstChargeCents) + '</strong></span><span>Collected<strong>' + money(quote.paymentPlan.collectedCents) + '</strong></span>'
+        : '<div class="record-numbers"><span>Total<strong>' + money(quote.totalCents) + '</strong></span><span>' + (instalments ? 'Balance<strong>' + money(quote.paymentPlan.balanceCents) : 'Deposit<strong>' + money(quote.depositCents)) + '</strong></span><span>Paid<strong>' + money(quote.paidCents) + '</strong></span>') + (quote.progressLink ? '<span>Project progress<strong>' + escape(quote.progress.percentage) + '%</strong></span>' : '') + '</div>' +
       (dashboard.isOwner && quote.portfolio?.published ? '<p class="portfolio-published-status"><strong>Published in portfolio</strong> · ' + escape(quote.portfolio.title) + '</p>' : '') +
       (quote.reviewNote ? '<p>Owner note: ' + escape(quote.reviewNote) + '</p>' : '');
     if (instalments) {
@@ -133,7 +146,7 @@ function renderQuotes() {
     }
     const actions = document.createElement('div'); actions.className = 'record-actions';
     if (quote.paymentLink) {
-      const copy = document.createElement('button'); copy.className = 'quiet-button'; copy.type = 'button'; copy.textContent = 'Copy payment link';
+      const copy = document.createElement('button'); copy.className = 'quiet-button'; copy.type = 'button'; copy.textContent = subscription ? 'Copy agreement link' : 'Copy payment link';
       copy.addEventListener('click', async () => {
         try { await navigator.clipboard.writeText(quote.paymentLink); copy.textContent = 'Copied'; }
         catch { status('[data-global-status]', 'Clipboard unavailable. Open the payment page and copy its complete address.', true); }
@@ -163,7 +176,7 @@ function renderQuotes() {
       });
       actions.append(rotate);
     }
-    if (dashboard.isOwner && ['approved', 'deposit_paid', 'paid', 'payment_review'].includes(quote.status)) {
+    if (dashboard.isOwner && ['approved', 'deposit_paid', 'paid', 'payment_review', 'subscribed'].includes(quote.status)) {
       const manage = document.createElement('button'); manage.className = 'quiet-button progress-manage-button'; manage.type = 'button'; manage.textContent = 'Manage progress';
       manage.addEventListener('click', () => editProgress(quote)); actions.append(manage);
     }
@@ -176,7 +189,7 @@ function renderQuotes() {
       review.addEventListener('click', () => editQuote(quote)); actions.append(review);
     }
     if (dashboard.isOwner && quote.status === 'approved' && !quote.paidCents) {
-      const cancel = document.createElement('button'); cancel.className = 'quiet-button'; cancel.type = 'button'; cancel.textContent = 'Cancel unpaid quote';
+      const cancel = document.createElement('button'); cancel.className = 'quiet-button'; cancel.type = 'button'; cancel.textContent = subscription ? 'Withdraw unsigned agreement' : 'Cancel unpaid quote';
       cancel.addEventListener('click', async () => {
         if (!window.confirm('Cancel this unpaid quote and disable its payment link?')) return;
         cancel.disabled = true;
@@ -184,6 +197,9 @@ function renderQuotes() {
         catch (error) { status('[data-global-status]', error.message, true); cancel.disabled = false; }
       });
       actions.append(cancel);
+    }
+    if (subscription && quote.status === 'subscribed') {
+      const note = document.createElement('p'); note.className = 'small-muted'; note.textContent = 'Pause, change or cancel the live subscription in your Stripe dashboard. A price or scope change needs a new agreement.'; actions.append(note);
     }
     if (quote.status === 'payment_review') {
       const note = document.createElement('p'); note.textContent = 'Further payments are paused after a refund or dispute. Reconcile this job in Stripe and contact Black Oak.'; actions.append(note);
@@ -370,7 +386,7 @@ async function loadDashboard() {
     $('[data-onboard]').textContent = dashboard.referral.payoutReady ? 'Review Stripe onboarding' : 'Set up Stripe payouts';
     $('[data-quote-count]').textContent = dashboard.quotes.length;
     $('[data-pending-count]').textContent = dashboard.quotes.filter((quote) => quote.status === 'pending_approval').length;
-    $('[data-paid-total]').textContent = money(dashboard.quotes.reduce((sum, quote) => sum + quote.paidCents - quote.payments.reduce((value, payment) => value + (payment.refundedCents || 0), 0), 0));
+    $('[data-paid-total]').textContent = money(dashboard.quotes.reduce((sum, quote) => sum + quote.paidCents + (quote.paymentPlan?.collectedCents || 0) - quote.payments.reduce((value, payment) => value + (payment.refundedCents || 0), 0), 0));
     $('[data-list-title]').textContent = dashboard.isOwner ? 'All client quotes' : 'Your quotes';
     if (!reviewQuote) resetEditor();
     if (progressQuote) closeProgressEditor();
@@ -412,8 +428,22 @@ async function prefillLeadQuote() {
   } catch (error) { status('[data-quote-status]', 'Could not load the enquiry: ' + error.message, true); }
 }
 
+function subscriptionPreview(form) {
+  const amount = Math.round(Math.max(0, Number(form.elements.subscriptionAmount?.value) || 0) * 100);
+  const setup = Math.round(Math.max(0, Number(form.elements.subscriptionSetupFee?.value) || 0) * 100);
+  const word = intervalWords[form.elements.subscriptionInterval?.value] || 'month';
+  const term = Math.max(0, Math.floor(Number(form.elements.subscriptionMinimumTerm?.value) || 0));
+  $('[data-due-preview-label]').textContent = 'First charge';
+  $('[data-due-preview]').textContent = money(amount + setup);
+  $('[data-balance-preview-label]').textContent = 'Then every ' + word;
+  $('[data-balance-preview]').textContent = money(amount);
+  $('[data-subscription-preview]').textContent = !amount ? 'Enter the subscription price to preview the agreement.'
+    : `${money(amount)} every ${word}${setup ? `, plus a ${money(setup)} setup fee on the first charge` : ''}. ${term ? `Minimum term ${term} ${word}${term === 1 ? '' : 's'} (${money(amount * term)} committed).` : 'No minimum term — the client can cancel any time with notice.'}`;
+}
+
 function calculatePreview() {
   const form = $('[data-quote-form]');
+  if (form.elements.paymentPlan.value === 'subscription') { subscriptionPreview(form); return; }
   const total = Math.round(Math.max(0, Number(form.elements.total.value) || 0) * 100);
   const deposit = Math.round(Math.max(0, Number(form.elements.deposit.value) || 0) * 100);
   const instalments = form.elements.paymentPlan.value === 'instalments_15';
@@ -432,6 +462,7 @@ function updatePaymentFields() {
   const form = $('[data-quote-form]');
   const payAsYouSell = form.elements.paymentPlan.value === 'pay_as_you_sell';
   const instalments = form.elements.paymentPlan.value === 'instalments_15';
+  const subscription = form.elements.paymentPlan.value === 'subscription';
   if (instalments) {
     if (standardDepositValue === null) standardDepositValue = form.elements.deposit.value;
     form.elements.deposit.value = '0';
@@ -439,9 +470,18 @@ function updatePaymentFields() {
     form.elements.deposit.value = standardDepositValue;
     standardDepositValue = null;
   }
-  form.elements.deposit.disabled = instalments;
-  form.elements.deposit.required = !instalments;
-  $('[data-deposit-field]').hidden = instalments;
+  form.elements.deposit.disabled = instalments || subscription;
+  form.elements.deposit.required = !instalments && !subscription;
+  $('[data-deposit-field]').hidden = instalments || subscription;
+  form.elements.total.disabled = subscription;
+  form.elements.total.required = !subscription;
+  $('[data-total-field]').hidden = subscription;
+  $('[data-total-note]').hidden = subscription;
+  $('[data-subscription-fields]').hidden = !subscription;
+  if (form.elements.subscriptionAmount) form.elements.subscriptionAmount.required = subscription;
+  $('[data-maintenance-choice]').hidden = subscription;
+  if (!reviewQuote && dashboard) $('[data-save-quote]').firstChild.textContent = dashboard.isOwner ? (subscription ? 'Create approved agreement link ' : 'Create approved payment link ') : 'Submit for approval ';
+  if (subscription) form.elements.maintenanceEnabled.checked = false;
   $('[data-instalment-plan-fields]').hidden = !instalments;
   $('[data-standard-deposit-note]').hidden = instalments;
   const method = form.elements.payAsYouSellMethod.value;
@@ -552,7 +592,7 @@ function editQuote(quote) {
   standardDepositValue = null;
   const form = $('[data-quote-form]');
   ['customerName', 'customerEmail', 'service', 'description'].forEach((field) => { form.elements[field].value = quote[field]; });
-  form.elements.total.value = (quote.totalCents / 100).toFixed(2);
+  form.elements.total.value = quote.paymentPlan.type === 'subscription' ? '' : (quote.totalCents / 100).toFixed(2);
   form.elements.deposit.value = (quote.depositCents / 100).toFixed(2);
   form.elements.paymentPlan.value = quote.paymentPlan.type;
   if (quote.paymentPlan.type === 'pay_as_you_sell') {
@@ -560,6 +600,14 @@ function editQuote(quote) {
     if (quote.paymentPlan.method.percent) form.elements.payAsYouSellPercent.value = String(quote.paymentPlan.method.percent);
     if (quote.paymentPlan.method.amountCents) form.elements.payAsYouSellAmount.value = (quote.paymentPlan.method.amountCents / 100).toFixed(2);
     if (quote.paymentPlan.method.salesPerPayment) form.elements.payAsYouSellSalesCount.value = String(quote.paymentPlan.method.salesPerPayment);
+  }
+  if (quote.paymentPlan.type === 'subscription' && !quote.paymentPlan.invalid) {
+    form.elements.subscriptionAmount.value = (quote.paymentPlan.amountCents / 100).toFixed(2);
+    form.elements.subscriptionInterval.value = quote.paymentPlan.interval;
+    form.elements.subscriptionSetupFee.value = (quote.paymentPlan.setupFeeCents / 100).toFixed(2);
+    form.elements.subscriptionMinimumTerm.value = String(quote.paymentPlan.minimumTermCycles);
+    form.elements.subscriptionNoticeDays.value = String(quote.paymentPlan.noticeDays);
+    form.elements.subscriptionTerms.value = quote.paymentPlan.terms || '';
   }
   form.elements.maintenanceEnabled.checked = quote.maintenance.enabled;
   if (quote.maintenance.enabled) form.elements.maintenanceMonthly.value = (quote.maintenance.monthlyCents / 100).toFixed(2);
@@ -582,7 +630,8 @@ $('[data-quote-form]').addEventListener('submit', async (event) => {
     await api('/api/partners', body, dashboard.csrf);
     const approved = Boolean(reviewQuote || dashboard.isOwner);
     resetEditor(); await loadDashboard();
-    status('[data-quote-status]', approved ? 'Approved. Copy the payment link from the quote card.' : 'Submitted. Black Oak can now review the scope, price and payment option.');
+    const agreement = values.paymentPlan === 'subscription';
+    status('[data-quote-status]', approved ? (agreement ? 'Approved. Copy the agreement link from the quote card and send it to your client to sign.' : 'Approved. Copy the payment link from the quote card.') : 'Submitted. Black Oak can now review the scope, price and payment option.');
   } catch (error) { status('[data-quote-status]', error.message, true); }
   finally { button.disabled = false; }
 });

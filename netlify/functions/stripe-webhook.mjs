@@ -20,6 +20,8 @@ import { CUSTOM_CHECKOUT_VERSION, markQuotePaymentReview, nextPayment, settleQuo
 import { releaseFailedQuoteCheckout } from '../lib/quote-checkout.mjs';
 import { portalStore } from '../lib/portal-auth.mjs';
 import { notifyQuotePayment } from '../lib/quote-notifications.mjs';
+import { SUBSCRIPTION_VERSION, recordSubscriptionInvoice, releaseFailedSubscriptionCheckout, settleSubscriptionCheckout, updateSubscriptionAgreement } from '../lib/subscriptions.mjs';
+import { notifySubscriptionStarted } from '../lib/subscription-notifications.mjs';
 import { MAINTENANCE_VERSION, adjustConnectedSale, disconnectSalesAccount, recordConnectedSale, releaseFailedMaintenanceCheckout, settleMaintenanceCheckout, stopCompletedSalesTracking, updateMaintenanceSubscription } from '../lib/pay-as-you-sell.mjs';
 
 async function reviewCustomCharge(stripe, charge, reason) {
@@ -298,12 +300,18 @@ export default async function handler(request) {
     } else if (event.type === 'checkout.session.async_payment_failed') {
       if (event.data.object.metadata?.checkout_version === MAINTENANCE_VERSION) {
         await releaseFailedMaintenanceCheckout(event.data.object, portalStore());
+      } else if (event.data.object.metadata?.checkout_version === SUBSCRIPTION_VERSION) {
+        await releaseFailedSubscriptionCheckout(event.data.object, portalStore());
       } else if (event.data.object.metadata?.checkout_version === CUSTOM_CHECKOUT_VERSION) {
         await releaseFailedQuoteCheckout(event.data.object, portalStore());
       }
     } else if (event.type === 'checkout.session.completed' || event.type === 'checkout.session.async_payment_succeeded') {
       if (event.data.object.metadata?.checkout_version === MAINTENANCE_VERSION) {
         await settleMaintenanceCheckout(event.data.object, portalStore());
+      } else if (event.data.object.metadata?.checkout_version === SUBSCRIPTION_VERSION) {
+        const before = await portalStore().get(`quote/${event.data.object.metadata.quote_id}`, { type: 'json' }).catch(() => null);
+        const quote = await settleSubscriptionCheckout(event.data.object, portalStore());
+        if (quote && before?.status !== 'subscribed') await notifySubscriptionStarted(quote);
       } else if (event.data.object.metadata?.checkout_version === CUSTOM_CHECKOUT_VERSION) {
         const quote = await settleQuotePayment(event.data.object);
         await notifyQuotePayment(quote, event.data.object);
@@ -314,6 +322,9 @@ export default async function handler(request) {
       }
     } else if (['customer.subscription.updated', 'customer.subscription.deleted'].includes(event.type)) {
       await updateMaintenanceSubscription(event.data.object, portalStore());
+      await updateSubscriptionAgreement(event.data.object, portalStore());
+    } else if (event.type === 'invoice.paid') {
+      await recordSubscriptionInvoice(event.data.object, portalStore());
     } else if (event.type === 'charge.refunded') {
       await reviewCustomCharge(stripe, event.data.object, 'refund');
       await adjustRefundedReward(stripe, event.data.object);

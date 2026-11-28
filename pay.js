@@ -99,6 +99,50 @@ function renderInstalments(currentQuote) {
   });
 }
 
+const subscriptionStates = { offered: 'Ready to sign', checkout_pending: 'Signed · finish on Stripe', active: 'Subscription active', past_due: 'Payment overdue', cancelled: 'Subscription ended' };
+
+function renderSubscription(currentQuote) {
+  const plan = currentQuote.paymentPlan;
+  const selected = plan.type === 'subscription' && !plan.invalid;
+  $('[data-subscription-agreement]').hidden = !selected;
+  $('[data-subscription-totals]').hidden = !selected;
+  $('[data-project-totals]').hidden = selected;
+  $('[data-client-due-box]').hidden = selected;
+  if (!selected) return false;
+  $('[data-scope-heading]').textContent = 'What your subscription includes.';
+  $('[data-subscription-summary]').textContent = `${money(plan.amountCents)} every ${plan.intervalLabel}${plan.setupFeeCents ? `, plus a one-off ${money(plan.setupFeeCents)} setup fee with the first payment (first charge ${money(plan.firstChargeCents)})` : ''}. ${plan.minimumTermCycles ? `Minimum term: ${plan.minimumTermCycles} ${plan.intervalLabel}${plan.minimumTermCycles === 1 ? '' : 's'}.` : 'No minimum term.'} ${plan.noticeDays ? `${plan.noticeDays} days’ cancellation notice.` : 'Cancel with written notice.'}`;
+  $('[data-agreement-text]').textContent = plan.agreementText;
+  $('[data-subscription-price]').textContent = money(plan.amountCents);
+  $('[data-subscription-interval]').textContent = plan.intervalAdverb.charAt(0).toUpperCase() + plan.intervalAdverb.slice(1);
+  $('[data-subscription-setup]').textContent = plan.setupFeeCents ? money(plan.setupFeeCents) + ' (first charge only)' : 'None';
+  $('[data-subscription-collected]').textContent = plan.invoicesPaid ? `${money(plan.collectedCents)} · ${plan.invoicesPaid} ${plan.invoicesPaid === 1 ? 'payment' : 'payments'}` : '—';
+  const expired = plan.status === 'offered' && Date.parse(currentQuote.expiresAt) <= Date.now();
+  const canSign = currentQuote.status === 'approved' && ['offered', 'checkout_pending'].includes(plan.status) && !expired;
+  $('[data-agreement-form]').hidden = !canSign;
+  $('[data-agreement-fields]').hidden = plan.status === 'checkout_pending';
+  $('[data-agreement-submit]').disabled = checkoutPending;
+  $('[data-agreement-submit]').firstChild.textContent = plan.status === 'checkout_pending' ? 'Continue to secure Stripe checkout ' : 'Sign & start subscription ';
+  $('[data-agreement-signed]').textContent = plan.acceptedBy
+    ? `Signed by ${plan.acceptedBy} on ${new Date(plan.acceptedAt).toLocaleString('en-AU')}.${plan.activatedAt ? ' Billing started ' + new Date(plan.activatedAt).toLocaleDateString('en-AU') + '.' : ''}`
+    : 'Card details are entered only on Stripe. Your subscription starts only after you sign and complete Stripe checkout.';
+  $('[data-payment-record-heading]').hidden = true;
+  $('[data-payment-history]').hidden = true;
+  $('[data-client-state]').textContent = expired ? 'Offer expired' : currentQuote.status === 'cancelled' ? 'Offer withdrawn' : subscriptionStates[plan.status] || plan.status;
+  $('[data-client-state]').className = 'status-pill ' + (plan.status === 'active' ? 'paid' : plan.status === 'past_due' ? 'payment_review' : currentQuote.status);
+  $('[data-payment-policy]').textContent = 'This is a recurring subscription, not a one-off project price. Only the price, billing frequency and services in the agreement below are approved. Any change needs a new agreement that you accept.';
+  if (currentQuote.status === 'cancelled') status('This subscription offer was withdrawn. Contact Black Oak if you need a new agreement.', true);
+  else if (expired) status('This subscription offer has expired. Contact Black Oak for a new agreement.', true);
+  else if (plan.status === 'active' && parameters.get('subscription') === 'returned') status('Thank you — your subscription is active. Your signed agreement is saved below.');
+  else if (plan.status === 'active') status('Your subscription is active. Your signed agreement is shown below.');
+  else if (plan.status === 'past_due') status('A subscription payment is overdue. Stripe will retry it; contact Black Oak if your card details changed.', true);
+  else if (plan.status === 'cancelled') status('This subscription has ended. No further charges will be made.');
+  else if (parameters.get('subscription') === 'returned') status('Stripe is confirming your subscription. Refresh in a moment; do not sign again.');
+  else if (parameters.get('subscription') === 'cancelled') status('Stripe checkout was closed, so your subscription has not started. You can continue when ready.');
+  else if (plan.status === 'checkout_pending') status('You have signed the agreement. Continue to Stripe to start the subscription.');
+  else status('Read the agreement below, then sign it to start your subscription on Stripe.');
+  return true;
+}
+
 async function loadQuote() {
   if (!/^[a-f0-9]{32}$/.test(quoteId) || !/^[A-Za-z0-9_-]{43}$/.test(privateToken)) {
     status('This private link is incomplete. Ask Black Oak or your referral partner for the full approved payment link.', true); return;
@@ -116,6 +160,13 @@ async function loadQuote() {
     const payAsYouSell = quote.paymentPlan.type === 'pay_as_you_sell';
     const instalments = quote.paymentPlan.type === 'instalments_15';
     renderInstalments(quote);
+    if (renderSubscription(quote)) {
+      $('[data-sales-plan]').hidden = true;
+      $('[data-maintenance-plan]').hidden = true;
+      $('[data-pay-button]').hidden = true;
+      $('[data-extra-payment]').hidden = true;
+      return;
+    }
     $('[data-sales-plan]').hidden = !payAsYouSell;
     if (payAsYouSell) {
       const method = quote.paymentPlan.method;
@@ -244,6 +295,30 @@ $('[data-maintenance-button]').addEventListener('click', async () => {
       location.assign(url.toString());
     }
   } catch (error) { status(error.message, true); button.disabled = false; }
+});
+$('[data-agreement-form]').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  if (checkoutPending || quote?.paymentPlan.type !== 'subscription') return;
+  const form = event.currentTarget;
+  const pending = quote.paymentPlan.status === 'checkout_pending';
+  const acceptedName = String(form.elements.acceptedName?.value || '').trim();
+  const accepted = Boolean(form.elements.accepted?.checked);
+  if (!pending && acceptedName.length < 2) { status('Type your full name to sign the agreement.', true); return; }
+  if (!pending && !accepted) { status('Tick the box to confirm you accept the agreement.', true); return; }
+  checkoutPending = true;
+  $('[data-agreement-submit]').disabled = true;
+  status(pending ? 'Opening secure Stripe checkout…' : 'Recording your signature and opening secure Stripe checkout…');
+  try {
+    const result = await request('subscription_checkout', { acceptedName, accepted, agreementHash: quote.paymentPlan.agreementHash });
+    if (result.awaitingConfirmation) { checkoutPending = false; await loadQuote(); status('Stripe is confirming your subscription. Do not sign again.'); return; }
+    const url = new URL(result.url);
+    if (url.protocol !== 'https:' || url.hostname !== 'checkout.stripe.com') throw new Error('The Stripe subscription address could not be verified. Contact Black Oak.');
+    location.assign(url.toString());
+  } catch (error) {
+    status(error.message, true);
+    checkoutPending = false;
+    $('[data-agreement-submit]').disabled = false;
+  }
 });
 $('[data-reload-quote]').addEventListener('click', loadQuote);
 loadQuote();

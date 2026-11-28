@@ -5,6 +5,8 @@ import { publicQuote } from '../lib/quotes.mjs';
 import { openQuoteCheckout, reconcileQuoteCheckout } from '../lib/quote-checkout.mjs';
 import { createSalesConnectionUrl, openMaintenanceCheckout, reconcileMaintenanceCheckout, stopCompletedSalesTracking } from '../lib/pay-as-you-sell.mjs';
 import { enforcePublicQuota } from '../lib/public-rate-limit.mjs';
+import { openSubscriptionCheckout, reconcileSubscriptionCheckout } from '../lib/subscriptions.mjs';
+import { notifySubscriptionStarted } from '../lib/subscription-notifications.mjs';
 
 function paymentFailure(error) {
   return {
@@ -40,6 +42,13 @@ export default async function handler(request, context) {
         try { quote = await reconcileMaintenanceCheckout(quote, getStripe(), store); }
         catch (error) { console.error('Maintenance reconciliation delayed:', paymentFailure(error)); }
       }
+      if (quote.paymentPlan?.type === 'subscription' && quote.paymentPlan.checkout?.sessionId) {
+        try {
+          const wasSubscribed = quote.status === 'subscribed';
+          quote = await reconcileSubscriptionCheckout(quote, getStripe(), store);
+          if (!wasSubscribed && quote.status === 'subscribed') await notifySubscriptionStarted(quote);
+        } catch (error) { console.error('Subscription reconciliation delayed:', paymentFailure(error)); }
+      }
       if (quote.status === 'paid' && quote.paymentPlan?.connectionStatus === 'connected') {
         try { quote = await stopCompletedSalesTracking(quote, getStripe(), store); }
         catch (error) { console.error('Stripe sales tracking disconnect delayed:', paymentFailure(error)); }
@@ -47,6 +56,7 @@ export default async function handler(request, context) {
       return json({ quote: publicQuote(quote) });
     }
     if (body.action === 'connect_sales_start') return json({ url: await createSalesConnectionUrl(quote, store) });
+    if (body.action === 'subscription_checkout') return json(await openSubscriptionCheckout(quote.id, { accepted: body.accepted === true, acceptedName: body.acceptedName, agreementHash: body.agreementHash }, getStripe(), store));
     if (body.action === 'maintenance_checkout') return json(await openMaintenanceCheckout(quote.id, getStripe(), store));
     if (body.action === 'checkout') return json(await openQuoteCheckout(quote.id, getStripe(), store, { extraAmount: body.extraAmount, expectedPaidCents: body.expectedPaidCents }));
     throw new PortalError('Unknown payment action.');

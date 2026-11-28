@@ -1,6 +1,7 @@
 import { PortalError, hash, secretToken, siteOrigin } from './portal-auth.mjs';
 import { getStripe, runtimeEnv } from './referrals.mjs';
 import { INSTALMENT_COUNT, INSTALMENT_PLAN_TYPE, INSTALMENT_VERSION, readInstalmentProgress, validateStoredInstalmentPlan } from './instalments.mjs';
+import { SUBSCRIPTION_PLAN_TYPE, publicSubscription, readSubscriptionPlan, validateSubscriptionPlan } from './subscriptions.mjs';
 
 export const PAY_AS_YOU_SELL_VERSION = 'black_oak_pay_as_you_sell_v1';
 export const MAINTENANCE_VERSION = 'black_oak_maintenance_v1';
@@ -26,8 +27,11 @@ function checked(value) {
 
 export function validatePaymentArrangement(input) {
   const requestedType = String(input.paymentPlan || 'standard');
-  if (!['standard', 'pay_as_you_sell', INSTALMENT_PLAN_TYPE].includes(requestedType)) throw new PortalError('Choose a valid payment option.');
+  if (!['standard', 'pay_as_you_sell', INSTALMENT_PLAN_TYPE, SUBSCRIPTION_PLAN_TYPE].includes(requestedType)) throw new PortalError('Choose a valid payment option.');
   const type = requestedType;
+  // A subscription agreement is its own recurring arrangement: no project
+  // balance and no separate maintenance add-on.
+  if (type === SUBSCRIPTION_PLAN_TYPE) return { paymentPlan: validateSubscriptionPlan(input), maintenance: { enabled: false, version: MAINTENANCE_VERSION, status: 'not_offered' } };
   let paymentPlan = { type: 'standard', version: PAY_AS_YOU_SELL_VERSION };
   if (type === INSTALMENT_PLAN_TYPE) {
     if (input.instalmentCount !== undefined && Number(input.instalmentCount) !== INSTALMENT_COUNT) throw new PortalError('This payment plan has exactly 15 instalments.');
@@ -70,6 +74,7 @@ export function validatePaymentArrangement(input) {
 export function readPaymentPlan(quote) {
   const plan = quote?.paymentPlan;
   if (plan?.type === INSTALMENT_PLAN_TYPE) return validateStoredInstalmentPlan(plan);
+  if (plan?.type === SUBSCRIPTION_PLAN_TYPE) return readSubscriptionPlan(quote) || { type: SUBSCRIPTION_PLAN_TYPE, invalid: true };
   if (!plan || plan.type !== 'pay_as_you_sell' || !Object.hasOwn(methodLabels, plan.method)) return { type: 'standard', version: PAY_AS_YOU_SELL_VERSION };
   if (plan.method === 'percentage' && (!Number.isInteger(plan.rateBps) || plan.rateBps < 100 || plan.rateBps > 10000)) return { type: 'standard', version: PAY_AS_YOU_SELL_VERSION };
   if (plan.method !== 'percentage' && (!Number.isInteger(plan.amountCents) || plan.amountCents < 500 || plan.amountCents > 10000000)) return { type: 'standard', version: PAY_AS_YOU_SELL_VERSION };
@@ -115,6 +120,7 @@ export function publicPaymentArrangement(quote, paidCents) {
   const maintenance = readMaintenance(quote);
   const publicMaintenance = maintenance.enabled ? { enabled: true, monthlyCents: maintenance.monthlyCents, status: maintenance.status } : { enabled: false, status: 'not_offered' };
   if (plan.type === INSTALMENT_PLAN_TYPE) return { paymentPlan: readInstalmentProgress(quote), maintenance: publicMaintenance };
+  if (plan.type === SUBSCRIPTION_PLAN_TYPE) return { paymentPlan: publicSubscription(quote), maintenance: publicMaintenance };
   if (plan.type !== 'pay_as_you_sell') return { paymentPlan: { type: 'standard' }, maintenance: publicMaintenance };
   const sales = plan.sales.filter((sale) => !sale.disputed && sale.netCents > 0);
   const method = {
